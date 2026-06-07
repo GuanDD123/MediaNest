@@ -134,7 +134,6 @@
                         currentIndex = mediaMap.get(item.path);
 
                         currentBuffer.src = "/video/" + item.path;
-
                         const buffer = currentBuffer;
                         buffer.onloadeddata = () => {
                             buffer.currentTime = 0;
@@ -181,33 +180,34 @@
             }
         }
 
-        function prevMedia() {
+        function prevImage() {
             if (currentIndex > 0) { showImage(currentIndex - 1); }
         }
-        function nextMedia() {
+        function nextImage() {
             if (currentIndex < mediaList.length - 1) { showImage(currentIndex + 1); }
         }
 
         videoA.addEventListener("ended", onVideoEnded);
         videoB.addEventListener("ended", onVideoEnded);
         function onVideoEnded() {
-            [currentBuffer, nextBuffer] = [nextBuffer, currentBuffer];
             currentIndex++;
+            if (currentIndex < mediaList.length) { switchVideo(); }
+        }
+        function switchVideo() {
+            [currentBuffer, nextBuffer] = [nextBuffer, currentBuffer];
 
-            if (currentIndex < mediaList.length) {
-                nextBuffer.pause();
-                currentBuffer.style.display = "block";
-                nextBuffer.style.display = "none";
-                currentBuffer.currentTime = 0;
-                currentBuffer.play();
-            }
+            nextBuffer.pause();
+            currentBuffer.style.display = "block";
+            nextBuffer.style.display = "none";
+            currentBuffer.currentTime = 0;
+            currentBuffer.play();
 
             if (currentIndex < mediaList.length - 1) { preloadNextVideo(); }
         }
-
         function preloadNextVideo() {
             const next = mediaList[currentIndex + 1];
             if (next?.type === "video") {
+                nextBuffer.preload = "auto";
                 nextBuffer.src = "/video/" + next.path;
                 nextBuffer.pause();
                 nextBuffer.load();
@@ -250,8 +250,8 @@
             else {
                 const x = e.clientX;
                 const w = window.innerWidth;
-                if (x < w * 0.3) { prevMedia(); }
-                else if (x > w * 0.7) { nextMedia(); }
+                if (x < w * 0.3) { prevImage(); }
+                else if (x > w * 0.7) { nextImage(); }
                 else { toggleControls(); }
             }
         }
