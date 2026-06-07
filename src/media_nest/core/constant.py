@@ -14,8 +14,4 @@ ROOT_KEY = ('id', 'path', 'last_sync_at')
 TASK_KEY = ('id', 'type_', 'path', 'dev', 'ino', 'duration_ms_flag', 'width_height_flag', 'thumb_flag')
 
 
-def get_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    return s.getsockname()[0]
-BASE_URL = 'http://192.168.0.110:8000'#f"http://{get_ip()}:8000"
+BASE_URL = 'http://192.168.0.110:8000'

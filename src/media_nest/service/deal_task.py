@@ -82,7 +82,6 @@ class DealTask:
                    'stream=width,height,duration', '-of', 'json', str(task.path)]
             out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
             stream = json.loads(out)['streams'][0]
-            return ((task.dev, task.ino), int(float(stream['duration']) * 1000),
-                    int(stream['width']), int(stream['height']))
+            return ((task.dev, task.ino), int(stream['width']), int(stream['height']), int(float(stream['duration']) * 1000))
         except Exception as e:
             print(f'[WARN] Failed to get video specific info for {task.path}: {e}')

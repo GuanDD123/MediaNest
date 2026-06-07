@@ -9,6 +9,7 @@ from media_nest.core.db_manager import DataBaseManager
 from media_nest.repository.repository import Repository
 from media_nest.web.media import router as media_router
 from media_nest.web.admin_action import router as admin_router
+from media_nest.web.playlist import router as playlist_router
 
 
 @asynccontextmanager
@@ -32,6 +33,7 @@ async def favicon():
 
 app.include_router(media_router)
 app.include_router(admin_router)
+app.include_router(playlist_router)
 
 app.mount('/static', StaticFiles(directory='static'), name='static')
 

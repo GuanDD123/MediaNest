@@ -1,9 +1,8 @@
 import shutil
 from pathlib import Path
 from urllib.parse import quote
-import random
 
-from media_nest.core.constant import THUMB_SAVE_PATH, BASE_URL
+from media_nest.core.constant import THUMB_SAVE_PATH
 from media_nest.repository.repository import Repository
 from media_nest.service.sync_library import SyncLibrary
 from media_nest.service.deal_task import DealTask
@@ -45,17 +44,3 @@ class Service:
 
     def delete_many(self, id_list: list[int]) -> bool:
         return self.repository.delete_many_in_id(id_list)
-
-    def build_m3u(self, parent_path: Path, shuffle_flag: bool) -> str:
-        video_info_list = self.repository.select_all_by_parent_path(parent_path=parent_path)
-
-        if shuffle_flag:
-            random.shuffle(video_info_list)
-
-        lines = ['#EXTM3U']
-        for video_info in video_info_list:
-            if video_info.type_ == 'video':
-                lines.append(f'#EXTINF:{int(video_info.duration_ms / 1000)},{video_info.name}')
-                lines.append(f'{BASE_URL}/video{quote(str(video_info.parent_path / video_info.name))}')
-
-        return '\n'.join(lines)
