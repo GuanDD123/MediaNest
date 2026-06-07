@@ -1,5 +1,8 @@
 from fastapi import APIRouter, Depends
+from pathlib import Path
+import datetime
 
+from media_nest.models.root_task_info import RootInfo
 from media_nest.repository.repository import Repository
 from media_nest.service.service import Service
 from media_nest.web.dependence import get_repository
@@ -7,13 +10,26 @@ from media_nest.web.dependence import get_repository
 router = APIRouter(prefix='/admin')
 
 
-@router.post("/sync")
+@router.post('/add_root')
+def add_root(path: str, repository: Repository = Depends(get_repository)):
+    repository.root_insert(RootInfo(id=None, path=Path(path), last_sync_at=datetime.datetime.now()))
+    return repository.root_select_all()
+
+
+@router.post('/clear_root')
+def clear_root(repository: Repository = Depends(get_repository)):
+    for info in repository.root_select_all():
+        repository.root_delete_by_id(info.id)
+    return repository.root_select_all()
+
+
+@router.post('/sync')
 def sync(repository: Repository = Depends(get_repository)):
     service = Service(repository)
     return service.sync()
 
 
-@router.post("/clear_cache")
+@router.post('/clear_cache')
 def clear_cache(repository: Repository = Depends(get_repository)):
     service = Service(repository)
     return service.clear_cache()

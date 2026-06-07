@@ -26,20 +26,21 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.get("/favicon.ico")
+@app.get('/favicon.ico')
 async def favicon():
     return Response(status_code=204)
 
 app.include_router(media_router)
 app.include_router(admin_router)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount('/static', StaticFiles(directory='static'), name='static')
 
 
-@app.get("/")
-@app.get("/index")
+@app.get('/')
+@app.get('/index')
 async def index():
-    return FileResponse("static/index.html")
+    return FileResponse('static/index.html')
+
 
 if __name__ == '__main__':
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=True)

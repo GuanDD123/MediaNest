@@ -89,7 +89,7 @@
 
                 div.onclick = () => {
                     if (item.type === "folder") {
-                        loadFolder("/folder/" + item.path);
+                        loadFolder("/folder" + item.path);
                     }
                     else if (item.type === "image") {
                         listView.hidden = true;
@@ -105,7 +105,7 @@
 
                         currentIndex = mediaMap.get(item.path);
 
-                        currentBuffer.src = "/video/" + item.path;
+                        currentBuffer.src = "/video" + item.path;
                         const buffer = currentBuffer;
                         buffer.onloadeddata = () => {
                             buffer.currentTime = 0;
@@ -153,7 +153,7 @@
             currentIndex = index
             const item = mediaList[index];
 
-            image.src = "/image/" + item.path;
+            image.src = "/image" + item.path;
 
             if (currentIndex < mediaList.length - 1) { preloadNextImage(); }
         }
@@ -161,7 +161,7 @@
             const next = mediaList[currentIndex + 1];
             if (next?.type === "image") {
                 const img = new Image();
-                img.src = "/image/" + next.path;
+                img.src = "/image" + next.path;
             }
         }
 
@@ -186,7 +186,7 @@
             const next = mediaList[currentIndex + 1];
             if (next?.type === "video") {
                 nextBuffer.preload = "auto";
-                nextBuffer.src = "/video/" + next.path;
+                nextBuffer.src = "/video" + next.path;
                 nextBuffer.pause();
                 nextBuffer.load();
             }

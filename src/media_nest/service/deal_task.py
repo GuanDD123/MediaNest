@@ -62,27 +62,27 @@ class DealTask:
                 width = height = None
                 if task.width_height_flag:
                     width, height = img.size
-                if img.mode == "RGBA":
-                    img = img.convert("RGB")
+                if img.mode == 'RGBA':
+                    img = img.convert('RGB')
                 if task.thumb_flag:
-                    img.draft("RGB", THUMB_SIZE)
+                    img.draft('RGB', THUMB_SIZE)
                     img.thumbnail(THUMB_SIZE, Image.Resampling.LANCZOS)
-                    img.save(THUMB_SAVE_PATH / f"{task.dev}_{task.ino}.jpg", "JPEG", quality=85, optimize=True)
+                    img.save(THUMB_SAVE_PATH / f'{task.dev}_{task.ino}.jpg', 'JPEG', quality=85, optimize=True)
             if task.width_height_flag:
                 return ((task.dev, task.ino), width, height)
         except Exception as e:
             if (file_size := task.path.stat().st_size) < 1024:
                 print(f'[INFO] File is too small: {task.path.name} {file_size}B')
             else:
-                print(f"[WARN] Failed to generate thumbnail for {task.path}: {e}")
+                print(f'[WARN] Failed to generate thumbnail for {task.path}: {e}')
 
     def _process_video(self, task: TaskInfo):
         try:
-            cmd = ["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
-                   "stream=width,height,duration", "-of", "json", str(task.path)]
+            cmd = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries',
+                   'stream=width,height,duration', '-of', 'json', str(task.path)]
             out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
-            stream = json.loads(out)["streams"][0]
-            return ((task.dev, task.ino), int(float(stream["duration"]) * 1000),
-                    int(stream["width"]), int(stream["height"]))
+            stream = json.loads(out)['streams'][0]
+            return ((task.dev, task.ino), int(float(stream['duration']) * 1000),
+                    int(stream['width']), int(stream['height']))
         except Exception as e:
-            print(f"[WARN] Failed to get video specific info for {task.path}: {e}")
+            print(f'[WARN] Failed to get video specific info for {task.path}: {e}')
