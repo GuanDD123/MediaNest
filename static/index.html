@@ -38,33 +38,6 @@
             object-fit: contain;
             object-position: center;
         }
-
-        button {
-            position: absolute;
-            z-index: 10;
-        }
-
-        #backBtn {
-            position: fixed;
-            top: 14px;
-            left: 14px;
-
-            width: 52px;
-            height: 36px;
-
-            border: none;
-            border-radius: 18px;
-
-            background: rgba(30, 30, 30, .55);
-            backdrop-filter: blur(10px);
-
-            color: white;
-            font-size: 24px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 
@@ -74,7 +47,6 @@
     </div>
 
     <div id="viewerView" hidden>
-        <button id="backBtn" onclick="closeViewer()"><span>←</span></button><br>
         <img id="image" hidden>
         <video id="videoA" controls></video>
         <video id="videoB" controls style="display:none;"></video>
@@ -147,7 +119,6 @@
                 list.appendChild(div);
             });
         }
-
         function closeViewer() {
             viewerView.hidden = true;
             listView.hidden = false;
@@ -163,6 +134,21 @@
             });
         }
 
+        viewerView.addEventListener("click", onViewerClick);
+        function onViewerClick(e) {
+            if (mediaList[currentIndex].type === "image") {
+                const x = e.clientX;
+                const w = window.innerWidth;
+                if (x < w * 0.5) { prevImage(); }
+                else { nextImage(); }
+            }
+        }
+        function prevImage() {
+            if (currentIndex > 0) { showImage(currentIndex - 1); }
+        }
+        function nextImage() {
+            if (currentIndex < mediaList.length - 1) { showImage(currentIndex + 1); }
+        }
         function showImage(index) {
             currentIndex = index
             const item = mediaList[index];
@@ -171,20 +157,12 @@
 
             if (currentIndex < mediaList.length - 1) { preloadNextImage(); }
         }
-
         function preloadNextImage() {
             const next = mediaList[currentIndex + 1];
             if (next?.type === "image") {
                 const img = new Image();
                 img.src = "/image/" + next.path;
             }
-        }
-
-        function prevImage() {
-            if (currentIndex > 0) { showImage(currentIndex - 1); }
-        }
-        function nextImage() {
-            if (currentIndex < mediaList.length - 1) { showImage(currentIndex + 1); }
         }
 
         videoA.addEventListener("ended", onVideoEnded);
@@ -211,48 +189,6 @@
                 nextBuffer.src = "/video/" + next.path;
                 nextBuffer.pause();
                 nextBuffer.load();
-            }
-        }
-
-
-        const backBtn = document.getElementById("backBtn");
-        let hideTimer;
-        viewerView.addEventListener("mousemove", showControls);
-        backBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            closeViewer();
-        });
-        viewerView.addEventListener("click", onViewerClick);
-
-        function toggleControls() {
-            if (backBtn.style.opacity == "0") { showControls(); }
-            else { hideControls(); }
-        }
-        function hideControls() {
-            backBtn.style.opacity = 0;
-            backBtn.style.pointerEvents = "none";
-        }
-        function showControls() {
-            backBtn.style.opacity = 1;
-            backBtn.style.pointerEvents = "auto";
-
-            clearTimeout(hideTimer);
-            hideTimer = setTimeout(() => {
-                backBtn.style.opacity = 0;
-                backBtn.style.pointerEvents = "none";
-            }, 3000);
-        }
-        function onViewerClick(e) {
-            const isVideo = mediaList[currentIndex].type === "video";
-            if (isVideo) {
-                toggleControls();
-            }
-            else {
-                const x = e.clientX;
-                const w = window.innerWidth;
-                if (x < w * 0.3) { prevImage(); }
-                else if (x > w * 0.7) { nextImage(); }
-                else { toggleControls(); }
             }
         }
     </script>
