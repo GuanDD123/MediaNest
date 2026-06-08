@@ -13,8 +13,29 @@ class BuildM3u:
         self.repository = repository
 
     def run(self, parent_path: Path, shuffle_flag: bool) -> str:
-        segment_video_info_list = self.repository.segments_select_many_join_video_id_by_parent_path(
-            parent_path=parent_path)
+        if HLS_MODE:
+            return self._hls(parent_path, shuffle_flag)
+        else:
+            return self._mp4(parent_path, shuffle_flag)
+
+    def _mp4(self, parent_path: Path, shuffle_flag: bool):
+        video_info_list = self.repository.select_all_by_parent_path(parent_path=parent_path)
+
+        if shuffle_flag:
+            random.shuffle(video_info_list)
+
+        lines = ['#EXTM3U']
+        for video_info in video_info_list:
+            if video_info.type_ == 'video':
+                lines.append(f'#EXTINF:{int(video_info.duration_ms / 1000)}, v - {video_info.name}')
+                lines.append(f'{BASE_URL}/media/video{quote(str(video_info.parent_path / video_info.name))}')
+
+        return '\n'.join(lines)
+
+    def _hls(self, parent_path: Path, shuffle_flag: bool) -> str:
+        if HLS_MODE:
+            segment_video_info_list = self.repository.segments_select_many_join_video_id_by_parent_path(
+                parent_path=parent_path)
 
         video_info_dict: dict[int, list[NodeJoinSegment]] = defaultdict(list)
         for segment_video_info in segment_video_info_list:
@@ -27,10 +48,8 @@ class BuildM3u:
         if HLS_MODE == 'fMP4':
             lines = ["#EXTM3U", "#EXT-X-VERSION:7",
                      "#EXT-X-PLAYLIST-TYPE:VOD", "#EXT-X-INDEPENDENT-SEGMENTS",]
-        elif HLS_MODE == 'TS':
+        elif HLS_MODE:
             lines = ['#EXTM3U', '#EXT-X-VERSION:3']
-        else:
-            lines = ['#EXTM3U']
         first_video = True
         segment_num = 0
         for segment_group in video_info_list:
@@ -47,16 +66,13 @@ class BuildM3u:
 
             for segment in segment_group:
                 lines.append(f'#EXTINF:{segment.segment_duration_ms / 1000}, {segment.video_name}')
-                if HLS_MODE:
-                    url_path = (f'{hls_base}/{segment.segment_name}')
-                else:
-                    url_path = f'{segment.video_parent_path}/{segment.video_name}'
+                url_path = (f'{hls_base}/{segment.segment_name}')
                 lines.append(BASE_URL + '/media/video' + quote(url_path))
                 segment_num += 1
 
             if segment_num > M3U_SEGMENT_NUM:
                 break
-                
+
             first_video = False
         lines.append('#EXT-X-ENDLIST')
 
