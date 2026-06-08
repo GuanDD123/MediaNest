@@ -13,6 +13,7 @@ router = APIRouter(prefix='/playlist')
 def playlist(request: Request, parent_path: str, shuffle_flag: bool = False,
              repository: Repository = Depends(get_repository)):
     m3u = BuildM3u(repository).run(Path('/' + parent_path), shuffle_flag)
+    print(m3u)
     if request.method == 'HEAD':
         return Response(headers={
             'Content-Type': 'application/vnd.apple.mpegurl'

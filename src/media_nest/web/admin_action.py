@@ -41,3 +41,9 @@ def sync(repository: Repository = Depends(get_repository)):
 def clear_cache(repository: Repository = Depends(get_repository)):
     Service(repository).clear_cache()
     return {'success': True}
+
+
+@router.post('/clear_segment')
+def clear_root(repository: Repository = Depends(get_repository)):
+    repository.segment_delete_all()
+    return {'success': True}

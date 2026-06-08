@@ -3,7 +3,7 @@ from urllib.parse import quote
 import random
 from collections import defaultdict
 
-from media_nest.core.constant import BASE_URL, HLS_MODE
+from media_nest.core.constant import BASE_URL, HLS_MODE, M3U_SEGMENT_NUM
 from media_nest.models.node_join_segment import NodeJoinSegment
 from media_nest.repository.repository import Repository
 
@@ -30,6 +30,7 @@ class BuildM3u:
         else:
             lines = ['#EXTM3U', '#EXT-X-VERSION:3']
         first_video = True
+        segment_num = 0
         for segment_group in video_info_list:
             segment_group.sort(key=lambda x: x.segment_order)
 
@@ -37,7 +38,7 @@ class BuildM3u:
                 first_segment = segment_group[0]
                 hls_base = (f'{first_segment.video_parent_path}/hls/{first_segment.video_dev}_{first_segment.video_ino}')
                 if HLS_MODE == 'fMP4':
-                    init_url = BASE_URL + '/media/video/' + quote(f'{hls_base}/init.mp4')
+                    init_url = BASE_URL + '/media/video' + quote(f'{hls_base}/init.mp4')
                     if not first_video:
                         lines.append("#EXT-X-DISCONTINUITY")
                     lines.append(f'#EXT-X-MAP:URI="{init_url}"')
@@ -48,7 +49,11 @@ class BuildM3u:
                     url_path = (f'{hls_base}/{segment.segment_name}')
                 else:
                     url_path = f'{segment.video_parent_path}/{segment.video_name}'
-                lines.append(BASE_URL + '/media/video/' + quote(url_path))
+                lines.append(BASE_URL + '/media/video' + quote(url_path))
+                segment_num += 1
+
+            if segment_num > M3U_SEGMENT_NUM:
+                break
                 
             first_video = False
         lines.append('#EXT-X-ENDLIST')

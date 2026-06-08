@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import threading
 from media_nest.core.db_manager import DataBaseManager
 from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY, SEGMENT_KEY
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
@@ -79,7 +79,7 @@ class Repository:
                         FROM node JOIN segment ON segment.video_id = node.id
                         WHERE node.parent_path = ?
                         ORDER BY node.id, segment.segment_order'''
-        cursor = self.database.connection.execute(sql, str(parent_path))
+        cursor = self.database.connection.execute(sql, (str(parent_path),))
         return [NodeJoinSegment(video_id=row[0], video_name=row[1], video_parent_path=Path(row[2]),
                                 video_dev=row[3], video_ino=row[4],
                                 segment_order=row[5], segment_name=row[6], segment_duration_ms=row[7]
@@ -168,6 +168,9 @@ class Repository:
 
     def task_delete_all(self) -> bool:
         return self._delete_all('task')
+
+    def segment_delete_all(self) -> bool:
+        return self._delete_all('segment')
 
     def delete_all(self) -> bool:
         return self._delete_all('node')
