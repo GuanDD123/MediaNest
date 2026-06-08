@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from media_nest.core.constant import THUMB_SAVE_PATH, HLS_MODE, THUMB_MODE
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
-from media_nest.models.root_task_info import TaskInfo
+from media_nest.models.root_task_segment_info import TaskInfo
 from media_nest.repository.repository import Repository
 
 
@@ -98,14 +98,14 @@ class SyncLibrary:
                              mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
                              width=None, height=None)
             self._task_mark(scan_result.task_insert_list, path, 'image', dev, ino,
-                            width_height_flag=True, thumb_flag=THUMB_MODE)
+                            width_height_flag=True, thumb_flag=True if THUMB_MODE else False)
         elif path.suffix.lower() in ['.mp4', '.avi', '.mov', '.mkv']:
             info = VideoInfo(id=None, dev=dev, ino=ino, root_id=root_id, parent_path=parent_path,
                              name=path.name, type_='video', size=path_stat.st_size,
                              mtime=Datetime.fromtimestamp(path_stat.st_mtime),
                              duration_ms=None, width=None, height=None)
             self._task_mark(scan_result.task_insert_list, path, 'video', dev, ino,
-                            duration_ms_flag=True, width_height_flag=True, hls_flag=HLS_MODE)
+                            duration_ms_flag=True, width_height_flag=True, hls_flag=True if HLS_MODE else False)
         else:
             return
         scan_result.node_insert_list.append(info)
@@ -144,19 +144,19 @@ class SyncLibrary:
                 update_flag = True
                 if db_info.type_ == 'video':
                     self._task_mark(scan_result.task_insert_list, path, 'video', dev, ino, duration_ms_flag=True,
-                                    width_height_flag=True, hls_flag=HLS_MODE)
+                                    width_height_flag=True, hls_flag=True if HLS_MODE else False)
                 else:  # image
                     self._task_mark(scan_result.task_insert_list, path, 'image', dev, ino, width_height_flag=True,
-                                    thumb_flag=THUMB_MODE)
+                                    thumb_flag=True if THUMB_MODE else False)
             else:
                 if HLS_MODE and db_info.type_ == 'video' and (
                         not Path(f'{parent_path}/hls/{dev}_{ino}').exists()):
                     self._task_mark(scan_result.task_insert_list, path, 'video', dev, ino, duration_ms_flag=False,
-                                    width_height_flag=False, hls_flag=HLS_MODE)
+                                    width_height_flag=False, hls_flag=True)
                 if THUMB_MODE and db_info.type_ == 'image' and (
                         not Path(f'{THUMB_SAVE_PATH}/{dev}_{ino}.jpg').exists()):
                     self._task_mark(scan_result.task_insert_list, path, 'image', dev, ino, width_height_flag=False,
-                                    thumb_flag=THUMB_MODE)
+                                    thumb_flag=True)
 
         if update_flag:
             scan_result.node_update_list.append((db_info.id, db_info))

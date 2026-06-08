@@ -4,7 +4,7 @@ from PIL import Image
 import subprocess
 
 from media_nest.service.sync_library import SyncLibrary
-from media_nest.models.root_task_info import RootInfo
+from media_nest.models.root_task_segment_info import RootInfo
 from tests.tool.run_collect_info import run_collect_info
 from tests.fake.fake_folder_file import create_folder_file
 

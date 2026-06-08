@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from media_nest.service.deal_task import DealTask
-from media_nest.models.root_task_info import TaskInfo
+from media_nest.models.root_task_segment_info import TaskInfo
 from tests.tool.run_collect_info import run_collect_info
 from tests.fake.fake_folder_file import create_folder_file
 
@@ -28,15 +28,24 @@ class FakeRepository:
                                TaskInfo(id=18, type_='image', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_8.jpg'), dev=66312, ino=2685, duration_ms_flag=False, width_height_flag=True, hls_flag=False, thumb_flag=True),
                                TaskInfo(id=19, type_='image', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_0.jpg'), dev=66312, ino=2677, duration_ms_flag=False, width_height_flag=True, hls_flag=False, thumb_flag=True),
                                TaskInfo(id=20, type_='image', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_5.jpg'), dev=66312, ino=2682, duration_ms_flag=False, width_height_flag=True, hls_flag=False, thumb_flag=True)]
+        self.segment_insert_list = []
+        self.video_update_list = []
+        self.image_update_list = []
 
     def task_select_all(self):
         return self.task_info_list
+    
+    def select_many_id_by_task_join_dev_ino(self):
+        return {f'{task.dev}_{task.ino}': task.id for task in self.task_info_list}
+    
+    def segment_insert_many(self, segment_insert_list):
+        self.segment_insert_list.append(segment_insert_list)
 
     def update_many_video_specific_info_by_dev_ino(self, video_update_list):
-        print(video_update_list)
+        self.video_update_list.append(video_update_list)
 
     def update_many_image_specific_info_by_dev_ino(self, image_update_list):
-        print(image_update_list)
+        self.image_update_list.append(image_update_list)
 
     def task_delete_all(self):
         self.task_info_list = []
@@ -49,3 +58,6 @@ def test_deal_task():
     do = 'deal task'
     run_collect_info(DealTask(repository).run, (), do)
     assert repository.task_select_all() == []
+    assert repository.segment_insert_list
+    assert repository.image_update_list
+    assert repository.video_update_list

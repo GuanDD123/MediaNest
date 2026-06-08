@@ -13,7 +13,8 @@ STATIC_PATH = ROOT_PATH / 'static'
 NODE_KEY = ('id', 'dev', 'ino', 'root_id', 'parent_path', 'name', 'type_', 'size', 'mtime', 'duration_ms', 'width', 'height')
 ROOT_KEY = ('id', 'path', 'last_sync_at')
 TASK_KEY = ('id', 'type_', 'path', 'dev', 'ino', 'duration_ms_flag', 'width_height_flag', 'hls_flag', 'thumb_flag')
+SEGMENT_KEY = ('video_id', 'segment_order', 'duration_ms', 'segment_name')
 
 BASE_URL = 'http://192.168.0.110:8000'
-HLS_MODE = True
+HLS_MODE = 'fMP4'  # TS, False
 THUMB_MODE = True

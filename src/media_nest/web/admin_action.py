@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Body
 from pathlib import Path
 import datetime
 
-from media_nest.models.root_task_info import RootInfo
+from media_nest.models.root_task_segment_info import RootInfo
 from media_nest.repository.repository import Repository
 from media_nest.service.service import Service
 from media_nest.web.dependence import get_repository

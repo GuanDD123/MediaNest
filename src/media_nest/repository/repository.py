@@ -1,9 +1,10 @@
 from pathlib import Path
 
 from media_nest.core.db_manager import DataBaseManager
-from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY
+from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY, SEGMENT_KEY
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
-from media_nest.models.root_task_info import RootInfo, TaskInfo
+from media_nest.models.root_task_segment_info import RootInfo, TaskInfo, SegmentInfo
+from media_nest.models.node_join_segment import NodeJoinSegment
 from media_nest.repository.tool import model_to_row, row_to_model
 
 
@@ -12,10 +13,12 @@ class Repository:
         self.database = database
         self.insert_placeholder = {'node': '(' + ','.join([f'{key}' for key in NODE_KEY[1:]]) + ')',
                                    'root': '(' + ','.join([f'{key}' for key in ROOT_KEY[1:]]) + ')',
-                                   'task': '(' + ','.join([f'{key}' for key in TASK_KEY[1:]]) + ')'}
+                                   'task': '(' + ','.join([f'{key}' for key in TASK_KEY[1:]]) + ')',
+                                   'segment': '(' + ','.join([f'{key}' for key in SEGMENT_KEY[1:]]) + ')'}
         self.values_placeholder = {'node': '(' + ','.join('?' * (len(NODE_KEY) - 1)) + ')',
                                    'root': '(' + ','.join('?' * (len(ROOT_KEY) - 1)) + ')',
-                                   'task': '(' + ','.join('?' * (len(TASK_KEY) - 1)) + ')'}
+                                   'task': '(' + ','.join('?' * (len(TASK_KEY) - 1)) + ')',
+                                   'segment': '(' + ','.join('?' * (len(SEGMENT_KEY) - 1)) + ')'}
         self.update_placeholder = {'node': ','.join([f'{key}=?' for key in NODE_KEY[1:]]),
                                    'root': ','.join([f'{key}=?' for key in ROOT_KEY[1:]])}
 
@@ -64,11 +67,32 @@ class Repository:
         cursor = self.database.connection.execute(sql, param_list)
         return [row_to_model(row, table=table) for row in cursor.fetchall() if row]
 
+    def select_many_id_by_task_join_dev_ino(self) -> dict[str, int]:
+        sql = '''SELECT task.dev, task.ino, node.id FROM task JOIN node
+                ON node.dev = task.dev AND node.ino = task.ino WHERE task.hls_flag = 1'''
+        cursor = self.database.connection.execute(sql)
+        return {f'{row[0]}_{row[1]}': row[2] for row in cursor.fetchall()}
+
+    def segments_select_many_join_video_id_by_parent_path(self, parent_path: Path) -> list[NodeJoinSegment]:
+        sql = '''SELECT node.id, node.name, node.parent_path, node.dev, node.ino,
+                        segment.segment_order, segment.segment_name, segment.duration_ms
+                        FROM node JOIN segment ON segment.video_id = node.id
+                        WHERE node.parent_path = ?
+                        ORDER BY node.id, segment.segment_order'''
+        cursor = self.database.connection.execute(sql, str(parent_path))
+        return [NodeJoinSegment(video_id=row[0], video_name=row[1], video_parent_path=Path(row[2]),
+                                video_dev=row[3], video_ino=row[4],
+                                segment_order=row[5], segment_name=row[6], segment_duration_ms=row[7]
+                                ) for row in cursor.fetchall() if row]
+
     def root_insert(self, info: RootInfo) -> bool:
         return self._insert(table='root', info=info)
 
     def task_insert_many(self, info_list: list[TaskInfo]) -> bool:
         return self._insert(table='task', info_list=info_list)
+
+    def segment_insert_many(self, info_list: list[SegmentInfo]) -> bool:
+        return self._insert(table='segment', info_list=info_list)
 
     def insert_one(self, info: FolderInfo | VideoInfo | ImageInfo) -> bool:
         return self._insert(table='node', info=info)
@@ -76,8 +100,8 @@ class Repository:
     def insert_many(self, info_list: list[FolderInfo | VideoInfo | ImageInfo]) -> bool:
         return self._insert(table='node', info_list=info_list)
 
-    def _insert(self, table: str, info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo = None,
-                info_list: list[FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo] = None):
+    def _insert(self, table: str, info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo = None,
+                info_list: list[FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo] = None):
         sql = f'INSERT INTO {table} {self.insert_placeholder[table]} VALUES {self.values_placeholder[table]}'
         with self.database.connection as connection:
             if info is not None:

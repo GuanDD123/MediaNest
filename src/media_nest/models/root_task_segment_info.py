@@ -21,3 +21,11 @@ class TaskInfo:
     width_height_flag: bool
     hls_flag: bool
     thumb_flag: bool
+
+
+@dataclass(slots=True)
+class SegmentInfo:
+    video_id: int
+    segment_order: int
+    duration_ms: int
+    segment_name: str
