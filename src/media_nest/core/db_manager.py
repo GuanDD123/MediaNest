@@ -34,6 +34,7 @@ class DataBaseManager:
                                 dev INTEGER NOT NULL, ino INTEGER NOT NULL,
                                 duration_ms_flag INTEGER NOT NULL CHECK(duration_ms_flag IN (0, 1)),
                                 width_height_flag INTEGER NOT NULL CHECK(width_height_flag IN (0, 1)),
+                                hls_flag INTEGER NOT NULL CHECK(hls_flag IN (0, 1)),
                                 thumb_flag INTEGER NOT NULL CHECK(thumb_flag IN (0, 1)));
             CREATE UNIQUE INDEX IF NOT EXISTS index_node_dev_ino ON node(dev, ino);
             CREATE INDEX IF NOT EXISTS index_node_parent_path ON node(parent_path);

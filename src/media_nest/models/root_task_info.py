@@ -19,4 +19,5 @@ class TaskInfo:
     ino: int
     duration_ms_flag: bool
     width_height_flag: bool
+    hls_flag: bool
     thumb_flag: bool

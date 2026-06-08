@@ -3,7 +3,7 @@ from pathlib import Path
 from datetime import datetime as Datetime
 from dataclasses import dataclass
 
-from media_nest.core.constant import THUMB_SAVE_PATH
+from media_nest.core.constant import THUMB_SAVE_PATH, HLS_MODE, THUMB_MODE
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
 from media_nest.models.root_task_info import TaskInfo
 from media_nest.repository.repository import Repository
@@ -98,22 +98,24 @@ class SyncLibrary:
                              mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
                              width=None, height=None)
             self._task_mark(scan_result.task_insert_list, path, 'image', dev, ino,
-                            width_height_flag=True, thumb_flag=True)
+                            width_height_flag=True, thumb_flag=THUMB_MODE)
         elif path.suffix.lower() in ['.mp4', '.avi', '.mov', '.mkv']:
             info = VideoInfo(id=None, dev=dev, ino=ino, root_id=root_id, parent_path=parent_path,
                              name=path.name, type_='video', size=path_stat.st_size,
                              mtime=Datetime.fromtimestamp(path_stat.st_mtime),
                              duration_ms=None, width=None, height=None)
             self._task_mark(scan_result.task_insert_list, path, 'video', dev, ino,
-                            duration_ms_flag=True, width_height_flag=True)
+                            duration_ms_flag=True, width_height_flag=True, hls_flag=HLS_MODE)
         else:
             return
         scan_result.node_insert_list.append(info)
 
     def _task_mark(self, task_insert_list: list, path: Path, type_: str, dev: int, ino: int,
-                   duration_ms_flag: bool = False, width_height_flag: bool = False, thumb_flag: bool = False):
+                   duration_ms_flag: bool = False, width_height_flag: bool = False, hls_flag: bool = False,
+                   thumb_flag: bool = False):
         task_insert_list.append(TaskInfo(id=None, type_=type_, path=path, dev=dev, ino=ino,
-                                         duration_ms_flag=duration_ms_flag, width_height_flag=width_height_flag, thumb_flag=thumb_flag))
+                                         duration_ms_flag=duration_ms_flag, width_height_flag=width_height_flag,
+                                         hls_flag=hls_flag, thumb_flag=thumb_flag))
 
     def _check_update(self, db_info: FolderInfo | VideoInfo | ImageInfo, scan_result: ScanResult, path: Path,
                       parent_path: Path, root_id: int, path_stat: os.stat_result, dev: int, ino: int):
@@ -142,14 +144,19 @@ class SyncLibrary:
                 update_flag = True
                 if db_info.type_ == 'video':
                     self._task_mark(scan_result.task_insert_list, path, 'video', dev, ino, duration_ms_flag=True,
-                                    width_height_flag=True)
+                                    width_height_flag=True, hls_flag=HLS_MODE)
                 else:  # image
                     self._task_mark(scan_result.task_insert_list, path, 'image', dev, ino, width_height_flag=True,
-                                    thumb_flag=True)
+                                    thumb_flag=THUMB_MODE)
             else:
-                if db_info.type_ == 'image' and not Path(f'{THUMB_SAVE_PATH}/{dev}_{ino}.jpg').exists():
+                if HLS_MODE and db_info.type_ == 'video' and (
+                        not Path(f'{parent_path}/hls/{dev}_{ino}').exists()):
+                    self._task_mark(scan_result.task_insert_list, path, 'video', dev, ino, duration_ms_flag=False,
+                                    width_height_flag=False, hls_flag=HLS_MODE)
+                if THUMB_MODE and db_info.type_ == 'image' and (
+                        not Path(f'{THUMB_SAVE_PATH}/{dev}_{ino}.jpg').exists()):
                     self._task_mark(scan_result.task_insert_list, path, 'image', dev, ino, width_height_flag=False,
-                                    thumb_flag=True)
+                                    thumb_flag=THUMB_MODE)
 
         if update_flag:
             scan_result.node_update_list.append((db_info.id, db_info))

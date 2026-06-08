@@ -2,6 +2,7 @@ import subprocess
 import json
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 from media_nest.core.constant import (THUMB_SIZE, THUMB_SAVE_PATH,
                                       IMAGE_WORKERS, VIDEO_WORKERS)
@@ -78,10 +79,22 @@ class DealTask:
 
     def _process_video(self, task: TaskInfo):
         try:
-            cmd = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries',
-                   'stream=width,height,duration', '-of', 'json', str(task.path)]
-            out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
-            stream = json.loads(out)['streams'][0]
-            return ((task.dev, task.ino), int(stream['width']), int(stream['height']), int(float(stream['duration']) * 1000))
+            if task.hls_flag:
+                hls_dir = Path(f'{task.path.parent}/hls/{task.dev}_{task.ino}')
+                self._build_hls(task.path, hls_dir)
+            if task.duration_ms_flag:
+                cmd = ['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries',
+                       'stream=width,height,duration', '-of', 'json', str(task.path)]
+                out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+                stream = json.loads(out)['streams'][0]
+                return ((task.dev, task.ino), int(stream['width']), int(stream['height']), int(float(stream['duration']) * 1000))
         except Exception as e:
-            print(f'[WARN] Failed to get video specific info for {task.path}: {e}')
+            print(f'[WARN] Fail: {task.path}: {e}')
+
+    def _build_hls(self, video_path: Path, hls_dir: Path):
+        hls_dir.mkdir(parents=True, exist_ok=True)
+
+        cmd = ["ffmpeg", "-i", str(video_path), "-c", "copy", "-hls_time", "4", "-hls_list_size", "0",
+               "-f", "hls", str(hls_dir / "index.m3u8")]
+
+        subprocess.run(cmd, check=True)
