@@ -27,8 +27,10 @@ class BuildM3u:
         if HLS_MODE == 'fMP4':
             lines = ["#EXTM3U", "#EXT-X-VERSION:7",
                      "#EXT-X-PLAYLIST-TYPE:VOD", "#EXT-X-INDEPENDENT-SEGMENTS",]
-        else:
+        elif HLS_MODE == 'TS':
             lines = ['#EXTM3U', '#EXT-X-VERSION:3']
+        else:
+            lines = ['#EXTM3U']
         first_video = True
         segment_num = 0
         for segment_group in video_info_list:

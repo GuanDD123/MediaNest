@@ -16,7 +16,6 @@ TASK_KEY = ('id', 'type_', 'path', 'dev', 'ino', 'duration_ms_flag', 'width_heig
 SEGMENT_KEY = ('video_id', 'segment_order', 'duration_ms', 'segment_name')
 
 BASE_URL = 'http://192.168.0.110:8000'
-HLS_MODE = 'TS'  # fMP4, False
-M3U_SEGMENT_NUM = 100
-LONG_VIDEO_MODE = False
+HLS_MODE = False  # TS, fMP4, False
+M3U_SEGMENT_NUM = 300
 THUMB_MODE = True

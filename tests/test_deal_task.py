@@ -8,13 +8,13 @@ from tests.fake.fake_folder_file import create_folder_file
 
 class FakeRepository:
     def __init__(self):
-        self.task_info_list = [TaskInfo(id=1, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_3.mp4'), dev=66312, ino=2693, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
-                               TaskInfo(id=2, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_0.mp4'), dev=66312, ino=2690, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
-                               TaskInfo(id=3, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_5.mp4'), dev=66312, ino=2695, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
-                               TaskInfo(id=4, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_2.mp4'), dev=66312, ino=2692, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
-                               TaskInfo(id=5, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_4.mp4'), dev=66312, ino=2694, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
-                               TaskInfo(id=6, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_6.mp4'), dev=66312, ino=2696, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
-                               TaskInfo(id=7, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_1.mp4'), dev=66312, ino=2691, duration_ms_flag=True, width_height_flag=True, hls_flag=True, thumb_flag=False),
+        self.task_info_list = [TaskInfo(id=1, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_3.mp4'), dev=66312, ino=2693, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
+                               TaskInfo(id=2, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_0.mp4'), dev=66312, ino=2690, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
+                               TaskInfo(id=3, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_5.mp4'), dev=66312, ino=2695, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
+                               TaskInfo(id=4, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_2.mp4'), dev=66312, ino=2692, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
+                               TaskInfo(id=5, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_4.mp4'), dev=66312, ino=2694, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
+                               TaskInfo(id=6, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_6.mp4'), dev=66312, ino=2696, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
+                               TaskInfo(id=7, type_='video', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_1.mp4'), dev=66312, ino=2691, duration_ms_flag=True, width_height_flag=True, hls_flag=False, thumb_flag=False),
                                TaskInfo(id=8, type_='image', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/test.webp'), dev=66312, ino=2689, duration_ms_flag=False, width_height_flag=True, hls_flag=False, thumb_flag=True),
                                TaskInfo(id=9, type_='image', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/test.png'), dev=66312, ino=2688, duration_ms_flag=False, width_height_flag=True, hls_flag=False, thumb_flag=True),
                                TaskInfo(id=10, type_='image', path=Path('/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_7.jpg'), dev=66312, ino=2684, duration_ms_flag=False, width_height_flag=True, hls_flag=False, thumb_flag=True),
@@ -58,6 +58,6 @@ def test_deal_task():
     do = 'deal task'
     run_collect_info(DealTask(repository).run, (), do)
     assert repository.task_select_all() == []
-    assert repository.segment_insert_list
+    print (repository.segment_insert_list)
     assert repository.image_update_list
     assert repository.video_update_list

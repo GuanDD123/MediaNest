@@ -38,7 +38,7 @@ def create_folder_file(video_num=5, image_num=10):
     # 创建视频文件
     video_dir = ROOT / '视频'
     for i in range(video_num):
-        subprocess.run(['ffmpeg', '-f', 'lavfi', '-i', 'testsrc=size=1280x720:rate=30', '-t', '13', '-y',
+        subprocess.run(['ffmpeg', '-f', 'lavfi', '-i', 'testsrc=size=1280x720:rate=30', '-t', '2', '-y',
                         str(video_dir / f'video_{i}.mp4')], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     # 超长路径

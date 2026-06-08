@@ -28,7 +28,10 @@ class FakeRepository:
 def test_build_m3u():
     build_m3u = BuildM3u(FakeRepository())
     result = build_m3u.run(Path('123'), shuffle_flag=True)
+    print(result)
     if HLS_MODE == 'fMP4':
         assert len(result.splitlines()) == 42 + 4
-    else:
+    elif HLS_MODE == 'TS':
         assert len(result.splitlines()) == 28 + 3
+    elif not HLS_MODE:
+        assert len(result.splitlines()) == 28 + 2
