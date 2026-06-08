@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Body
 from pathlib import Path
 import datetime
 
@@ -11,25 +11,33 @@ router = APIRouter(prefix='/admin')
 
 
 @router.post('/add_root')
-def add_root(path: str, repository: Repository = Depends(get_repository)):
+def add_root(path: str = Body(...), repository: Repository = Depends(get_repository)):
     repository.root_insert(RootInfo(id=None, path=Path(path), last_sync_at=datetime.datetime.now()))
-    return repository.root_select_all()
+    return {'success': True}
+
+
+@router.post('/delete_root')
+def delete_root(path: str = Body(...), repository: Repository = Depends(get_repository)):
+    for root_info in repository.root_select_all():
+        if str(root_info.path) == path:
+            repository.root_delete_by_id(root_info.id)
+            return {'success': True}
 
 
 @router.post('/clear_root')
 def clear_root(repository: Repository = Depends(get_repository)):
     for info in repository.root_select_all():
         repository.root_delete_by_id(info.id)
-    return repository.root_select_all()
+    return {'success': True}
 
 
 @router.post('/sync')
 def sync(repository: Repository = Depends(get_repository)):
-    service = Service(repository)
-    return service.sync()
+    Service(repository).sync()
+    return {'success': True}
 
 
 @router.post('/clear_cache')
 def clear_cache(repository: Repository = Depends(get_repository)):
-    service = Service(repository)
-    return service.clear_cache()
+    Service(repository).clear_cache()
+    return {'success': True}
