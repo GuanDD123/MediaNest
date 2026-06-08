@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from media_nest.core.constant import DB_PATH
+from media_nest.core.constant import DB_PATH, STATIC_PATH
 from media_nest.core.db_manager import DataBaseManager
 from media_nest.repository.repository import Repository
 from media_nest.web.media import router as media_router
@@ -35,13 +35,13 @@ app.include_router(media_router)
 app.include_router(admin_router)
 app.include_router(playlist_router)
 
-app.mount('/static', StaticFiles(directory='static'), name='static')
+app.mount('/static', StaticFiles(directory=STATIC_PATH), name='static')
 
 
 @app.get('/')
 @app.get('/index')
 async def index():
-    return FileResponse('static/index.html')
+    return FileResponse(STATIC_PATH / 'index.html')
 
 
 if __name__ == '__main__':
