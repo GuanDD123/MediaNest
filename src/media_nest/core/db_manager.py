@@ -41,7 +41,7 @@ class DataBaseManager:
                                       segment_order INTEGER NOT NULL,
                                       duration_ms INTEGER NOT NULL,
                                       segment_name TEXT NOT NULL,
-                                      PRIMARY KEY (video_id, segment_order),
+                                      PRIMARY KEY (video_id, segment_order) ON CONFLICT IGNORE,
                                       FOREIGN KEY(video_id) REFERENCES node(id) ON DELETE CASCADE);
             CREATE UNIQUE INDEX IF NOT EXISTS index_node_dev_ino ON node(dev, ino);
             CREATE INDEX IF NOT EXISTS index_node_parent_path ON node(parent_path);

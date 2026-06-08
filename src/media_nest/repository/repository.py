@@ -14,11 +14,11 @@ class Repository:
         self.insert_placeholder = {'node': '(' + ','.join([f'{key}' for key in NODE_KEY[1:]]) + ')',
                                    'root': '(' + ','.join([f'{key}' for key in ROOT_KEY[1:]]) + ')',
                                    'task': '(' + ','.join([f'{key}' for key in TASK_KEY[1:]]) + ')',
-                                   'segment': '(' + ','.join([f'{key}' for key in SEGMENT_KEY[1:]]) + ')'}
+                                   'segment': '(' + ','.join([f'{key}' for key in SEGMENT_KEY]) + ')'}
         self.values_placeholder = {'node': '(' + ','.join('?' * (len(NODE_KEY) - 1)) + ')',
                                    'root': '(' + ','.join('?' * (len(ROOT_KEY) - 1)) + ')',
                                    'task': '(' + ','.join('?' * (len(TASK_KEY) - 1)) + ')',
-                                   'segment': '(' + ','.join('?' * (len(SEGMENT_KEY) - 1)) + ')'}
+                                   'segment': '(' + ','.join('?' * len(SEGMENT_KEY)) + ')'}
         self.update_placeholder = {'node': ','.join([f'{key}=?' for key in NODE_KEY[1:]]),
                                    'root': ','.join([f'{key}=?' for key in ROOT_KEY[1:]])}
 

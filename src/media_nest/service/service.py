@@ -13,13 +13,9 @@ class Service:
         self.repository = repository
 
     def sync(self) -> bool:
-        try:
-            SyncLibrary(self.repository).run()
-            DealTask(self.repository).run()
-            return True
-        except Exception as e:
-            print(f'Error occurred while syncing: {e}')
-            return False
+        SyncLibrary(self.repository).run()
+        DealTask(self.repository).run()
+        return True
 
     def clear_cache(self) -> bool:
         try:
