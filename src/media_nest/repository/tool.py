@@ -19,39 +19,24 @@ Segment = namedtuple("Segment", SEGMENT_KEY)
 
 
 def model_to_row(
-    info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo,
     table: str,
-) -> tuple:
+    info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo,
+) -> tuple[int | str, ...]:
     if table == "root":
         return (str(info.path), int(info.last_sync_at.timestamp()))
-    elif table == "task":
-        return (
-            info.type_,
-            str(info.path),
-            info.dev,
-            info.ino,
-            info.duration_ms_flag,
-            info.width_height_flag,
-            info.hls_flag,
-            info.thumb_flag,
-        )
-    elif table == "segment":
-        return (
-            info.video_id,
-            info.segment_order,
-            info.duration_ms,
-            str(info.segment_name),
-        )
     elif table == "node":
         if info.type_ == "folder":
             duration_ms = None
-            width, height = None, None
+            width = None
+            height = None
         elif info.type_ == "video":
             duration_ms = info.duration_ms
-            width, height = info.width, info.height
+            width = info.width
+            height = info.height
         else:  # image
             duration_ms = None
-            width, height = info.width, info.height
+            width = info.width
+            height = info.height
         return (
             info.dev,
             info.ino,
@@ -65,10 +50,28 @@ def model_to_row(
             width,
             height,
         )
+    elif table == "task":
+        return (
+            info.type_,
+            str(info.path),
+            info.dev,
+            info.ino,
+            int(info.duration_ms_flag),
+            int(info.width_height_flag),
+            int(info.hls_flag),
+            int(info.thumb_flag),
+        )
+    else:  # segment
+        return (
+            info.video_id,
+            info.order_num,
+            info.duration_ms,
+            info.name,
+        )
 
 
 def row_to_model(
-    row: tuple, table: str
+    table: str, row: tuple[int | str, ...]
 ) -> RootInfo | TaskInfo | FolderInfo | VideoInfo | ImageInfo | SegmentInfo:
     if table == "root":
         root = Root(*row)
@@ -76,27 +79,6 @@ def row_to_model(
             id=root.id,
             path=Path(root.path),
             last_sync_at=Datetime.fromtimestamp(root.last_sync_at),
-        )
-    elif table == "task":
-        task = Task(*row)
-        return TaskInfo(
-            id=task.id,
-            type_=task.type_,
-            path=Path(task.path),
-            dev=task.dev,
-            ino=task.ino,
-            duration_ms_flag=bool(task.duration_ms_flag),
-            width_height_flag=bool(task.width_height_flag),
-            hls_flag=bool(task.hls_flag),
-            thumb_flag=bool(task.thumb_flag),
-        )
-    elif table == "segment":
-        segment = Segment(*row)
-        return SegmentInfo(
-            video_id=segment.video_id,
-            segment_order=segment.segment_order,
-            duration_ms=segment.duration_ms,
-            segment_name=segment.segment_name,
         )
     elif table == "node":
         node = Node(*row)
@@ -141,3 +123,24 @@ def row_to_model(
                 width=node.width,
                 height=node.height,
             )
+    elif table == "task":
+        task = Task(*row)
+        return TaskInfo(
+            id=task.id,
+            type_=task.type_,
+            path=Path(task.path),
+            dev=task.dev,
+            ino=task.ino,
+            duration_ms_flag=bool(task.duration_ms_flag),
+            width_height_flag=bool(task.width_height_flag),
+            hls_flag=bool(task.hls_flag),
+            thumb_flag=bool(task.thumb_flag),
+        )
+    else:  # segment
+        segment = Segment(*row)
+        return SegmentInfo(
+            video_id=segment.video_id,
+            order_num=segment.order_num,
+            duration_ms=segment.duration_ms,
+            name=segment.name,
+        )

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from media_nest.core.constant import HLS_MODE
-from media_nest.models.node_join_segment import NodeJoinSegment
+from media_nest.models.video_segment_info import NodeJoinSegment
 from media_nest.service.build_m3u import BuildM3u
 
 

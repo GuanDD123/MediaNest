@@ -4,7 +4,7 @@ import random
 from collections import defaultdict
 
 from media_nest.core.constant import BASE_URL, HLS_MODE, M3U_SEGMENT_NUM
-from media_nest.models.node_join_segment import NodeJoinSegment
+from media_nest.models.video_segment_info import VideoSegmentInfo
 from media_nest.repository.repository import Repository
 
 
@@ -37,7 +37,7 @@ class BuildM3u:
             segment_video_info_list = self.repository.segments_select_many_join_video_id_by_parent_path(
                 parent_path=parent_path)
 
-        video_info_dict: dict[int, list[NodeJoinSegment]] = defaultdict(list)
+        video_info_dict: dict[int, list[VideoSegmentInfo]] = defaultdict(list)
         for segment_video_info in segment_video_info_list:
             video_info_dict[segment_video_info.video_id].append(segment_video_info)
         video_info_list = list(video_info_dict.values())

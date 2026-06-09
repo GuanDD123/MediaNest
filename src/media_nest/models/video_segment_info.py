@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-__all__ = ("NodeJoinSegment",)
+__all__ = ("VideoSegmentInfo",)
 
 
 @dataclass(slots=True)
-class NodeJoinSegment:
+class VideoSegmentInfo:
     video_id: int
     video_parent_path: Path
     video_name: str

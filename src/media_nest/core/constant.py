@@ -37,7 +37,7 @@ TASK_KEY = (
     "hls_flag",
     "thumb_flag",
 )
-SEGMENT_KEY = ("video_id", "segment_order", "duration_ms", "segment_name")
+SEGMENT_KEY = ("video_id", "order_num", "duration_ms", "name")
 
 BASE_URL = "http://192.168.0.110:8000"
 

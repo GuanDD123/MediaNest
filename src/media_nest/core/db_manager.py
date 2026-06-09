@@ -41,10 +41,10 @@ class DataBaseManager:
                                 );
             CREATE TABLE IF NOT EXISTS segment (
                                       video_id INTEGER NOT NULL,
-                                      segment_order INTEGER NOT NULL,
+                                      order_num INTEGER NOT NULL,
                                       duration_ms INTEGER NOT NULL,
-                                      segment_name TEXT NOT NULL,
-                                      PRIMARY KEY (video_id, segment_order) ON CONFLICT IGNORE,
+                                      name TEXT NOT NULL,
+                                      PRIMARY KEY (video_id, order_num) ON CONFLICT IGNORE,
                                       FOREIGN KEY(video_id) REFERENCES node(id) ON DELETE CASCADE
                                       );
             CREATE UNIQUE INDEX IF NOT EXISTS index_node_dev_ino ON node(dev, ino);
