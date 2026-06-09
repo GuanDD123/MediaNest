@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+__all__ = ("TaskInfo", "SegmentInfo")
+
 
 @dataclass(slots=True)
 class TaskInfo:
