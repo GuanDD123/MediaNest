@@ -25,13 +25,13 @@ class FolderInfo(CommonInfo):
 
 @dataclass(slots=True)
 class MediaInfo(CommonInfo):
-    width: int | None
-    height: int | None
+    width: int | None = None
+    height: int | None = None
 
 
 @dataclass(slots=True)
 class VideoInfo(MediaInfo):
-    duration_ms: int | None
+    duration_ms: int | None = None
 
 
 @dataclass(slots=True)

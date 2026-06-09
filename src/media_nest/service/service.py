@@ -2,9 +2,8 @@ import shutil
 from pathlib import Path
 from urllib.parse import quote
 
-from media_nest import repository
+from media_nest.repository import Repository
 from media_nest.core.constant import THUMB_SAVE_PATH
-from media_nest.repository.repository import Repository
 from media_nest.service.sync_library import SyncLibrary
 from media_nest.service.deal_task import DealTask
 
