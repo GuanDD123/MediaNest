@@ -3,7 +3,7 @@ import threading
 from media_nest.core.db_manager import DataBaseManager
 from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY, SEGMENT_KEY
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
-from media_nest.models.root_task_segment_info import RootInfo, TaskInfo, SegmentInfo
+from media_nest.models.task_segment_info import RootInfo, TaskInfo, SegmentInfo
 from media_nest.models.node_join_segment import NodeJoinSegment
 from media_nest.repository.tool import model_to_row, row_to_model
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from media_nest.service.deal_task import DealTask
-from media_nest.models.root_task_segment_info import TaskInfo
+from media_nest.models.task_segment_info import TaskInfo
 from tests.tool.run_collect_info import run_collect_info
 from tests.fake.fake_folder_file import create_folder_file
 

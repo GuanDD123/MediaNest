@@ -4,7 +4,7 @@ from collections import namedtuple
 
 from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY, SEGMENT_KEY
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
-from media_nest.models.root_task_segment_info import RootInfo, TaskInfo, SegmentInfo
+from media_nest.models.task_segment_info import RootInfo, TaskInfo, SegmentInfo
 
 Node = namedtuple('Node', NODE_KEY)
 Root = namedtuple('Root', ROOT_KEY)

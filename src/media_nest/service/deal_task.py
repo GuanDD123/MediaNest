@@ -7,7 +7,7 @@ from functools import partial
 
 from media_nest.core.constant import (THUMB_SIZE, THUMB_SAVE_PATH,
                                       IMAGE_WORKERS, VIDEO_WORKERS, HLS_MODE)
-from media_nest.models.root_task_segment_info import TaskInfo, SegmentInfo
+from media_nest.models.task_segment_info import TaskInfo, SegmentInfo
 from media_nest.repository.repository import Repository
 
 

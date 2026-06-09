@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from media_nest.core.constant import THUMB_SAVE_PATH, HLS_MODE, THUMB_MODE
 from media_nest.models.node_info import FolderInfo, VideoInfo, ImageInfo
-from media_nest.models.root_task_segment_info import TaskInfo
+from media_nest.models.task_segment_info import TaskInfo
 from media_nest.repository.repository import Repository
 
 
