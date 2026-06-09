@@ -18,7 +18,7 @@ class DataBaseManager:
         self.connection.executescript("""
             CREATE TABLE IF NOT EXISTS root (id INTEGER PRIMARY KEY,
                                       path TEXT NOT NULL UNIQUE,
-                                      last_sync_at INTEGER
+                                      last_sync_time INTEGER
                                       );
             CREATE TABLE IF NOT EXISTS node (id INTEGER PRIMARY KEY,
                                 dev INTEGER NOT NULL, ino INTEGER NOT NULL,
@@ -41,10 +41,10 @@ class DataBaseManager:
                                 );
             CREATE TABLE IF NOT EXISTS segment (
                                       video_id INTEGER NOT NULL,
-                                      order_num INTEGER NOT NULL,
+                                      order_ INTEGER NOT NULL,
                                       duration_ms INTEGER NOT NULL,
                                       name TEXT NOT NULL,
-                                      PRIMARY KEY (video_id, order_num) ON CONFLICT IGNORE,
+                                      PRIMARY KEY (video_id, order_) ON CONFLICT IGNORE,
                                       FOREIGN KEY(video_id) REFERENCES node(id) ON DELETE CASCADE
                                       );
             CREATE UNIQUE INDEX IF NOT EXISTS index_node_dev_ino ON node(dev, ino);

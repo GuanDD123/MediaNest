@@ -11,7 +11,7 @@ ROOT_PATH = Path(__file__).resolve().parents[3]
 DB_PATH = ROOT_PATH / "media_info.db"
 STATIC_PATH = ROOT_PATH / "static"
 
-NODE_KEY = (
+NODE_KEYS = (
     "id",
     "dev",
     "ino",
@@ -25,8 +25,8 @@ NODE_KEY = (
     "width",
     "height",
 )
-ROOT_KEY = ("id", "path", "last_sync_at")
-TASK_KEY = (
+ROOT_KEYS = ("id", "path", "last_sync_time")
+TASK_KEYS = (
     "id",
     "type_",
     "path",
@@ -37,7 +37,7 @@ TASK_KEY = (
     "hls_flag",
     "thumb_flag",
 )
-SEGMENT_KEY = ("video_id", "order_num", "duration_ms", "name")
+SEGMENT_KEYS = ("video_id", "order_", "duration_ms", "name")
 
 BASE_URL = "http://192.168.0.110:8000"
 

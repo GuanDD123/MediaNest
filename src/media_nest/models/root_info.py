@@ -9,4 +9,4 @@ __all__ = ("RootInfo",)
 class RootInfo:
     id: int
     path: Path
-    last_sync_at: Datetime
+    last_sync_time: Datetime

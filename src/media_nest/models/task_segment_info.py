@@ -20,6 +20,6 @@ class TaskInfo:
 @dataclass(slots=True)
 class SegmentInfo:
     video_id: int
-    order_num: int
+    order_: int
     duration_ms: int
     name: str

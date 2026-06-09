@@ -91,9 +91,9 @@ class TestInsert:
         self.repository.segment_insert_many(
             [
                 SegmentInfo(
-                    video_id=4, order_num=1, duration_ms=1000, name="Segment 1"
+                    video_id=4, order_=1, duration_ms=1000, name="Segment 1"
                 ),
-                SegmentInfo(video_id=4, order_num=2, duration_ms=800, name="Segment 2"),
+                SegmentInfo(video_id=4, order_=2, duration_ms=800, name="Segment 2"),
             ]
         )
         assert (

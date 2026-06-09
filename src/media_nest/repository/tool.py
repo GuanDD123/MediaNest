@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime as Datetime
 from collections import namedtuple
 
-from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY, SEGMENT_KEY
+from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, TASK_KEYS, SEGMENT_KEYS
 from media_nest.models import (
     FolderInfo,
     VideoInfo,
@@ -12,10 +12,10 @@ from media_nest.models import (
     SegmentInfo,
 )
 
-Node = namedtuple("Node", NODE_KEY)
-Root = namedtuple("Root", ROOT_KEY)
-Task = namedtuple("Task", TASK_KEY)
-Segment = namedtuple("Segment", SEGMENT_KEY)
+Node = namedtuple("Node", NODE_KEYS)
+Root = namedtuple("Root", ROOT_KEYS)
+Task = namedtuple("Task", TASK_KEYS)
+Segment = namedtuple("Segment", SEGMENT_KEYS)
 
 
 def model_to_row(
@@ -23,7 +23,7 @@ def model_to_row(
     info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo,
 ) -> tuple[int | str, ...]:
     if table == "root":
-        return (str(info.path), int(info.last_sync_at.timestamp()))
+        return (str(info.path), int(info.last_sync_time.timestamp()))
     elif table == "node":
         if info.type_ == "folder":
             duration_ms = None
@@ -64,7 +64,7 @@ def model_to_row(
     else:  # segment
         return (
             info.video_id,
-            info.order_num,
+            info.order_,
             info.duration_ms,
             info.name,
         )
@@ -78,7 +78,7 @@ def row_to_model(
         return RootInfo(
             id=root.id,
             path=Path(root.path),
-            last_sync_at=Datetime.fromtimestamp(root.last_sync_at),
+            last_sync_time=Datetime.fromtimestamp(root.last_sync_time),
         )
     elif table == "node":
         node = Node(*row)
@@ -140,7 +140,7 @@ def row_to_model(
         segment = Segment(*row)
         return SegmentInfo(
             video_id=segment.video_id,
-            order_num=segment.order_num,
+            order_=segment.order_,
             duration_ms=segment.duration_ms,
             name=segment.name,
         )

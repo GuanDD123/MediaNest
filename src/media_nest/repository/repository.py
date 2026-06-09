@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from media_nest.core.db_manager import DataBaseManager
-from media_nest.core.constant import NODE_KEY, ROOT_KEY, TASK_KEY, SEGMENT_KEY
+from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, TASK_KEYS, SEGMENT_KEYS
 from media_nest.models import (
     FolderInfo,
     VideoInfo,
@@ -57,18 +57,18 @@ class Select:
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
     def node_select_in_id(
-        self, id_list: list[int]
+        self, ids: list[int]
     ) -> list[FolderInfo | VideoInfo | ImageInfo]:
-        sql = f"SELECT * FROM node WHERE id IN ({','.join('?' * len(id_list))})"
-        cursor = self.database.connection.execute(sql, id_list)
+        sql = f"SELECT * FROM node WHERE id IN ({','.join('?' * len(ids))})"
+        cursor = self.database.connection.execute(sql, ids)
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
     def node_select_in_dev_ino(
         self, dev_ino_list: list[tuple[int, int]]
     ) -> list[FolderInfo | VideoInfo | ImageInfo]:
         sql = f"SELECT * FROM node WHERE (dev, ino) IN ({','.join(('(?,?)' for _ in range(len(dev_ino_list))))})"
-        param_list = [param for dev_ino in dev_ino_list for param in dev_ino]
-        cursor = self.database.connection.execute(sql, param_list)
+        params = [param for dev_ino in dev_ino_list for param in dev_ino]
+        cursor = self.database.connection.execute(sql, params)
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
     def node_select_id_join_task_dev_ino_by_hlsflag(self) -> dict[str, int]:
@@ -81,10 +81,10 @@ class Select:
     def segments_select_join_node_id_by_parent_path(
         self, parent_path_str: str
     ) -> list[VideoSegmentInfo]:
-        sql = """SELECT s.order_num, s.name, s.duration_ms, n.id, n.dev, n.ino, n.parent_path, n.name
+        sql = """SELECT s.order_, s.name, s.duration_ms, n.id, n.dev, n.ino, n.parent_path, n.name
                         FROM segment s JOIN node n ON s.video_id = n.id
                         WHERE n.parent_path = ?
-                        ORDER BY n.id, s.order_num"""
+                        ORDER BY n.id, s.order_"""
         cursor = self.database.connection.execute(sql, (parent_path_str,))
         return [
             VideoSegmentInfo(
@@ -104,69 +104,67 @@ class Select:
 
 class Insert:
     insert_placeholder = {
-        "node": "(" + ",".join((key for key in NODE_KEY[1:])) + ")",
-        "root": "(" + ",".join((key for key in ROOT_KEY[1:])) + ")",
-        "task": "(" + ",".join((key for key in TASK_KEY[1:])) + ")",
-        "segment": "(" + ",".join((key for key in SEGMENT_KEY)) + ")",
+        "node": "(" + ",".join((key for key in NODE_KEYS[1:])) + ")",
+        "root": "(" + ",".join((key for key in ROOT_KEYS[1:])) + ")",
+        "task": "(" + ",".join((key for key in TASK_KEYS[1:])) + ")",
+        "segment": "(" + ",".join((key for key in SEGMENT_KEYS)) + ")",
     }
     values_placeholder = {
-        "node": "(" + ",".join("?" * (len(NODE_KEY) - 1)) + ")",
-        "root": "(" + ",".join("?" * (len(ROOT_KEY) - 1)) + ")",
-        "task": "(" + ",".join("?" * (len(TASK_KEY) - 1)) + ")",
-        "segment": "(" + ",".join("?" * len(SEGMENT_KEY)) + ")",
+        "node": "(" + ",".join("?" * (len(NODE_KEYS) - 1)) + ")",
+        "root": "(" + ",".join("?" * (len(ROOT_KEYS) - 1)) + ")",
+        "task": "(" + ",".join("?" * (len(TASK_KEYS) - 1)) + ")",
+        "segment": "(" + ",".join("?" * len(SEGMENT_KEYS)) + ")",
     }
 
     def root_insert(self, info: RootInfo) -> bool:
-        return self._insert("root", info=info)
+        return self._insert("root", insert_many=False, info=info)
 
     def node_insert(self, info: FolderInfo | VideoInfo | ImageInfo) -> bool:
-        return self._insert("node", info=info)
+        return self._insert("node", insert_many=False, info=info)
 
     def task_insert(self, info: TaskInfo) -> bool:
-        return self._insert("task", info=info)
+        return self._insert("task", insert_many=False, info=info)
+
+    def node_insert_many(self, infos: list[FolderInfo | VideoInfo | ImageInfo]) -> bool:
+        return self._insert("node", insert_many=True, infos=infos)
+
+    def task_insert_many(self, infos: list[TaskInfo]) -> bool:
+        return self._insert("task", insert_many=True, infos=infos)
+
+    def segment_insert_many(self, infos: list[SegmentInfo]) -> bool:
+        return self._insert("segment", insert_many=True, infos=infos)
 
     def _insert(
         self,
         table: str,
-        info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo,
-    ):
-        sql = f"INSERT INTO {table} {self.insert_placeholder[table]} VALUES {self.values_placeholder[table]}"
-        with self.database.connection as connection:
-            param_tuple = model_to_row(table, info)
-            cursor = connection.execute(sql, param_tuple)
-        return True if cursor.rowcount else False
-
-    def node_insert_many(
-        self, info_list: list[FolderInfo | VideoInfo | ImageInfo]
-    ) -> bool:
-        return self._insert_many("node", info_list=info_list)
-
-    def task_insert_many(self, info_list: list[TaskInfo]) -> bool:
-        return self._insert_many("task", info_list=info_list)
-
-    def segment_insert_many(self, info_list: list[SegmentInfo]) -> bool:
-        return self._insert_many("segment", info_list=info_list)
-
-    def _insert_many(
-        self,
-        table: str,
-        info_list: list[
+        insert_many: bool,
+        info: FolderInfo
+        | VideoInfo
+        | ImageInfo
+        | RootInfo
+        | TaskInfo
+        | SegmentInfo = None,
+        infos: list[
             FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo
-        ],
+        ] = None,
     ):
         sql = f"INSERT INTO {table} {self.insert_placeholder[table]} VALUES {self.values_placeholder[table]}"
         with self.database.connection as connection:
-            param = ((model_to_row(table, info)) for info in info_list)
-            cursor = connection.executemany(sql, param)
+            if insert_many:
+                params_generator = ((model_to_row(table, info)) for info in infos)
+                cursor = connection.executemany(sql, params_generator)
+            else:
+                params = model_to_row(table, info)
+                cursor = connection.execute(sql, params)
         return True if cursor.rowcount else False
 
 
 class Update:
     update_placeholder = {
-        "node": ",".join((f"{key}=?" for key in NODE_KEY[1:])),
-        "root": ",".join((f"{key}=?" for key in ROOT_KEY[1:])),
-        "task": ",".join((f"{key}=?" for key in TASK_KEY[1:])),
-        "segment": ",".join((f"{key}=?" for key in SEGMENT_KEY)),
+        "node": ",".join((f"{key}=?" for key in NODE_KEYS[1:])),
+        "root": ",".join((f"{key}=?" for key in ROOT_KEYS[1:])),
+        "task": ",".join((f"{key}=?" for key in TASK_KEYS[1:])),
+        "segment": ",".join((f"{key}=?" for key in SEGMENT_KEYS)),
     }
 
     def root_update_by_id(self, id: int, info: RootInfo) -> bool:
@@ -185,8 +183,8 @@ class Update:
     ):
         sql = f"UPDATE {table} SET {self.update_placeholder[table]} WHERE id = ?"
         with self.database.connection as connection:
-            param_tuple = (*model_to_row(table, info), id)
-            cursor = connection.execute(sql, param_tuple)
+            params = (*model_to_row(table, info), id)
+            cursor = connection.execute(sql, params)
         return True if cursor.rowcount else False
 
     def node_update_many_by_id(
@@ -194,8 +192,10 @@ class Update:
     ) -> bool:
         sql = f"UPDATE node SET {self.update_placeholder['node']} WHERE id = ?"
         with self.database.connection as connection:
-            param = ((*model_to_row("node", info), id) for id, info in update_list)
-            cursor = connection.executemany(sql, param)
+            params_generator = (
+                (*model_to_row("node", info), id) for id, info in update_list
+            )
+            cursor = connection.executemany(sql, params_generator)
         return True if cursor.rowcount else False
 
     def node_update_many_width_height_by_dev_ino(
@@ -203,10 +203,10 @@ class Update:
     ) -> bool:
         sql = """UPDATE node SET width = ?, height = ? WHERE dev = ? AND ino = ?"""
         with self.database.connection as connection:
-            param = (
+            params_generator = (
                 (width, height, dev, ino) for (dev, ino), width, height in update_list
             )
-            cursor = connection.executemany(sql, param)
+            cursor = connection.executemany(sql, params_generator)
         return True if cursor.rowcount else False
 
     def node_update_many_width_height_duration_by_dev_ino(
@@ -214,11 +214,11 @@ class Update:
     ) -> bool:
         sql = """UPDATE node SET width = ?, height = ?, duration_ms = ? WHERE dev = ? AND ino = ?"""
         with self.database.connection as connection:
-            param = (
+            params_generator = (
                 (width, height, duration_ms, dev, ino)
                 for (dev, ino), width, height, duration_ms in update_list
             )
-            cursor = connection.executemany(sql, param)
+            cursor = connection.executemany(sql, params_generator)
         return True if cursor.rowcount else False
 
 
@@ -235,10 +235,10 @@ class Delete:
             cursor = connection.execute(sql, (id,))
         return True if cursor.rowcount else False
 
-    def node_delete_in_id(self, id_list: list[int]) -> bool:
-        sql = f"""DELETE FROM node WHERE id IN ({",".join("?" * len(id_list))})"""
+    def node_delete_in_id(self, ids: list[int]) -> bool:
+        sql = f"""DELETE FROM node WHERE id IN ({",".join("?" * len(ids))})"""
         with self.database.connection as connection:
-            cursor = connection.execute(sql, id_list)
+            cursor = connection.execute(sql, ids)
         return True if cursor.rowcount else False
 
     def task_delete_all(self) -> bool:

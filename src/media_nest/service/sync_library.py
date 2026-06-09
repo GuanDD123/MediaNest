@@ -47,7 +47,7 @@ class SyncLibrary:
                     scan_result.node_update_list = []
                     update_num = 0
 
-            root_info.last_sync_at = Datetime.now()
+            root_info.last_sync_time = Datetime.now()
             self.repository.root_update_by_id(root_info.id, root_info)
 
         if (id_list := [db_info.id for db_info in scan_result.db_info_dict.values()]):

@@ -12,7 +12,7 @@ router = APIRouter(prefix='/admin')
 
 @router.post('/add_root')
 def add_root(path: str = Body(...), repository: Repository = Depends(get_repository)):
-    repository.root_insert(RootInfo(id=None, path=Path(path), last_sync_at=datetime.datetime.now()))
+    repository.root_insert(RootInfo(id=None, path=Path(path), last_sync_time=datetime.datetime.now()))
     return {'success': True}
 
 
