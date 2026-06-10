@@ -26,7 +26,7 @@ class TestSyncLibrary:
     @pytest.mark.run(order=1)
     def test_setup_class_data(self):
         create_folder_file(video_num=VIDEO_NUM, image_num=IMAGE_NUM)
-        self.repository.root_insert(RootInfo(None, ROOT, Datetime.now()))
+        self.repository.root_insert(RootInfo(None, ROOT, Datetime.now(), 0), )
 
     @pytest.mark.run(order=2)
     def test_initialization(self):

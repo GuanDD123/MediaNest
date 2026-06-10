@@ -23,7 +23,7 @@ def model_to_row(
     info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo,
 ) -> tuple[int | str, ...]:
     if table == "root":
-        return (str(info.path), int(info.last_sync_time.timestamp()))
+        return (str(info.path), int(info.last_sync_time.timestamp()), info.size)
     elif table == "node":
         if info.type_ == "folder":
             duration_ms = None
@@ -79,6 +79,7 @@ def row_to_model(
             id=root.id,
             path=Path(root.path),
             last_sync_time=Datetime.fromtimestamp(root.last_sync_time),
+            size=root.size,
         )
     elif table == "node":
         node = Node(*row)

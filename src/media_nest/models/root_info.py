@@ -10,3 +10,4 @@ class RootInfo:
     id: int
     path: Path
     last_sync_time: Datetime
+    size: int

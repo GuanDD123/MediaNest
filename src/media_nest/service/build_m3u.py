@@ -27,7 +27,7 @@ class BuildM3u:
         video_infos: list[VideoInfo] = [
             video_info
             for video_info in self.repository.node_select_by_parent_path(
-                parent_path=str(parent_path)
+                str(parent_path)
             )
             if video_info.type_ == "video"
         ]
@@ -55,7 +55,7 @@ class BuildM3u:
     def _hls(self, parent_path: Path, shuffle_flag: bool) -> str:
         video_segment_infos: list[VideoSegmentInfo] = (
             self.repository.segments_select_join_node_id_by_parent_path(
-                parent_path=str(parent_path)
+                str(parent_path)
             )
         )
 

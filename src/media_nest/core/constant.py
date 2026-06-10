@@ -25,7 +25,7 @@ NODE_KEYS = (
     "width",
     "height",
 )
-ROOT_KEYS = ("id", "path", "last_sync_time")
+ROOT_KEYS = ("id", "path", "last_sync_time", "size")
 TASK_KEYS = (
     "id",
     "type_",

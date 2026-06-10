@@ -18,7 +18,8 @@ class DataBaseManager:
         self.connection.executescript("""
             CREATE TABLE IF NOT EXISTS root (id INTEGER PRIMARY KEY,
                                       path TEXT NOT NULL UNIQUE,
-                                      last_sync_time INTEGER NOT NULL
+                                      last_sync_time INTEGER NOT NULL,
+                                      size INTEGER NOT NULL
                                       );
             CREATE TABLE IF NOT EXISTS node (id INTEGER PRIMARY KEY,
                                 dev INTEGER NOT NULL, ino INTEGER NOT NULL,

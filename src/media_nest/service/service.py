@@ -20,7 +20,7 @@ class Service:
 
     def add_root(self, path_str: str) -> None:
         self.repository.root_insert(
-            RootInfo(id=None, path=Path(path_str), last_sync_time=Datetime.now())
+            RootInfo(id=None, path=Path(path_str), last_sync_time=Datetime.now(), size=0)
         )
 
     def delete_root(self, path_str: str) -> None:
@@ -48,7 +48,7 @@ class Service:
 
     def get_all_root(self) -> list[dict[str, str]]:
         return [
-            {"type": "folder", "path": quote(str(info.path)), "name": info.path.name}
+            {"type": "folder", "path": quote(str(info.path)), "name": info.path.name, "size": info.size}
             for info in self.repository.root_select_all()
         ]
 

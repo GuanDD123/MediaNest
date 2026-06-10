@@ -62,6 +62,7 @@ class SyncLibrary:
                     node_update_num = 0
 
             root_info.last_sync_time = Datetime.now()
+            root_info.size = scan_result.folder_size_dict.get((root_info.path.stat().st_dev, root_info.path.stat().st_ino), -1)
             self.repository.root_update_by_id(root_info.id, root_info)
 
         self._sync_to_db(scan_result)

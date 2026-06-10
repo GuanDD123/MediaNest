@@ -1,3 +1,4 @@
+const topBar = document.getElementById("topBar");
 const listView = document.getElementById("listView");
 const list = document.getElementById("list");
 const viewerView = document.getElementById("viewerView");
@@ -16,6 +17,14 @@ async function loadFolder(path) {
     mediaList = [];
     mediaMap.clear();
 
+    if (path === "/media/root") {
+        topBar.style.display = "flex";
+        listView.style.paddingTop = "10px";
+    } else {
+        topBar.style.display = "none";
+        listView.style.paddingTop = "20px";
+    }
+
     try {
         const response = await fetch(path);
         const data = await response.json();
@@ -23,7 +32,26 @@ async function loadFolder(path) {
         data.forEach(item => {
             const div = document.createElement("div");
             div.className = "item";
-            div.textContent = item.name;
+
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "item-name";
+            nameSpan.textContent = item.type === "folder" ? item.name + " (" + decodeURIComponent(item.path) + ")" : item.name;
+            div.appendChild(nameSpan);
+
+            const sizeSpan = document.createElement("span");
+            sizeSpan.className = "item-col col-size";
+            sizeSpan.textContent = item.type === "folder" ? "Folder (" + item.size + " items )" : formatSize(item.size);
+            div.appendChild(sizeSpan);
+
+            const dimSpan = document.createElement("span");
+            dimSpan.className = "item-col col-dim";
+            dimSpan.textContent = (item.type !== "folder" && item.width && item.height) ? `${item.width} × ${item.height}` : "-";
+            div.appendChild(dimSpan);
+
+            const durSpan = document.createElement("span");
+            durSpan.className = "item-col col-dur";
+            durSpan.textContent = (item.type === "video" && item.duration) ? formatDuration(item.duration) : "-";
+            div.appendChild(durSpan);
 
             if (item.type !== "folder") {
                 mediaMap.set(item.path, mediaList.length);
@@ -45,7 +73,57 @@ async function loadFolder(path) {
     }
 }
 
-function openMedia(index) {
+function formatSize(bytes) {
+    if (bytes === undefined || bytes === null || isNaN(bytes)) return "-";
+    if (bytes === 0) return "0 B";
+    const k = 1024;
+    const sizes = ["B", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+function formatDuration(seconds) {
+    if (seconds === undefined || seconds === null || isNaN(seconds)) return "-";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+
+let mouseTimer = null;
+const closeBtn = document.getElementById("closeBtn");
+let isAutoSwitching = false;
+
+function setViewerUiVisible(visible) {
+    if (visible) {
+        closeBtn.style.opacity = "1";
+        closeBtn.style.pointerEvents = "auto";
+        viewerView.classList.remove("hide-cursor");
+        if (mediaList[currentIndex]?.type === "video") {
+            video.controls = true;
+        }
+    } else {
+        if (!viewerView.hidden) {
+            closeBtn.style.opacity = "0";
+            closeBtn.style.pointerEvents = "none";
+            viewerView.classList.add("hide-cursor");
+            video.controls = false;
+        }
+    }
+}
+
+viewerView.addEventListener("mousemove", () => {
+    if (isAutoSwitching || viewerView.hidden) return;
+
+    setViewerUiVisible(true);
+
+    clearTimeout(mouseTimer);
+    mouseTimer = setTimeout(() => {
+        setViewerUiVisible(false);
+    }, 1000);
+});
+
+
+function openMedia(index, isSilent = false) {
     currentIndex = index;
     const item = mediaList[currentIndex];
 
@@ -55,6 +133,7 @@ function openMedia(index) {
     if (item.type === "image") {
         video.hidden = true;
         video.pause();
+        video.controls = false;
         image.hidden = false;
         showImage(currentIndex);
     } else if (item.type === "video") {
@@ -62,36 +141,16 @@ function openMedia(index) {
         video.hidden = false;
         playVideo(item.path);
     }
-}
 
-function closeViewer() {
-    viewerView.hidden = true;
-    listView.hidden = false;
-
-    image.hidden = true;
-    image.src = "";
-
-    video.hidden = true;
-    video.pause();
-    video.currentTime = 0;
-    video.src = "";
-}
-
-viewerView.addEventListener("click", onViewerClick);
-function onViewerClick(e) {
-    if (mediaList[currentIndex]?.type === "image" && e.target !== document.getElementById('closeBtn')) {
-        const x = e.clientX;
-        const w = window.innerWidth;
-        if (x < w * 0.5) { prevImage(); }
-        else { nextImage(); }
+    if (isSilent) {
+        setViewerUiVisible(false);
+    } else {
+        setViewerUiVisible(true);
+        clearTimeout(mouseTimer);
+        mouseTimer = setTimeout(() => setViewerUiVisible(false), 1000);
     }
 }
-function prevImage() {
-    if (currentIndex > 0) { openMedia(currentIndex - 1); }
-}
-function nextImage() {
-    if (currentIndex < mediaList.length - 1) { openMedia(currentIndex + 1); }
-}
+
 function showImage(index) {
     const item = mediaList[index];
     image.src = "/media/image" + item.path;
@@ -108,7 +167,7 @@ function preloadNextImage() {
 function playVideo(path) {
     video.src = "/media/video" + path;
     video.onloadeddata = () => {
-        video.play().catch(err => console.warn("自动播放被浏览器拦截:", err));
+        video.play().catch(err => console.warn("自动播放被拦截:", err));
     };
 }
 video.addEventListener("ended", () => {
@@ -118,3 +177,48 @@ video.addEventListener("ended", () => {
         closeViewer();
     }
 });
+
+
+viewerView.addEventListener("click", onViewerClick);
+function onViewerClick(e) {
+    if (mediaList[currentIndex]?.type === "image" && e.target !== document.getElementById('closeBtn')) {
+        const x = e.clientX;
+        const w = window.innerWidth;
+        if (x < w * 0.5) { prevImage(); }
+        else { nextImage(); }
+    }
+}
+function prevImage() {
+    if (currentIndex > 0) { openMedia(currentIndex - 1); }
+}
+function nextImage() {
+    if (currentIndex < mediaList.length - 1) { openMedia(currentIndex + 1); }
+}
+
+video.addEventListener("ended", () => {
+    if (currentIndex < mediaList.length - 1) {
+        isAutoSwitching = true;
+
+        openMedia(currentIndex + 1, true);
+
+        setTimeout(() => {
+            isAutoSwitching = false;
+        }, 300);
+    } else {
+        closeViewer();
+    }
+});
+
+
+function closeViewer() {
+    viewerView.hidden = true;
+    listView.hidden = false;
+
+    image.hidden = true;
+    image.src = "";
+
+    video.hidden = true;
+    video.pause();
+    video.currentTime = 0;
+    video.src = "";
+}

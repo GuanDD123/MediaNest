@@ -8,7 +8,7 @@
 </head>
 
 <body>
-    <div id="topBar">
+    <div id="topBar" style="display: none;">
         <button onclick="sync()" title="同步">🔄</button>
         <button onclick="addRoot()" title="新增">➕</button>
         <button onclick="deleteRoot()" title="删除">🗑️</button>
@@ -21,7 +21,7 @@
     <div id="viewerView" hidden>
         <button id="closeBtn" onclick="closeViewer()" title="返回列表">❌</button>
         <img id="image" hidden>
-        <video id="video" controls hidden></video>
+        <video id="video" hidden></video>
     </div>
 
     <script src="/static/index.js"></script>
