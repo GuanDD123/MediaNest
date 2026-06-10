@@ -22,7 +22,14 @@
     </div>
 
     <div id="viewerView" hidden>
-        <button id="closeBtn" onclick="closeViewer()" title="返回列表">❌</button>
+        <div id="viewerTopBar">
+            <span id="viewerTitle">加载中...</span>
+            <div class="viewer-actions">
+                <button id="markBtn" onclick="toggleCurrentMark()" title="标记/取消标记">☆</button>
+                <button id="closeBtn" onclick="closeViewer()" title="返回列表">❌</button>
+            </div>
+        </div>
+
         <img id="image" hidden>
         <video id="video" hidden></video>
     </div>

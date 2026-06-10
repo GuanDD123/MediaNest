@@ -4,6 +4,9 @@ const list = document.getElementById("list");
 const viewerView = document.getElementById("viewerView");
 const image = document.getElementById("image");
 const video = document.getElementById("video");
+const viewerTopBar = document.getElementById("viewerTopBar");
+const viewerTitle = document.getElementById("viewerTitle");
+const markBtn = document.getElementById("markBtn");
 const closeBtn = document.getElementById("closeBtn");
 
 let mediaList = [];
@@ -54,7 +57,16 @@ function renderList(data) {
 
         const nameSpan = document.createElement("span");
         nameSpan.className = "item-name";
-        nameSpan.textContent = item.type === "folder" ? item.name + " (" + decodeURIComponent(item.path) + ")" : item.name;
+
+        if (item.marked) {
+            const star = document.createElement("span");
+            star.className = "item-mark";
+            star.textContent = "⭐";
+            nameSpan.appendChild(star);
+        }
+        const name = item.type === "folder" ? item.name + " (" + decodeURIComponent(item.path) + ")" : item.name;
+        const textNode = document.createTextNode(name);
+        nameSpan.appendChild(textNode);
         div.appendChild(nameSpan);
 
         const sizeSpan = document.createElement("span");
@@ -127,16 +139,16 @@ function shufflePlay() {
 
 function setViewerUiVisible(visible) {
     if (visible) {
-        closeBtn.style.opacity = "1";
-        closeBtn.style.pointerEvents = "auto";
+        viewerTopBar.style.opacity = "1";
+        viewerTopBar.style.pointerEvents = "auto";
         viewerView.classList.remove("hide-cursor");
         if (mediaList[currentIndex]?.type === "video") {
             video.controls = true;
         }
     } else {
         if (!viewerView.hidden) {
-            closeBtn.style.opacity = "0";
-            closeBtn.style.pointerEvents = "none";
+            viewerTopBar.style.opacity = "0";
+            viewerTopBar.style.pointerEvents = "none";
             viewerView.classList.add("hide-cursor");
             video.controls = false;
         }
@@ -158,6 +170,9 @@ viewerView.addEventListener("mousemove", () => {
 function openMedia(index, isSilent = false) {
     currentIndex = index;
     const item = mediaList[currentIndex];
+
+    viewerTitle.textContent = item.name;
+    markBtn.textContent = item.marked ? "⭐" : "☆";
 
     listView.hidden = true;
     viewerView.hidden = false;
@@ -213,7 +228,7 @@ video.addEventListener("ended", () => {
 
 viewerView.addEventListener("click", onViewerClick);
 function onViewerClick(e) {
-    if (mediaList[currentIndex]?.type === "image" && e.target !== document.getElementById('closeBtn')) {
+    if (mediaList[currentIndex]?.type === "image" && !e.target.closest('.viewer-actions')) {
         const x = e.clientX;
         const w = window.innerWidth;
         if (x < w * 0.5) { prevImage(); }
@@ -253,4 +268,42 @@ function closeViewer() {
     video.pause();
     video.currentTime = 0;
     video.src = "";
+}
+
+
+async function toggleCurrentMark() {
+    const item = mediaList[currentIndex];
+    const newMarkState = !item.marked;
+
+    item.marked = newMarkState;
+    markBtn.textContent = newMarkState ? "⭐" : "☆";
+
+    const folderItem = currentFolderData.find(i => i.path === item.path);
+    if (folderItem) folderItem.marked = newMarkState;
+
+    renderList(currentFolderData);
+
+    try {
+        const res = await fetch("/admin/mark", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: item.id,
+                marked: newMarkState
+            })
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+            throw new Error(data.msg || "后端返回标记失败");
+        }
+    } catch (err) {
+        console.error("标记通信失败:", err);
+        item.marked = !newMarkState;
+        if (folderItem) folderItem.marked = !newMarkState;
+        markBtn.textContent = item.marked ? "⭐" : "☆";
+        renderList(currentFolderData);
+
+        alert("标记状态同步至服务器失败，请检查网络");
+    }
 }

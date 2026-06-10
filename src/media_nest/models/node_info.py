@@ -16,6 +16,7 @@ class CommonInfo:
     type_: str
     size: int
     mtime: Datetime
+    marked: bool = False
 
 
 @dataclass(slots=True)

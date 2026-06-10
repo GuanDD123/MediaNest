@@ -29,7 +29,8 @@ class DataBaseManager:
                                 size INTEGER NOT NULL,
                                 mtime INTEGER NOT NULL,
                                 duration_ms INTEGER,
-                                width INTEGER, height INTEGER
+                                width INTEGER, height INTEGER,
+                                marked INTEGER NOT NULL CHECK(marked IN (0, 1))
                                       );
             CREATE TABLE IF NOT EXISTS task (id INTEGER PRIMARY KEY,
                                 type_ TEXT NOT NULL CHECK(type_ IN ('folder', 'video', 'image')),

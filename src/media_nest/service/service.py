@@ -56,10 +56,12 @@ class Service:
         results: list[dict] = []
         for info in self.repository.node_select_by_parent_path(path_str):
             result = {
+                "id": info.id,
                 "type": info.type_,
                 "path": quote(str(info.parent_path / info.name)),
                 "name": info.name,
                 "size": info.size,
+                "marked": info.marked
             }
             if info.type_ != "folder":
                 result["width"] = info.width
@@ -71,3 +73,6 @@ class Service:
 
     def build_m3u(self, parent_str: str, shuffle_flag: bool = False) -> str:
         return BuildM3u(self.repository).run(Path("/" + parent_str), shuffle_flag)
+    
+    def mark(self, id: int, marked: bool) -> None:
+        self.repository.node_update_marked_by_id(id, marked)

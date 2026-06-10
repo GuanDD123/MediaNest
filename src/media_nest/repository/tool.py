@@ -49,6 +49,7 @@ def model_to_row(
             duration_ms,
             width,
             height,
+            int(info.marked),
         )
     elif table == "task":
         return (
@@ -94,6 +95,7 @@ def row_to_model(
                 type_=node.type_,
                 size=node.size,
                 mtime=Datetime.fromtimestamp(node.mtime),
+                marked=bool(node.marked),
             )
         elif node.type_ == "video":
             return VideoInfo(
@@ -106,6 +108,7 @@ def row_to_model(
                 type_=node.type_,
                 size=node.size,
                 mtime=Datetime.fromtimestamp(node.mtime),
+                marked=bool(node.marked),
                 width=node.width,
                 height=node.height,
                 duration_ms=node.duration_ms,
@@ -121,6 +124,7 @@ def row_to_model(
                 type_=node.type_,
                 size=node.size,
                 mtime=Datetime.fromtimestamp(node.mtime),
+                marked=bool(node.marked),
                 width=node.width,
                 height=node.height,
             )

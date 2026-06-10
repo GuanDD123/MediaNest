@@ -37,3 +37,8 @@ def sync(repository: Repository = Depends(get_repository)):
 def clear_cache(repository: Repository = Depends(get_repository)):
     Service(repository).clear_cache()
     return {"success": True}
+
+@router.post("/mark")
+def mark(id: int = Body(...), marked: bool = Body(...), repository: Repository = Depends(get_repository)):
+    Service(repository).mark(id, marked)
+    return {"success": True}
