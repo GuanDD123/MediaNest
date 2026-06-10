@@ -2,14 +2,11 @@ const listView = document.getElementById("listView");
 const list = document.getElementById("list");
 const viewerView = document.getElementById("viewerView");
 const image = document.getElementById("image");
-const videoA = document.getElementById("videoA");
-const videoB = document.getElementById("videoB");
+const video = document.getElementById("video");
 
 let mediaList = [];
 let mediaMap = new Map();
 let currentIndex = 0;
-let currentBuffer = videoA;
-let nextBuffer = videoB;
 
 loadFolder("/media/root");
 
@@ -19,51 +16,54 @@ async function loadFolder(path) {
     mediaList = [];
     mediaMap.clear();
 
-    const response = await fetch(path);
-    const data = await response.json();
+    try {
+        const response = await fetch(path);
+        const data = await response.json();
 
-    data.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "item";
-        div.textContent = item.name;
+        data.forEach(item => {
+            const div = document.createElement("div");
+            div.className = "item";
+            div.textContent = item.name;
 
-        if (item.type !== "folder") {
-            mediaMap.set(item.path, mediaList.length);
-            mediaList.push(item);
-        }
-
-        div.onclick = () => {
-            if (item.type === "folder") {
-                loadFolder("/media/folder" + item.path);
+            if (item.type !== "folder") {
+                mediaMap.set(item.path, mediaList.length);
+                mediaList.push(item);
             }
-            else if (item.type === "image") {
-                listView.hidden = true;
-                viewerView.hidden = false;
-                image.hidden = false;
-                showImage(mediaMap.get(item.path));
-            }
-            else {
-                listView.hidden = true;
-                viewerView.hidden = false;
-                image.hidden = true;
-                currentBuffer.style.display = "block";
 
-                currentIndex = mediaMap.get(item.path);
-
-                currentBuffer.src = "/media/video" + item.path;
-                const buffer = currentBuffer;
-                buffer.onloadeddata = () => {
-                    buffer.currentTime = 0;
-                    buffer.play();
+            div.onclick = () => {
+                if (item.type === "folder") {
+                    loadFolder("/media/folder" + item.path);
+                } else {
+                    openMedia(mediaMap.get(item.path));
                 }
-
-                preloadNextVideo();
             }
-        }
 
-        list.appendChild(div);
-    });
+            list.appendChild(div);
+        });
+    } catch (err) {
+        console.error("加载目录失败:", err);
+    }
 }
+
+function openMedia(index) {
+    currentIndex = index;
+    const item = mediaList[currentIndex];
+
+    listView.hidden = true;
+    viewerView.hidden = false;
+
+    if (item.type === "image") {
+        video.hidden = true;
+        video.pause();
+        image.hidden = false;
+        showImage(currentIndex);
+    } else if (item.type === "video") {
+        image.hidden = true;
+        video.hidden = false;
+        playVideo(item.path);
+    }
+}
+
 function closeViewer() {
     viewerView.hidden = true;
     listView.hidden = false;
@@ -71,17 +71,15 @@ function closeViewer() {
     image.hidden = true;
     image.src = "";
 
-    [videoA, videoB].forEach(v => {
-        v.pause();
-        v.currentTime = 0;
-        v.src = "";
-        v.style.display = "none";
-    });
+    video.hidden = true;
+    video.pause();
+    video.currentTime = 0;
+    video.src = "";
 }
 
 viewerView.addEventListener("click", onViewerClick);
 function onViewerClick(e) {
-    if (mediaList[currentIndex].type === "image") {
+    if (mediaList[currentIndex]?.type === "image" && e.target !== document.getElementById('closeBtn')) {
         const x = e.clientX;
         const w = window.innerWidth;
         if (x < w * 0.5) { prevImage(); }
@@ -89,18 +87,15 @@ function onViewerClick(e) {
     }
 }
 function prevImage() {
-    if (currentIndex > 0) { showImage(currentIndex - 1); }
+    if (currentIndex > 0) { openMedia(currentIndex - 1); }
 }
 function nextImage() {
-    if (currentIndex < mediaList.length - 1) { showImage(currentIndex + 1); }
+    if (currentIndex < mediaList.length - 1) { openMedia(currentIndex + 1); }
 }
 function showImage(index) {
-    currentIndex = index
     const item = mediaList[index];
-
     image.src = "/media/image" + item.path;
-
-    if (currentIndex < mediaList.length - 1) { preloadNextImage(); }
+    if (index < mediaList.length - 1) { preloadNextImage(); }
 }
 function preloadNextImage() {
     const next = mediaList[currentIndex + 1];
@@ -110,29 +105,16 @@ function preloadNextImage() {
     }
 }
 
-videoA.addEventListener("ended", onVideoEnded);
-videoB.addEventListener("ended", onVideoEnded);
-function onVideoEnded() {
-    currentIndex++;
-    if (currentIndex < mediaList.length) { switchVideo(); }
+function playVideo(path) {
+    video.src = "/media/video" + path;
+    video.onloadeddata = () => {
+        video.play().catch(err => console.warn("自动播放被浏览器拦截:", err));
+    };
 }
-function switchVideo() {
-    [currentBuffer, nextBuffer] = [nextBuffer, currentBuffer];
-
-    nextBuffer.pause();
-    currentBuffer.style.display = "block";
-    nextBuffer.style.display = "none";
-    currentBuffer.currentTime = 0;
-    currentBuffer.play();
-
-    if (currentIndex < mediaList.length - 1) { preloadNextVideo(); }
-}
-function preloadNextVideo() {
-    const next = mediaList[currentIndex + 1];
-    if (next?.type === "video") {
-        nextBuffer.preload = "auto";
-        nextBuffer.src = "/media/video" + next.path;
-        nextBuffer.pause();
-        nextBuffer.load();
+video.addEventListener("ended", () => {
+    if (currentIndex < mediaList.length - 1) {
+        openMedia(currentIndex + 1);
+    } else {
+        closeViewer();
     }
-}
+});

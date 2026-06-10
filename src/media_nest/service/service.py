@@ -65,7 +65,7 @@ class Service:
                 result["width"] = info.width
                 result["height"] = info.height
                 if info.type_ == "video":
-                    result["duration"] = int(info.duration / 1000)
+                    result["duration"] = int(info.duration_ms / 1000)
             results.append(result)
         return results
 
