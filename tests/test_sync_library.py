@@ -20,21 +20,21 @@ IMAGE_NUM = 11
 class TestSyncLibrary:
     repository: Repository
 
-    @classmethod
-    def setup_class(cls):
-        create_folder_file(video_num=VIDEO_NUM, image_num=IMAGE_NUM)
-        cls.repository.root_insert(RootInfo(None, ROOT, Datetime.now()))
-
     def teardown_method(self):
         self.repository.task_delete_all()
 
     @pytest.mark.run(order=1)
+    def test_setup_class_data(self):
+        create_folder_file(video_num=VIDEO_NUM, image_num=IMAGE_NUM)
+        self.repository.root_insert(RootInfo(None, ROOT, Datetime.now()))
+
+    @pytest.mark.run(order=2)
     def test_initialization(self):
         run_collect_info(SyncLibrary(self.repository).run, (), "1: ")
         assert len(self.repository.node_select_all()) == 53
         assert len(self.repository.task_select_all()) == IMAGE_NUM + 2 + VIDEO_NUM
 
-    @pytest.mark.run(order=2)
+    @pytest.mark.run(order=3)
     def test_no_addition(self):
         run_collect_info(SyncLibrary(self.repository).run, (), "2: ")
         assert len(self.repository.node_select_all()) == 53
@@ -43,7 +43,7 @@ class TestSyncLibrary:
         ]
         assert len(task_list) == 0
 
-    @pytest.mark.run(order=3)
+    @pytest.mark.run(order=4)
     def test_addition(self):
         (Image.new("RGB", (100, 100)).save(ROOT / "图片" / "风景" / "new.jpg"))
         subprocess.run(
@@ -69,7 +69,7 @@ class TestSyncLibrary:
         ]
         assert len(task_list) == 2
 
-    @pytest.mark.run(order=3)
+    @pytest.mark.run(order=5)
     def test_update(self):
         # print(self.repository.node_select_all())
         img_path = ROOT / "图片" / "风景" / "img_0.jpg"
@@ -98,7 +98,7 @@ class TestSyncLibrary:
         # print(self.repository.node_select_all())
         assert len(task_list) == 2
 
-    @pytest.mark.run(order=4)
+    @pytest.mark.run(order=6)
     def test_delete(self):
         (ROOT / "图片" / "风景" / "img_1.jpg").unlink()
         (ROOT / "视频" / "video_1.mp4").unlink()
@@ -110,7 +110,7 @@ class TestSyncLibrary:
         ]
         assert len(task_list) == 0
 
-    @pytest.mark.run(order=5)
+    @pytest.mark.run(order=7)
     def test_rename(self):
         (ROOT / "图片" / "风景" / "img_2.jpg").rename(
             ROOT / "图片" / "风景" / "img_2_renamed.jpg"
@@ -124,7 +124,7 @@ class TestSyncLibrary:
         ]
         assert len(task_list) == 0
 
-    @pytest.mark.run(order=6)
+    @pytest.mark.run(order=8)
     def test_move(self):
         (ROOT / "图片" / "风景" / "img_3.jpg").rename(
             ROOT / "图片" / "人物" / "img_3.jpg"
@@ -137,7 +137,7 @@ class TestSyncLibrary:
         ]
         assert len(task_list) == 0
 
-    @pytest.mark.run(order=7)
+    @pytest.mark.run(order=9)
     def test_chinese_files(self):
         (ROOT / "中文测试").mkdir()
         (ROOT / "中文测试" / "测试图片.jpg").touch()

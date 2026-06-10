@@ -42,7 +42,7 @@ SEGMENT_KEYS = ("video_id", "order_", "duration_ms", "name")
 BASE_URL = "http://192.168.0.110:8000"
 
 HLS_MODE = False  # TS, fMP4, False
-M3U_SEGMENT_NUM = 300
+M3U_ITEM_NUM_LIMIT = 3000
 SEGMENT_SAVE_PATH = Path("/Media/segments")
 
 IMAGE_SUFFIX = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
