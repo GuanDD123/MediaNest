@@ -88,6 +88,15 @@ body {
     inset: 0;
     overflow: hidden;
     background: #000000;
+    z-index: 999999;
+}
+
+#viewerView:fullscreen {
+    background: #000000;
+}
+
+#viewerView:-webkit-full-screen {
+    background: #000000;
 }
 
 #viewerView.hide-cursor {
@@ -101,40 +110,92 @@ body {
     width: 100%;
     height: 100%;
     object-fit: contain;
-    object-position: center;
+    z-index: 1;
+}
+
+#viewerView.ui-hidden #viewerTopBar,
+#viewerView.ui-hidden #viewerBottomBar {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+}
+
+#viewerView.ui-hidden {
+    cursor: none !important;
 }
 
 #viewerTopBar {
     position: absolute;
-    top: calc(20px + env(safe-area-inset-top, 0px));
-    right: calc(20px + env(safe-area-inset-right, 0px));
+    top: calc(15px + env(safe-area-inset-top, 0px));
+    right: calc(15px + env(safe-area-inset-right, 0px));
 
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 16px;
-    z-index: 10;
-    padding: 6px 6px 6px 18px;
-    background: rgba(0, 0, 0, 0.65);
-    border-radius: 30px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    gap: 12px;
+    z-index: 1000000;
 
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.15s ease-in-out;
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+
+    transition: opacity 0.3s ease;
+    opacity: 1;
 }
 
 #viewerTitle {
     color: #ffffff;
     font-size: 14px;
-    font-weight: 500;
-    /* max-width: 180px;*/
+    /* max-width: 150px;*/
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.ui-hidden #viewerTopBar {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#viewerBottomBar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 15px 20px calc(15px + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+    opacity: 1;
+    transition: all 0.3s ease;
+}
+
+.ctrl-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 5px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#timeCurrent,
+#timeTotal {
+    color: white;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+#progressBar {
+    flex: 1;
+    cursor: pointer;
+    accent-color: #ffd700;
 }
 
 .viewer-actions {
@@ -196,4 +257,10 @@ body {
 
 .shuffle-btn:active {
     transform: scale(0.98);
+}
+
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-panel {
+    display: none !important;
 }

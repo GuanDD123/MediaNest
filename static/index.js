@@ -2,6 +2,10 @@ const topBar = document.getElementById("topBar");
 const listView = document.getElementById("listView");
 const list = document.getElementById("list");
 const viewerView = document.getElementById("viewerView");
+const viewerBottomBar = document.getElementById("viewerBottomBar");
+const progressBar = document.getElementById("progressBar");
+const timeCurrent = document.getElementById("timeCurrent");
+const timeTotal = document.getElementById("timeTotal");
 const image = document.getElementById("image");
 const video = document.getElementById("video");
 const viewerTopBar = document.getElementById("viewerTopBar");
@@ -9,6 +13,7 @@ const viewerTitle = document.getElementById("viewerTitle");
 const markBtn = document.getElementById("markBtn");
 const closeBtn = document.getElementById("closeBtn");
 
+let uiTimer = null;
 let mediaList = [];
 let mediaMap = new Map();
 let currentIndex = 0;
@@ -136,35 +141,19 @@ function shufflePlay() {
     openMedia(0);
 }
 
+function wakeUpUI() {
+    viewerView.classList.remove("ui-hidden");
+    clearTimeout(uiTimer);
 
-function setViewerUiVisible(visible) {
-    if (visible) {
-        viewerTopBar.style.opacity = "1";
-        viewerTopBar.style.pointerEvents = "auto";
-        viewerView.classList.remove("hide-cursor");
-        if (mediaList[currentIndex]?.type === "video") {
-            video.controls = true;
-        }
-    } else {
-        if (!viewerView.hidden) {
-            viewerTopBar.style.opacity = "0";
-            viewerTopBar.style.pointerEvents = "none";
-            viewerView.classList.add("hide-cursor");
-            video.controls = false;
-        }
-    }
+    uiTimer = setTimeout(() => {
+        if (video.paused && !video.hidden) return;
+        viewerView.classList.add("ui-hidden");
+    }, 2000);
 }
 
-viewerView.addEventListener("mousemove", () => {
-    if (isAutoSwitching || viewerView.hidden) return;
-
-    setViewerUiVisible(true);
-
-    clearTimeout(mouseTimer);
-    mouseTimer = setTimeout(() => {
-        setViewerUiVisible(false);
-    }, 1000);
-});
+viewerView.addEventListener("mousemove", wakeUpUI);
+viewerView.addEventListener("touchstart", wakeUpUI);
+viewerView.addEventListener("click", wakeUpUI);
 
 
 function openMedia(index, isSilent = false) {
@@ -180,21 +169,20 @@ function openMedia(index, isSilent = false) {
     if (item.type === "image") {
         video.hidden = true;
         video.pause();
-        video.controls = false;
+        viewerBottomBar.hidden = true;
         image.hidden = false;
         showImage(currentIndex);
     } else if (item.type === "video") {
         image.hidden = true;
+        viewerBottomBar.hidden = false;
         video.hidden = false;
         playVideo(item.path);
     }
 
     if (isSilent) {
-        setViewerUiVisible(false);
+        viewerView.classList.add("ui-hidden");
     } else {
-        setViewerUiVisible(true);
-        clearTimeout(mouseTimer);
-        mouseTimer = setTimeout(() => setViewerUiVisible(false), 1000);
+        wakeUpUI();
     }
 }
 
@@ -211,20 +199,49 @@ function preloadNextImage() {
     }
 }
 
-function playVideo(path) {
-    video.src = "/media/video" + path;
-    video.onloadeddata = () => {
-        video.play().catch(err => console.warn("自动播放被拦截:", err));
-    };
-}
 video.addEventListener("ended", () => {
     if (currentIndex < mediaList.length - 1) {
-        openMedia(currentIndex + 1);
+        openMedia(currentIndex + 1, true);
     } else {
         closeViewer();
     }
 });
-
+function playVideo(path) {
+    video.src = "/media/video" + path;
+    video.play().catch(() => console.warn("自动播放拦截"));
+} function togglePlayState() {
+    if (video.paused) {
+        video.play();
+        wakeUpUI();
+    } else {
+        video.pause();
+        wakeUpUI();
+    }
+}
+video.addEventListener("click", (e) => {
+    e.stopPropagation();
+    togglePlayState();
+});
+function formatTime(sec) {
+    let m = Math.floor(sec / 60);
+    let s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
+}
+video.addEventListener("loadedmetadata", () => {
+    progressBar.max = video.duration;
+    timeTotal.textContent = formatTime(video.duration);
+});
+video.addEventListener("timeupdate", () => {
+    if (!progressBar.matches(':active')) {
+        progressBar.value = video.currentTime;
+        timeCurrent.textContent = formatTime(video.currentTime);
+    }
+});
+progressBar.addEventListener("input", () => {
+    video.currentTime = progressBar.value;
+    timeCurrent.textContent = formatTime(video.currentTime);
+    wakeUpUI();
+});
 
 viewerView.addEventListener("click", onViewerClick);
 function onViewerClick(e) {
@@ -305,5 +322,23 @@ async function toggleCurrentMark() {
         renderList(currentFolderData);
 
         alert("标记状态同步至服务器失败，请检查网络");
+    }
+}
+
+function toggleCustomFullScreen() {
+    const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+
+    if (!isFull) {
+        if (viewerView.requestFullscreen) {
+            viewerView.requestFullscreen();
+        } else if (viewerView.webkitRequestFullscreen) {
+            viewerView.webkitRequestFullscreen();
+        }
+    } else {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        }
     }
 }

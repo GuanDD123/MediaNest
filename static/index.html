@@ -31,7 +31,15 @@
         </div>
 
         <img id="image" hidden>
-        <video id="video" hidden></video>
+        <video id="video" hidden playsinline webkit-playsinline></video>
+
+        <div id="viewerBottomBar" hidden>
+            <button class="ctrl-btn" onclick="togglePlayState()">⏯️</button>
+            <span id="timeCurrent">00:00</span>
+            <input type="range" id="progressBar" min="0" value="0" step="0.1">
+            <span id="timeTotal">00:00</span>
+            <button class="ctrl-btn" onclick="toggleCustomFullScreen()">⛶</button>
+        </div>
     </div>
 
     <script src="/static/index.js"></script>
