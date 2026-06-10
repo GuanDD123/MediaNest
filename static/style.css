@@ -129,3 +129,28 @@ body {
 #closeBtn:hover {
     background: rgba(255, 255, 255, 0.45);
 }
+
+.shuffle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px;
+    background: #3d3434;
+    color: #e0d5d5;
+    border: 1px solid #4a3f3f;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    width: 100%;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.shuffle-btn:hover {
+    background: #4a3f3f;
+}
+
+.shuffle-btn:active {
+    transform: scale(0.98);
+}

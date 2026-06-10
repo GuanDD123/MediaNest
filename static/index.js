@@ -4,10 +4,14 @@ const list = document.getElementById("list");
 const viewerView = document.getElementById("viewerView");
 const image = document.getElementById("image");
 const video = document.getElementById("video");
+const closeBtn = document.getElementById("closeBtn");
 
 let mediaList = [];
 let mediaMap = new Map();
 let currentIndex = 0;
+let currentFolderData = [];
+let mouseTimer = null;
+let isAutoSwitching = false;
 
 loadFolder("/media/root");
 
@@ -16,6 +20,7 @@ async function loadFolder(path) {
     list.innerHTML = "";
     mediaList = [];
     mediaMap.clear();
+    document.getElementById("folderActions").style.display = "none";
 
     if (path === "/media/root") {
         topBar.style.display = "flex";
@@ -29,48 +34,59 @@ async function loadFolder(path) {
         const response = await fetch(path);
         const data = await response.json();
 
-        data.forEach(item => {
-            const div = document.createElement("div");
-            div.className = "item";
-
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "item-name";
-            nameSpan.textContent = item.type === "folder" ? item.name + " (" + decodeURIComponent(item.path) + ")" : item.name;
-            div.appendChild(nameSpan);
-
-            const sizeSpan = document.createElement("span");
-            sizeSpan.className = "item-col col-size";
-            sizeSpan.textContent = item.type === "folder" ? "Folder (" + item.size + " items )" : formatSize(item.size);
-            div.appendChild(sizeSpan);
-
-            const dimSpan = document.createElement("span");
-            dimSpan.className = "item-col col-dim";
-            dimSpan.textContent = (item.type !== "folder" && item.width && item.height) ? `${item.width} × ${item.height}` : "-";
-            div.appendChild(dimSpan);
-
-            const durSpan = document.createElement("span");
-            durSpan.className = "item-col col-dur";
-            durSpan.textContent = (item.type === "video" && item.duration) ? formatDuration(item.duration) : "-";
-            div.appendChild(durSpan);
-
-            if (item.type !== "folder") {
-                mediaMap.set(item.path, mediaList.length);
-                mediaList.push(item);
-            }
-
-            div.onclick = () => {
-                if (item.type === "folder") {
-                    loadFolder("/media/folder" + item.path);
-                } else {
-                    openMedia(mediaMap.get(item.path));
-                }
-            }
-
-            list.appendChild(div);
-        });
+        currentFolderData = data;
+        renderList(currentFolderData);
     } catch (err) {
         console.error("加载目录失败:", err);
     }
+}
+function renderList(data) {
+    list.innerHTML = "";
+    mediaList = [];
+    mediaMap.clear();
+
+    const hasMedia = data.some(item => item.type !== "folder");
+    document.getElementById("folderActions").style.display = hasMedia ? "block" : "none";
+
+    data.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "item";
+
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "item-name";
+        nameSpan.textContent = item.type === "folder" ? item.name + " (" + decodeURIComponent(item.path) + ")" : item.name;
+        div.appendChild(nameSpan);
+
+        const sizeSpan = document.createElement("span");
+        sizeSpan.className = "item-col col-size";
+        sizeSpan.textContent = item.type === "folder" ? "Folder (" + item.size + " items )" : formatSize(item.size);
+        div.appendChild(sizeSpan);
+
+        const dimSpan = document.createElement("span");
+        dimSpan.className = "item-col col-dim";
+        dimSpan.textContent = (item.type !== "folder" && item.width && item.height) ? `${item.width} × ${item.height}` : "-";
+        div.appendChild(dimSpan);
+
+        const durSpan = document.createElement("span");
+        durSpan.className = "item-col col-dur";
+        durSpan.textContent = (item.type === "video" && item.duration) ? formatDuration(item.duration) : "-";
+        div.appendChild(durSpan);
+
+        if (item.type !== "folder") {
+            mediaMap.set(item.path, mediaList.length);
+            mediaList.push(item);
+        }
+
+        div.onclick = () => {
+            if (item.type === "folder") {
+                loadFolder("/media/folder" + item.path);
+            } else {
+                openMedia(mediaMap.get(item.path));
+            }
+        }
+
+        list.appendChild(div);
+    });
 }
 
 function formatSize(bytes) {
@@ -88,10 +104,26 @@ function formatDuration(seconds) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
+function shufflePlay() {
+    if (currentFolderData.length === 0) return;
 
-let mouseTimer = null;
-const closeBtn = document.getElementById("closeBtn");
-let isAutoSwitching = false;
+    const folders = currentFolderData.filter(item => item.type === "folder");
+    const medias = currentFolderData.filter(item => item.type !== "folder");
+
+    if (medias.length === 0) return;
+
+    for (let i = medias.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [medias[i], medias[j]] = [medias[j], medias[i]];
+    }
+
+    currentFolderData = [...folders, ...medias];
+
+    renderList(currentFolderData);
+
+    openMedia(0);
+}
+
 
 function setViewerUiVisible(visible) {
     if (visible) {
