@@ -54,7 +54,7 @@ class Service:
 
     def get_all_in_folder(self, path_str: str) -> list[dict[str, str | int]]:
         results: list[dict] = []
-        for info in self.repository.node_select_by_parent_path(Path(path_str)):
+        for info in self.repository.node_select_by_parent_path(path_str):
             result = {
                 "type": info.type_,
                 "path": quote(str(info.parent_path / info.name)),
