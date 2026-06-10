@@ -5,8 +5,8 @@ from media_nest.core.db_manager import DataBaseManager
 from media_nest.repository import Repository
 
 
-@pytest.fixture(scope="class", autouse=True)
-def repository(request):
+@pytest.fixture(scope="class", autouse=False)
+def get_repository(request):
     database = DataBaseManager("")
     database.connection = sqlite3.connect(":memory:")
     database.init()

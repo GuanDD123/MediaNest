@@ -236,9 +236,15 @@ class Delete:
         return True if cursor.rowcount else False
 
     def node_delete_in_id(self, ids: list[int]) -> bool:
-        sql = f"""DELETE FROM node WHERE id IN ({",".join("?" * len(ids))})"""
+        return self._delete_in_one_key("node", key="id", values=ids)
+
+    def segment_delete_in_video_id(self, ids: list[int]) -> bool:
+        return self._delete_in_one_key("segment", key="video_id", values=ids)
+
+    def _delete_in_one_key(self, table: str, key: str, values: list[int]) -> bool:
+        sql = f"""DELETE FROM {table} WHERE {key} IN ({",".join("?" * len(values))})"""
         with self.database.connection as connection:
-            cursor = connection.execute(sql, ids)
+            cursor = connection.execute(sql, values)
         return True if cursor.rowcount else False
 
     def task_delete_all(self) -> bool:

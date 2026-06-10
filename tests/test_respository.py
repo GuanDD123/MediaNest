@@ -1,10 +1,15 @@
 from pathlib import Path
 from datetime import datetime as Datetime
+import pytest
 
 from media_nest.models import FolderInfo, ImageInfo, VideoInfo, TaskInfo, SegmentInfo
+from media_nest.repository import Repository
 
 
+@pytest.mark.usefixtures("get_repository")
 class TestInsert:
+    repository: Repository
+
     def setup_method(self):
         fake_data_list = [
             FolderInfo(
@@ -90,9 +95,7 @@ class TestInsert:
         }
         self.repository.segment_insert_many(
             [
-                SegmentInfo(
-                    video_id=4, order_=1, duration_ms=1000, name="Segment 1"
-                ),
+                SegmentInfo(video_id=4, order_=1, duration_ms=1000, name="Segment 1"),
                 SegmentInfo(video_id=4, order_=2, duration_ms=800, name="Segment 2"),
             ]
         )
@@ -177,7 +180,9 @@ class TestInsert:
         assert self.repository.node_select_by_id(3) == wait_to_update[1]
         assert self.repository.node_select_by_id(4) == wait_to_update[2]
 
-        self.repository.node_update_many_width_height_by_dev_ino([((100, 2004), 200, 300)])
+        self.repository.node_update_many_width_height_by_dev_ino(
+            [((100, 2004), 200, 300)]
+        )
         self.repository.node_update_many_width_height_duration_by_dev_ino(
             [((100, 2005), 1000, 2000, 12000)]
         )

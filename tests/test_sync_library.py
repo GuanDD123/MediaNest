@@ -6,6 +6,7 @@ import pytest
 
 from media_nest.service.sync_library import SyncLibrary
 from media_nest.models import RootInfo
+from media_nest.repository import Repository
 from tests.tool.run_collect_info import run_collect_info
 from tests.fake.fake_folder_file import create_folder_file
 
@@ -15,7 +16,10 @@ VIDEO_NUM = 7
 IMAGE_NUM = 11
 
 
+@pytest.mark.usefixtures("get_repository")
 class TestSyncLibrary:
+    repository: Repository
+
     @classmethod
     def setup_class(cls):
         create_folder_file(video_num=VIDEO_NUM, image_num=IMAGE_NUM)
