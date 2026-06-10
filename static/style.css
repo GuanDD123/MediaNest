@@ -91,15 +91,12 @@ body {
     z-index: 999999;
 }
 
-#viewerView:fullscreen {
-    background: #000000;
-}
-
+#viewerView:fullscreen,
 #viewerView:-webkit-full-screen {
     background: #000000;
 }
 
-#viewerView.hide-cursor {
+#viewerView.ui-hidden {
     cursor: none !important;
 }
 
@@ -113,51 +110,38 @@ body {
     z-index: 1;
 }
 
-#viewerView.ui-hidden #viewerTopBar,
-#viewerView.ui-hidden #viewerBottomBar {
+.ui-hidden #viewerTopBar,
+.ui-hidden #viewerBottomBar {
     opacity: 0;
     pointer-events: none;
     transform: translateY(10px);
-}
-
-#viewerView.ui-hidden {
-    cursor: none !important;
 }
 
 #viewerTopBar {
     position: absolute;
     top: calc(15px + env(safe-area-inset-top, 0px));
     right: calc(15px + env(safe-area-inset-right, 0px));
-
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 12px;
     z-index: 1000000;
-
     padding: 8px 16px;
     background: rgba(0, 0, 0, 0.6);
     border-radius: 30px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-
-    transition: opacity 0.3s ease;
     opacity: 1;
 }
 
 #viewerTitle {
     color: #ffffff;
     font-size: 14px;
-    /* max-width: 150px;*/
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-}
-
-.ui-hidden #viewerTopBar {
-    opacity: 0;
-    pointer-events: none;
+    max-width: 200px;
 }
 
 #viewerBottomBar {
@@ -172,7 +156,11 @@ body {
     z-index: 100;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
     opacity: 1;
-    transition: all 0.3s ease;
+}
+
+#viewerTopBar,
+#viewerBottomBar {
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .ctrl-btn {
