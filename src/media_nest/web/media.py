@@ -1,4 +1,3 @@
-from pathlib import Path
 from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
 
@@ -16,7 +15,7 @@ def get_all(repository: Repository = Depends(get_repository)):
 
 @router.get("/folder/{path:path}")
 def get_in_folder(path: str, repository: Repository = Depends(get_repository)):
-    return Service(repository).get_all_in_folder(Path("/" + path))
+    return Service(repository).get_all_in_folder("/" + path)
 
 
 @router.get("/image/{path:path}")
