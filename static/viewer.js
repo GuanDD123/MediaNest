@@ -185,6 +185,29 @@ function nextMedia() {
 }
 
 
+window.prevMedia = function () {
+    const state = window.getState();
+    if (state.currentIndex > 0) {
+        window.send_progress(state.currentIndex);
+        const isUIHidden = state.viewerView.classList.contains("ui-hidden");
+        window.openMedia(state.currentIndex - 1, isUIHidden);
+    } else {
+        alert("已经是第一个文件了");
+    }
+};
+
+window.nextMedia = function () {
+    const state = window.getState();
+    window.send_progress(state.currentIndex);
+    if (state.currentIndex < state.mediaList.length - 1) {
+        const isUIHidden = state.viewerView.classList.contains("ui-hidden");
+        window.openMedia(state.currentIndex + 1, isUIHidden);
+    } else {
+        window.closeViewer();
+    }
+};
+
+
 window.toggleCustomFullScreen = function () {
     const state = window.getState();
     const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
