@@ -218,3 +218,54 @@ window.toggleCustomFullScreen = function () {
         (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
     }
 };
+
+
+window.deleteCurrentMedia = async function () {
+    const state = window.getState();
+    const item = state.mediaList[state.currentIndex];
+    if (!item) return;
+
+    // if (!confirm(`确定要彻底删除文件 "${item.name}" 吗？\n此操作不可恢复！`)) return;
+
+    try {
+        const response = await fetch(`/admin/delete`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: item.id,
+                path: `${item.parent_path}/${item.name}`
+            })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+            alert(data.msg || "OK");
+            const deletedIndex = state.currentIndex;
+
+            state.mediaList.splice(deletedIndex, 1);
+
+            if (state.currentFolderData && state.currentFolderData[1]) {
+                const mList = state.currentFolderData[1];
+                const idx = mList.findIndex(i => i.parent_path === item.parent_path && i.name === item.name);
+                if (idx !== -1) mList.splice(idx, 1);
+            }
+
+            renderList(state.currentFolderData);
+
+            if (state.mediaList.length === 0) {
+                window.closeViewer();
+            } else {
+                const nextIndex = deletedIndex >= state.mediaList.length ? state.mediaList.length - 1 : deletedIndex;
+                const isUIHidden = state.viewerView.classList.contains("ui-hidden");
+                window.openMedia(nextIndex, isUIHidden);
+            }
+        } else {
+            alert(data.msg || "删除失败");
+        }
+    } catch (err) {
+        console.error("删除文件请求失败:", err);
+        alert("网络错误，无法连接到服务器");
+    }
+};

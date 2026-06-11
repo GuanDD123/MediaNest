@@ -2,7 +2,6 @@ import shutil
 from pathlib import Path
 import json
 from datetime import datetime as Datetime
-import random
 
 from media_nest.models import RootInfo, VideoInfo, ImageInfo, FolderInfo
 from media_nest.repository import Repository
@@ -54,6 +53,13 @@ class Admin:
 
     def mark(self, id: int, marked: bool) -> None:
         self.repository.node_update_marked_by_id(id, marked)
+
+    def delete_file(self, id: int, path_str: str) -> None:
+        print(path_str)
+        Path(path_str).unlink(missing_ok=True)
+        print(1)
+        self.repository.node_delete_by_id(id)
+        print(2)
 
 
 class Playlist:

@@ -38,7 +38,20 @@ def clear_cache(repository: Repository = Depends(get_repository)):
     Service(repository).clear_cache()
     return {"success": True}
 
+
 @router.post("/mark")
-def mark(data: dict[str, int | bool] = Body(...), repository: Repository = Depends(get_repository)):
+def mark(
+    data: dict[str, int | bool] = Body(...),
+    repository: Repository = Depends(get_repository),
+):
     Service(repository).mark(data["id"], data["marked"])
+    return {"success": True}
+
+
+@router.post("/delete")
+def delete_file(
+    data: dict[str, int | str] = Body(...),
+    repository: Repository = Depends(get_repository),
+):
+    Service(repository).delete_file(data["id"], data["path"])
     return {"success": True}
