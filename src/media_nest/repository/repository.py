@@ -17,6 +17,8 @@ __all__ = ["Repository"]
 
 
 class Select:
+    database: DataBaseManager
+
     def root_select_all(self) -> list[RootInfo]:
         return self._select_all(table="root")
 
@@ -54,6 +56,11 @@ class Select:
     ) -> list[FolderInfo | VideoInfo | ImageInfo]:
         sql = "SELECT * FROM node WHERE parent_path = ? ORDER BY name"
         cursor = self.database.connection.execute(sql, (parent_path_str,))
+        return [row_to_model("node", row) for row in cursor.fetchall() if row]
+
+    def node_select_marked(self) -> list[FolderInfo | VideoInfo | ImageInfo]:
+        sql = "SELECT * FROM node WHERE marked = 1"
+        cursor = self.database.connection.execute(sql)
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
     def node_select_in_id(
@@ -103,6 +110,8 @@ class Select:
 
 
 class Insert:
+    database: DataBaseManager
+
     insert_placeholder = {
         "node": "(" + ",".join((key for key in NODE_KEYS[1:])) + ")",
         "root": "(" + ",".join((key for key in ROOT_KEYS[1:])) + ")",
@@ -160,6 +169,8 @@ class Insert:
 
 
 class Update:
+    database: DataBaseManager
+
     update_placeholder = {
         "node": ",".join((f"{key}=?" for key in NODE_KEYS[1:])),
         "root": ",".join((f"{key}=?" for key in ROOT_KEYS[1:])),
@@ -186,7 +197,7 @@ class Update:
             params = (*model_to_row(table, info), id)
             cursor = connection.execute(sql, params)
         return True if cursor.rowcount else False
-    
+
     def node_update_marked_by_id(self, id: int, marked: bool) -> bool:
         sql = """UPDATE node SET marked = ? WHERE id = ?"""
         with self.database.connection as connection:
@@ -229,6 +240,8 @@ class Update:
 
 
 class Delete:
+    database: DataBaseManager
+
     def root_delete_by_id(self, id: int) -> bool:
         return self._delete_by_id("root", id=id)
 

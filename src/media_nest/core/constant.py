@@ -10,6 +10,8 @@ VIDEO_WORKERS = 4
 ROOT_PATH = Path(__file__).resolve().parents[3]
 DB_PATH = ROOT_PATH / "media_info.db"
 STATIC_PATH = ROOT_PATH / "static"
+LAST_PLAYLIST = ROOT_PATH / "last_playlist.json"
+LAST_PROGRESS = ROOT_PATH / "progress.txt"
 
 NODE_KEYS = (
     "id",

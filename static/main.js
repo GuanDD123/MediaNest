@@ -1,4 +1,5 @@
 // main.js - 初始化入口
+
 (function () {
     // 初始化全局事件
     window.initViewerEvents();

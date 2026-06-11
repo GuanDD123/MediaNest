@@ -1,15 +1,17 @@
 // mark.js - 标记功能
+
 window.toggleCurrentMark = async function () {
     const state = window.getState();
     const item = state.mediaList[state.currentIndex];
     const newMarkState = !item.marked;
 
-    item.marked = newMarkState;
     state.markBtn.textContent = newMarkState ? "⭐" : "☆";
 
-    // 同步 currentFolderData 中的标记状态
-    const folderItem = state.currentFolderData.find(i => i.path === item.path);
+    // 更新 currentFolderData、mediaList 中的标记状态
+    const [folderList, mediaList] = state.currentFolderData;
+    const folderItem = mediaList.find(i => i.path === item.path);
     if (folderItem) folderItem.marked = newMarkState;
+    item.marked = newMarkState;
 
     // 重新渲染列表以更新星标显示
     renderList(state.currentFolderData);

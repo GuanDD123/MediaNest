@@ -10,9 +10,16 @@
 
 <body>
     <div id="topBar" style="display: none;">
-        <button onclick="sync()" title="同步">🔄</button>
-        <button onclick="addRoot()" title="新增">➕</button>
-        <button onclick="deleteRoot()" title="删除">🗑️</button>
+        <div id="leftTopBar">
+            <button onclick="sync()" title="同步">🔄</button>
+            <button onclick="addRoot()" title="新增">➕</button>
+            <button onclick="deleteRoot()" title="删除">➖</button>
+        </div>
+        <div id="rightTopBar">
+            <button onclick="continueLastPlay()" title="继续上次播放">▶️</button>
+            <button onclick="filterMarked()" title="筛选标记">⭐</button>
+            <button onclick="deleteSelected()" title="删除选中">🗑️</button>
+        </div>
     </div>
 
     <div id="listView">

@@ -39,6 +39,6 @@ def clear_cache(repository: Repository = Depends(get_repository)):
     return {"success": True}
 
 @router.post("/mark")
-def mark(id: int = Body(...), marked: bool = Body(...), repository: Repository = Depends(get_repository)):
-    Service(repository).mark(id, marked)
+def mark(data: dict[str, int | bool] = Body(...), repository: Repository = Depends(get_repository)):
+    Service(repository).mark(data["id"], data["marked"])
     return {"success": True}
