@@ -16,10 +16,9 @@ def get_all_root(repository: Repository = Depends(get_repository)):
 @router.get("/folder/{path:path}")
 def get_all_in_folder(
     path: str,
-    shuffle_flag: bool = False,
     repository: Repository = Depends(get_repository),
 ):
-    return Service(repository).get_all_in_folder("/" + path, shuffle_flag)
+    return Service(repository).get_all_in_folder("/" + path)
 
 
 @router.get("/image/{path:path}")

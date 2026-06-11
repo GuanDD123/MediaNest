@@ -62,29 +62,19 @@ async function continueLastPlay() {
     }
 }
 
-async function shufflePlay() {
+function shufflePlay() {
     const state = window.getState();
-    if (!state.mediaList || state.mediaList.length === 0) return;
 
-    if (state.isFiltered) {
-        const mediaList = state.currentFolderData[1];
-        for (let i = mediaList.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [mediaList[i], mediaList[j]] = [mediaList[j], mediaList[i]];
-        }
-        renderList(state.currentFolderData);
-        window.send_playlist(state.currentFolderData);
-        window.send_progress(-1);
-        window.openMedia(0);
-    } else {
-        const folderPath = state.mediaList[0].parent_path;
-        await window.loadFolder(`/media/folder${encodeURI(folderPath)}`, true);
-        window.send_playlist(state.currentFolderData);
-        window.send_progress(-1);
-        window.openMedia(0);
+    if (!state.currentFolderData || !state.currentFolderData[1] || state.currentFolderData[1].length === 0) {
+        return;
     }
-}
 
+    state.currentFolderData[1].sort(() => Math.random() - 0.5);
+    renderList(state.currentFolderData);
+    window.send_playlist(state.currentFolderData);
+    window.send_progress(-1);
+    window.openMedia(0);
+}
 
 async function filterMarked() {
     const state = window.getState();

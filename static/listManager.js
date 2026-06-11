@@ -1,6 +1,6 @@
 // listManager.js - 目录加载、列表渲染
 
-window.loadFolder = async function (path, shuffleFlag = false) {
+window.loadFolder = async function (path) {
     window.closeViewer();
     const state = window.getState();
     state.folderActions.style.display = "none";
@@ -18,7 +18,7 @@ window.loadFolder = async function (path, shuffleFlag = false) {
     }
 
     try {
-        const response = await fetch(`${path}?shuffle_flag=${shuffleFlag}`);
+        const response = await fetch(path);
         const data = await response.json();
         state.currentFolderData = data;
         renderList(state.currentFolderData);

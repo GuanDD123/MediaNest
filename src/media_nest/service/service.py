@@ -81,12 +81,10 @@ class Media:
         )
 
     def get_all_in_folder(
-        self, path_str: str, shuffle_flag: bool
+        self, path_str: str
     ) -> tuple[list[dict[str, str | int]], list[dict[str, str | int]]]:
         node_infos = self.repository.node_select_by_parent_path(path_str)
         folder_infos, media_infos = self._separate_folder_media(node_infos)
-        if shuffle_flag:
-            random.shuffle(media_infos)
         return (
             self._node_infos_to_response(folder_infos),
             self._node_infos_to_response(media_infos),
