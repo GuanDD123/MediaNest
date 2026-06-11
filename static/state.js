@@ -24,7 +24,8 @@ window.AppState = {
     mediaMap: new Map(),    // 路径 -> 索引
     currentIndex: 0,
     uiTimer: null,
-    renderListFlag: null
+    renderListFlag: null,
+    isFiltered: null,
 };
 
 // 辅助函数，使外部可以访问

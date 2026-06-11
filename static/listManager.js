@@ -7,6 +7,7 @@ window.loadFolder = async function (path, shuffleFlag = false) {
     state.list.innerHTML = "";
     state.mediaList = [];
     state.mediaMap.clear();
+    state.isFiltered = false;
 
     if (path === "/media/root") {
         state.topBar.style.display = "flex";
@@ -40,7 +41,7 @@ function renderList(data) {
     folderList.forEach(item => {
         const div = document.createElement("div");
         div.className = "item";
-        
+
         const textContainer = document.createElement("div");
         textContainer.className = "item-text-container";
 
@@ -53,7 +54,7 @@ function renderList(data) {
         subSpan.className = "item-subtitle";
         subSpan.textContent = `${item.parent_path}/${item.name}`;
         textContainer.appendChild(subSpan);
-        
+
         div.appendChild(textContainer);
 
         const sizeSpan = document.createElement("span");
