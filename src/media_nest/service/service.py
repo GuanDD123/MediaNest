@@ -1,16 +1,10 @@
 import shutil
 from pathlib import Path
-import json
 from datetime import datetime as Datetime
 
 from media_nest.models import RootInfo, VideoInfo, ImageInfo, FolderInfo
 from media_nest.repository import Repository
-from media_nest.core.constant import (
-    THUMB_SAVE_PATH,
-    SEGMENT_SAVE_PATH,
-    LAST_PLAYLIST,
-    LAST_PROGRESS,
-)
+from media_nest.core.constant import THUMB_SAVE_PATH, SEGMENT_SAVE_PATH
 from .sync_library import SyncLibrary
 from .deal_task import DealTask
 from .build_m3u import BuildM3u
@@ -138,31 +132,6 @@ class Media:
                     result["duration"] = int(info.duration_ms / 1000)
             results.append(result)
         return results
-
-    @staticmethod
-    def save_playlist(playlist: tuple[list[dict], list[dict]]) -> None:
-        with open(LAST_PLAYLIST, "w", encoding="utf-8") as f:
-            json.dump(playlist, f, indent=4, ensure_ascii=False)
-
-    @staticmethod
-    def save_progress(index: int) -> None:
-        LAST_PROGRESS.write_text(str(index))
-
-    @staticmethod
-    def continue_last_play() -> tuple[
-        tuple[list[dict[str, str | int]], list[dict[str, str | int]]], int
-    ]:
-        if not LAST_PLAYLIST.exists() or not LAST_PROGRESS.exists():
-            return [], 0
-
-        with open(LAST_PLAYLIST, "r", encoding="utf-8") as f:
-            last_playlist = json.load(f)
-        with open(LAST_PROGRESS, "r", encoding="utf-8") as f:
-            index = int(f.read().strip())
-        if index + 1 >= len(last_playlist[1]):
-            return [], 0
-
-        return (last_playlist, index)
 
 
 class Service(Admin, Playlist, Media):

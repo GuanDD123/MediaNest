@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from media_nest.core.constant import DB_PATH, STATIC_PATH
 from media_nest.core.db_manager import DataBaseManager
 from media_nest.repository import Repository
+from media_nest.service import Service
 from media_nest.web.media import router as media_router
 from media_nest.web.admin import router as admin_router
 from media_nest.web.playlist import router as playlist_router
@@ -18,7 +19,8 @@ async def lifespan(app: FastAPI):
     database.connect()
     database.init()
 
-    app.state.repository = Repository(database)
+    repository = Repository(database)
+    app.state.service = Service(repository)
 
     yield
 

@@ -1,57 +1,45 @@
-from fastapi import APIRouter, Depends, Body
-
-from media_nest.repository import Repository
-from media_nest.service import Service
-from media_nest.web.dependence import get_repository
+from fastapi import APIRouter, Request, Body
 
 router = APIRouter(prefix="/admin")
 
 
 @router.post("/add_root")
-def add_root(path: str = Body(...), repository: Repository = Depends(get_repository)):
-    Service(repository).add_root(path)
+def add_root(request: Request, path: str = Body(...)):
+    request.app.state.service.add_root(path)
     return {"success": True}
 
 
 @router.post("/delete_root")
-def delete_root(
-    path: str = Body(...), repository: Repository = Depends(get_repository)
-):
-    Service(repository).delete_root(path)
+def delete_root(request: Request, path: str = Body(...)):
+    request.app.state.service.delete_root(path)
     return {"success": True}
 
 
 @router.post("/clear_root")
-def clear_root(repository: Repository = Depends(get_repository)):
-    Service(repository).clear_root()
+def clear_root(request: Request):
+    request.app.state.service.clear_root()
     return {"success": True}
 
 
 @router.post("/sync")
-def sync(repository: Repository = Depends(get_repository)):
-    Service(repository).sync()
+def sync(request: Request):
+    request.app.state.service.sync()
     return {"success": True}
 
 
 @router.post("/clear_cache")
-def clear_cache(repository: Repository = Depends(get_repository)):
-    Service(repository).clear_cache()
+def clear_cache(request: Request):
+    request.app.state.service.clear_cache()
     return {"success": True}
 
 
 @router.post("/mark")
-def mark(
-    data: dict[str, int | bool] = Body(...),
-    repository: Repository = Depends(get_repository),
-):
-    Service(repository).mark(data["id"], data["marked"])
+def mark(request: Request, data: dict[str, int | bool] = Body(...)):
+    request.app.state.service.mark(data["id"], data["marked"])
     return {"success": True}
 
 
 @router.post("/delete")
-def delete_file(
-    data: dict[str, int | str] = Body(...),
-    repository: Repository = Depends(get_repository),
-):
-    Service(repository).delete_file(data["id"], data["path"])
+def delete_file(request: Request, data: dict[str, int | str] = Body(...)):
+    request.app.state.service.delete_file(data["id"], data["path"])
     return {"success": True}

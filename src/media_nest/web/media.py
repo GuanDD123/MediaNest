@@ -1,24 +1,9 @@
-from fastapi import APIRouter, Depends, Body
+from fastapi import APIRouter, Request, Body
 from fastapi.responses import FileResponse
 
-from media_nest.repository import Repository
-from media_nest.service import Service
-from media_nest.web.dependence import get_repository
+from media_nest.service import play_progress
 
 router = APIRouter(prefix="/media")
-
-
-@router.get("/root")
-def get_all_root(repository: Repository = Depends(get_repository)):
-    return Service(repository).get_all_root()
-
-
-@router.get("/folder/{path:path}")
-def get_all_in_folder(
-    path: str,
-    repository: Repository = Depends(get_repository),
-):
-    return Service(repository).get_all_in_folder("/" + path)
 
 
 @router.get("/image/{path:path}")
@@ -27,23 +12,36 @@ def get_media(path: str):
     return FileResponse("/" + path)
 
 
+@router.get("/root")
+def get_all_root(request: Request):
+    return request.app.state.service.get_all_root()
+
+
+@router.get("/folder/{path:path}")
+def get_all_in_folder(
+    request: Request,
+    path: str,
+):
+    return request.app.state.service.get_all_in_folder("/" + path)
+
+
 @router.get("/filter_marked")
-def filter_marked(repository: Repository = Depends(get_repository)):
-    return Service(repository).filter_marked()
+def filter_marked(request: Request):
+    return request.app.state.service.filter_marked()
 
 
 @router.post("/playlist")
 def save_playlist(playlist: list[list[dict], list[dict]] = Body(...)):
-    Service.save_playlist(playlist)
+    play_progress.save_playlist(playlist)
     return {"success": True}
 
 
 @router.post("/progress")
 def save_progress(index: int = Body(...)):
-    Service.save_progress(index)
+    play_progress.save_progress(index)
     return {"success": True}
 
 
 @router.get("/continue_last_play")
-def continue_last_play(repository: Repository = Depends(get_repository)):
-    return Service(repository).continue_last_play()
+def continue_last_play():
+    return play_progress.continue_last_play()
