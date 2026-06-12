@@ -221,6 +221,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    align-self: start; 
 }
 
 .grid-item:hover {
@@ -231,7 +232,6 @@ body {
 .grid-thumb-wrap {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1;
     border-radius: 6px;
     overflow: hidden;
     background: #251e1e;
