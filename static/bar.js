@@ -16,7 +16,7 @@ function sync() {
         method: "POST"
     })
         .then(res => res.json())
-        .then(data => { Toast.fromResponse(data); })
+        .then(data => Toast.fromResponse(data))
         .catch(() => Toast.error());
 }
 
@@ -30,7 +30,7 @@ function addRoot() {
         body: JSON.stringify(path)
     })
         .then(res => res.json())
-        .then(data => { Toast.fromResponse(data); })
+        .then(data => Toast.fromResponse(data))
         .catch(() => Toast.error());
 }
 function deleteRoot() {
@@ -43,7 +43,7 @@ function deleteRoot() {
         body: JSON.stringify(path)
     })
         .then(res => res.json())
-        .then(data => { Toast.fromResponse(data); })
+        .then(data => Toast.fromResponse(data))
         .catch(() => Toast.error());
 }
 
@@ -83,7 +83,6 @@ async function filterMarked() {
         const data = await response.json();
 
         state.currentFolderData = data;
-        state.isFiltered = true;
 
         state.topBar.style.display = "none";
         state.listView.style.paddingTop = "20px";
@@ -93,3 +92,14 @@ async function filterMarked() {
         console.error("筛选标记失败:", err);
     }
 }
+
+
+window.toggleViewMode = function () {
+    const state = window.getState();
+    state.viewMode = state.viewMode === "list" ? "grid" : "list";
+    localStorage.setItem("viewMode", state.viewMode);
+
+    if (state.currentFolderData && state.currentFolderData.length > 0) {
+        window.renderList(state.currentFolderData);
+    }
+};

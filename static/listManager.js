@@ -7,9 +7,10 @@ window.loadFolder = async function (path) {
     state.list.innerHTML = "";
     state.mediaList = [];
     state.mediaMap.clear();
-    state.isFiltered = false;
+    state.isRoot = false;
 
     if (path === "/media/root") {
+        state.isRoot = true;
         state.topBar.style.display = "flex";
         state.listView.style.paddingTop = "10px";
     } else {
@@ -38,80 +39,165 @@ function renderList(data) {
     folderActions.style.display = mediaList?.length ? "block" : "none";
     list.innerHTML = "";
 
-    folderList.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "item";
+    list.className = state.viewMode === "grid" ? "grid-container" : "list-container";
 
-        const textContainer = document.createElement("div");
-        textContainer.className = "item-text-container";
+    if (!state.isRoot) {
+        const backDiv = document.createElement("div");
+        backDiv.className = state.viewMode === "grid" ? "grid-item" : "item";
+        backDiv.style.borderLeft = "4px solid #ffd700";
 
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "item-name";
-        nameSpan.textContent = item.name;
-        textContainer.appendChild(nameSpan);
+        if (state.viewMode === "grid") {
+            const thumbWrap = document.createElement("div");
+            thumbWrap.className = "grid-thumb-wrap";
+            const img = document.createElement("img");
+            img.className = "grid-thumb";
+            img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ffd700" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`;
+            thumbWrap.appendChild(img);
+            backDiv.appendChild(thumbWrap);
 
-        const subSpan = document.createElement("div");
-        subSpan.className = "item-subtitle";
-        subSpan.textContent = `${item.parent_path}/${item.name}`;
-        textContainer.appendChild(subSpan);
-
-        div.appendChild(textContainer);
-
-        const sizeSpan = document.createElement("span");
-        sizeSpan.className = "item-col col-size";
-        sizeSpan.textContent = `${item.size} items`;
-        div.appendChild(sizeSpan);
-
-        div.onclick = () => {
-            const path = `${item.parent_path}/${item.name}`;
-            window.loadFolder(`/media/folder${encodeURI(path)}`);
-        };
-
-        list.appendChild(div);
-    });
-
-    mediaList.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "item";
-
-        const nameSpan = document.createElement("span");
-        nameSpan.className = "item-name";
-        if (item.marked) {
-            const star = document.createElement("span");
-            star.className = "item-mark";
-            star.textContent = "⭐";
-            nameSpan.appendChild(star);
+            const title = document.createElement("div");
+            title.className = "grid-title";
+            title.textContent = "返回主页";
+            backDiv.appendChild(title);
+        } else {
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "item-name";
+            nameSpan.textContent = "⬅️ 返回主页";
+            backDiv.appendChild(nameSpan);
         }
-        nameSpan.appendChild(document.createTextNode(item.name));
-        div.appendChild(nameSpan);
 
-        const sizeSpan = document.createElement("span");
-        sizeSpan.className = "item-col col-size";
-        sizeSpan.textContent = window.formatSize(item.size);
-        div.appendChild(sizeSpan);
+        backDiv.onclick = () => window.loadFolder("/media/root");
+        list.appendChild(backDiv);
+    }
 
-        const dimSpan = document.createElement("span");
-        dimSpan.className = "item-col col-dim";
-        dimSpan.textContent = (item.width && item.height) ? `${item.width} × ${item.height}` : "-";
-        div.appendChild(dimSpan);
+    if (folderList) {
+        folderList.forEach(item => {
+            const div = document.createElement("div");
+            div.className = state.viewMode === "grid" ? "grid-item" : "item";
 
-        const durSpan = document.createElement("span");
-        durSpan.className = "item-col col-dur";
-        durSpan.textContent = (item.type === "video" && item.duration) ? window.formatDuration(item.duration) : "-";
-        div.appendChild(durSpan);
+            if (state.viewMode === "grid") {
+                const thumbWrap = document.createElement("div");
+                thumbWrap.className = "grid-thumb-wrap";
+                const img = document.createElement("img");
+                img.className = "grid-thumb";
+                img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ffd700" xmlns="http://www.w3.org/2000/svg"><path d="M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>`;
+                thumbWrap.appendChild(img);
+                div.appendChild(thumbWrap);
 
-        state.mediaMap.set(`${item.parent_path}/${item.name}`, state.mediaList.length);
-        state.mediaList.push(item);
+                const title = document.createElement("div");
+                title.className = "grid-title";
+                title.textContent = item.name;
+                div.appendChild(title);
 
-        div.onclick = () => {
-            if (state.renderListFlag) {
-                window.send_playlist(state.currentFolderData);
-                window.send_progress(-1);
-                state.renderListFlag = false;
+            } else {
+                const textContainer = document.createElement("div");
+                textContainer.className = "item-text-container";
+
+                const nameSpan = document.createElement("div");
+                nameSpan.className = "item-name";
+                nameSpan.textContent = item.name;
+                textContainer.appendChild(nameSpan);
+
+                const subSpan = document.createElement("div");
+                subSpan.className = "item-subtitle";
+                subSpan.textContent = `${item.parent_path}/${item.name}`;
+                textContainer.appendChild(subSpan);
+
+                div.appendChild(textContainer);
+
+                const sizeSpan = document.createElement("span");
+                sizeSpan.className = "item-col col-size";
+                sizeSpan.textContent = `${item.size} items`;
+                div.appendChild(sizeSpan);
             }
-            window.openMedia(state.mediaMap.get(`${item.parent_path}/${item.name}`));
-        };
 
-        list.appendChild(div);
-    });
+            div.onclick = () => {
+                const path = `${item.parent_path}/${item.name}`;
+                window.loadFolder(`/media/folder${encodeURI(path)}`);
+            };
+
+            list.appendChild(div);
+        });
+    }
+
+    if (mediaList) {
+        mediaList.forEach(item => {
+            const div = document.createElement("div");
+            div.className = state.viewMode === "grid" ? "grid-item" : "item";
+
+            if (state.viewMode === "grid") {
+                const thumbWrap = document.createElement("div");
+                thumbWrap.className = "grid-thumb-wrap";
+                const img = document.createElement("img");
+                img.className = "grid-thumb";
+                img.loading = "lazy";
+
+                if (item.type === "video") {
+                    img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ccbfbf" xmlns="http://www.w3.org/2000/svg"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>`;
+                } else {
+                    img.src = `/media/thumb${item.thumb_path}`;
+                    img.onerror = () => {
+                        img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23555" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`;
+                    };
+                }
+
+                thumbWrap.appendChild(img);
+
+                if (item.marked) {
+                    const star = document.createElement("span");
+                    star.className = "grid-mark";
+                    star.textContent = "⭐";
+                    thumbWrap.appendChild(star);
+                }
+                div.appendChild(thumbWrap);
+
+                const title = document.createElement("div");
+                title.className = "grid-title";
+                title.textContent = item.name;
+                title.title = item.name;
+                div.appendChild(title);
+
+            } else {
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "item-name";
+                if (item.marked) {
+                    const star = document.createElement("span");
+                    star.className = "item-mark";
+                    star.textContent = "⭐";
+                    nameSpan.appendChild(star);
+                }
+                nameSpan.appendChild(document.createTextNode(item.name));
+                div.appendChild(nameSpan);
+
+                const sizeSpan = document.createElement("span");
+                sizeSpan.className = "item-col col-size";
+                sizeSpan.textContent = window.formatSize(item.size);
+                div.appendChild(sizeSpan);
+
+                const dimSpan = document.createElement("span");
+                dimSpan.className = "item-col col-dim";
+                dimSpan.textContent = (item.width && item.height) ? `${item.width} × ${item.height}` : "-";
+                div.appendChild(dimSpan);
+
+                const durSpan = document.createElement("span");
+                durSpan.className = "item-col col-dur";
+                durSpan.textContent = (item.type === "video" && item.duration) ? window.formatDuration(item.duration) : "-";
+                div.appendChild(durSpan);
+            }
+
+            state.mediaMap.set(`${item.parent_path}/${item.name}`, state.mediaList.length);
+            state.mediaList.push(item);
+
+            div.onclick = () => {
+                if (state.renderListFlag) {
+                    window.send_playlist(state.currentFolderData);
+                    window.send_progress(-1);
+                    state.renderListFlag = false;
+                }
+                window.openMedia(state.mediaMap.get(`${item.parent_path}/${item.name}`));
+            };
+
+            list.appendChild(div);
+        });
+    }
 }

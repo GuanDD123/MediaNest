@@ -18,6 +18,8 @@ window.AppState = {
     progressBar: document.getElementById("progressBar"),
     timeTotal: document.getElementById("timeTotal"),
 
+    viewMode: localStorage.getItem("viewMode") || "list",
+
     // 数据状态
     currentFolderData: [],  // 原始目录数据（含文件夹）
     mediaList: [],          // 当前目录媒体文件列表
@@ -25,7 +27,7 @@ window.AppState = {
     currentIndex: 0,
     uiTimer: null,
     renderListFlag: null,
-    isFiltered: null,
+    isRoot: null,
 };
 
 // 辅助函数，使外部可以访问

@@ -20,7 +20,8 @@ class Select:
     database: DataBaseManager
 
     def root_select_all(self) -> list[RootInfo]:
-        return self._select_all(table="root")
+        cursor = self.database.connection.execute("SELECT * FROM root ORDER BY path")
+        return [row_to_model("root", row) for row in cursor.fetchall() if row]
 
     def node_select_all(self) -> list[FolderInfo | VideoInfo | ImageInfo]:
         return self._select_all(table="node")

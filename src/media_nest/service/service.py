@@ -130,6 +130,8 @@ class Media:
                 result["height"] = info.height
                 if info.type_ == "video":
                     result["duration"] = int(info.duration_ms / 1000)
+                else:
+                    result["thumb_path"] = f"{str(THUMB_SAVE_PATH)}/{info.dev}_{info.ino}.jpg"
             results.append(result)
         return results
 

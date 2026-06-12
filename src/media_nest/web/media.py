@@ -7,6 +7,7 @@ router = APIRouter(prefix="/media")
 
 
 @router.get("/image/{path:path}")
+@router.get("/thumb/{path:path}")
 @router.get("/video/{path:path}")
 def get_media(path: str):
     return FileResponse("/" + path)
