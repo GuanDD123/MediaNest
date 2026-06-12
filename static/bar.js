@@ -83,6 +83,7 @@ async function filterMarked() {
         const data = await response.json();
 
         state.currentFolderData = data;
+        state.isRoot = false
 
         state.topBar.style.display = "none";
         state.listView.style.paddingTop = "20px";
