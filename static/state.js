@@ -29,6 +29,7 @@ window.AppState = {
     uiTimer: null,
     renderListFlag: null,
     isRoot: null,
+    fileDeleteNum: 0,
 };
 
 // 辅助函数，使外部可以访问

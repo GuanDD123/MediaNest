@@ -23,14 +23,14 @@ window.loadFolder = async function (path) {
         const response = await fetch(path);
         const data = await response.json();
         state.currentFolderData = data;
-        renderList(state.currentFolderData);
+        window.renderList(state.currentFolderData);
     } catch (err) {
         console.error("加载目录失败:", err);
         state.pathRocord.pop();
     }
 };
 
-function renderList(data) {
+window.renderList = function (data) {
     const state = window.getState();
     const { folderActions, list } = state;
     state.mediaList = [];
