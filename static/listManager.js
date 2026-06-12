@@ -109,7 +109,7 @@ function renderList(data) {
 
                 const sizeSpan = document.createElement("span");
                 sizeSpan.className = "item-col col-size";
-                sizeSpan.textContent = `${item.size} items`;
+                sizeSpan.textContent = `${item.size} files`;
                 div.appendChild(sizeSpan);
             }
 

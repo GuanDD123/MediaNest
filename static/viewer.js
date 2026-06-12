@@ -93,17 +93,35 @@ window.initViewerEvents = function () {
     viewerView.addEventListener("touchstart", (e) => {
         if (!state.video.hidden) wakeUpUI();
     }, { passive: true });
+    viewerView.addEventListener("touchend", (e) => {
+        if (e.target.closest('#viewerTopBar') || e.target.closest('#viewerBottomBar')) return;
+
+        if (!state.image.hidden) {
+            e.preventDefault();
+            onImageClick(e);
+        } else if (!state.video.hidden) {
+            if (e.target.closest('#video')) return;
+
+            e.preventDefault();
+            const isUIHidden = viewerView.classList.contains("ui-hidden");
+            if (isUIHidden) {
+                wakeUpUI();
+            } else {
+                viewerView.classList.add("ui-hidden");
+                clearTimeout(state.uiTimer);
+            }
+        }
+    });
+
     viewerView.addEventListener("mousemove", wakeUpUI);
     viewerView.addEventListener("click", (e) => {
         if (!state.image.hidden) {
             onImageClick(e);
         } else if (!state.video.hidden) {
             if (e.target.closest('#viewerTopBar') || e.target.closest('#viewerBottomBar') || e.target.closest('#video')) return;
-
             const isUIHidden = viewerView.classList.contains("ui-hidden");
-            if (isUIHidden) {
-                wakeUpUI();
-            } else {
+            if (isUIHidden) wakeUpUI();
+            else {
                 viewerView.classList.add("ui-hidden");
                 clearTimeout(state.uiTimer);
             }
@@ -133,32 +151,38 @@ window.initViewerEvents = function () {
     });
 };
 
-// 图片点击左右切换
+// 图片点击/触控左右切换
 function onImageClick(event) {
     const state = window.getState();
-    if (!event.target.closest('.viewer-actions')) {
-        window.send_progress(state.currentIndex);
+    if (event.target.closest('.viewer-actions')) return;
 
-        const isUIHidden = state.viewerView.classList.contains("ui-hidden");
-        const x = event.clientX;
-        const w = window.innerWidth;
+    window.send_progress(state.currentIndex);
 
-        if (x < w * 0.382) {
-            if (state.currentIndex > 0) {
-                window.openMedia(state.currentIndex - 1, isUIHidden);
-            }
-        } else if (x > w * 0.618) {
-            if (state.currentIndex < state.mediaList.length - 1) {
-                window.openMedia(state.currentIndex + 1, isUIHidden);
-            }
+    const isUIHidden = state.viewerView.classList.contains("ui-hidden");
+
+    let x;
+    if (event.type === 'touchend') {
+        x = event.changedTouches[0].clientX;
+    } else {
+        x = event.clientX;
+    }
+
+    const w = window.innerWidth;
+
+    if (x < w * 0.382) {
+        if (state.currentIndex > 0) {
+            window.openMedia(state.currentIndex - 1, isUIHidden);
         }
-        else {
-            if (isUIHidden) {
-                wakeUpUI();
-            } else {
-                state.viewerView.classList.add("ui-hidden");
-                clearTimeout(state.uiTimer);
-            }
+    } else if (x > w * 0.618) {
+        if (state.currentIndex < state.mediaList.length - 1) {
+            window.openMedia(state.currentIndex + 1, isUIHidden);
+        }
+    } else {
+        if (isUIHidden) {
+            wakeUpUI();
+        } else {
+            state.viewerView.classList.add("ui-hidden");
+            clearTimeout(state.uiTimer);
         }
     }
 }
