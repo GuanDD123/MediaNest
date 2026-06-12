@@ -98,8 +98,20 @@ async function filterMarked() {
 window.toggleViewMode = function () {
     const state = window.getState();
     state.viewMode = state.viewMode === "list" ? "grid" : "list";
+    updateViewModeButtonIcon(state.viewMode);
 
     if (!state.isRoot && state.currentFolderData && state.currentFolderData.length > 0) {
         window.renderList(state.currentFolderData);
     }
-};
+}
+function updateViewModeButtonIcon(mode) {
+    const btn = document.querySelector('#rightTopBar button:last-child'); // 假设按钮位置固定
+    if (!btn) return;
+    if (mode === 'list') {
+        btn.innerHTML = '📋';
+        btn.title = '切换为网格视图';
+    } else {
+        btn.innerHTML = '🔲';
+        btn.title = '切换为列表视图';
+    }
+}

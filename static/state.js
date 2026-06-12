@@ -21,6 +21,7 @@ window.AppState = {
     viewMode: "list",
 
     // 数据状态
+    pathRocord: [],
     currentFolderData: [],  // 原始目录数据（含文件夹）
     mediaList: [],          // 当前目录媒体文件列表
     mediaMap: new Map(),    // 路径 -> 索引

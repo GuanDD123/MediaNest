@@ -3,6 +3,7 @@
 window.loadFolder = async function (path) {
     window.closeViewer();
     const state = window.getState();
+    state.pathRocord.push(path);
     state.folderActions.style.display = "none";
     state.list.innerHTML = "";
     state.mediaList = [];
@@ -25,6 +26,7 @@ window.loadFolder = async function (path) {
         renderList(state.currentFolderData);
     } catch (err) {
         console.error("加载目录失败:", err);
+        state.pathRocord.pop();
     }
 };
 
@@ -59,16 +61,19 @@ function renderList(data) {
 
             const title = document.createElement("div");
             title.className = "grid-title";
-            title.textContent = "返回主页";
+            title.textContent = "返回上一页";
             backDiv.appendChild(title);
         } else {
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
-            nameSpan.textContent = "⬅️ 返回主页";
+            nameSpan.textContent = "⬅️ 返回上一页";
             backDiv.appendChild(nameSpan);
         }
 
-        backDiv.onclick = () => window.loadFolder("/media/root");
+        backDiv.onclick = () => {
+            state.pathRocord.pop();
+            window.loadFolder(state.pathRocord.pop());
+        }
         list.appendChild(backDiv);
     }
 
