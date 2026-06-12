@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Request, Body
+from fastapi import APIRouter, Request, Body, HTTPException, status
 from fastapi.responses import FileResponse
+import os
 
 from media_nest.service import play_progress
 
@@ -10,7 +11,11 @@ router = APIRouter(prefix="/media")
 @router.get("/thumb/{path:path}")
 @router.get("/video/{path:path}")
 def get_media(path: str):
-    return FileResponse("/" + path)
+    if not os.path.exists(path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"File not found: {path}"
+        )
+    return FileResponse(path)
 
 
 @router.get("/root")

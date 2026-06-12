@@ -49,11 +49,9 @@ class Admin:
         self.repository.node_update_marked_by_id(id, marked)
 
     def delete_file(self, id: int, path_str: str) -> None:
-        print(path_str)
+        print(f"Deleting file: {path_str}")
         Path(path_str).unlink(missing_ok=True)
-        print(1)
         self.repository.node_delete_by_id(id)
-        print(2)
 
 
 class Playlist:
