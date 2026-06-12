@@ -11,11 +11,11 @@ router = APIRouter(prefix="/media")
 @router.get("/thumb/{path:path}")
 @router.get("/video/{path:path}")
 def get_media(path: str):
-    if not os.path.exists(path):
+    if not os.path.exists("/" + path):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"File not found: {path}"
+            status_code=status.HTTP_404_NOT_FOUND, detail=f"File not found: {"/" + path}"
         )
-    return FileResponse(path)
+    return FileResponse("/" + path)
 
 
 @router.get("/root")
