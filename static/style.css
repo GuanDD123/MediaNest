@@ -206,9 +206,8 @@ body {
 /* ================== listManager.js ================== */
 
 .grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 16px;
+    column-width: 140px;
+    column-gap: 16px;
     padding: 10px;
 }
 
@@ -221,7 +220,12 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    align-self: start; 
+
+    break-inside: avoid;
+    page-break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+
+    margin-bottom: 16px;
 }
 
 .grid-item:hover {
