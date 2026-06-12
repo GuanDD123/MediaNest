@@ -7,13 +7,13 @@ window.loadFolder = async function (path) {
     state.list.innerHTML = "";
     state.mediaList = [];
     state.mediaMap.clear();
-    state.isRoot = false;
 
     if (path === "/media/root") {
         state.isRoot = true;
         state.topBar.style.display = "flex";
         state.listView.style.paddingTop = "10px";
     } else {
+        state.isRoot = false;
         state.topBar.style.display = "none";
         state.listView.style.paddingTop = "20px";
     }
@@ -39,14 +39,15 @@ function renderList(data) {
     folderActions.style.display = mediaList?.length ? "block" : "none";
     list.innerHTML = "";
 
-    list.className = state.viewMode === "grid" ? "grid-container" : "list-container";
+    const effectiveMode = state.isRoot ? 'list' : state.viewMode;
+    list.className = effectiveMode === "grid" ? "grid-container" : "list-container";
 
     if (!state.isRoot) {
         const backDiv = document.createElement("div");
-        backDiv.className = state.viewMode === "grid" ? "grid-item" : "item";
+        backDiv.className = effectiveMode === "grid" ? "grid-item" : "item";
         backDiv.style.borderLeft = "4px solid #ffd700";
 
-        if (state.viewMode === "grid") {
+        if (effectiveMode === "grid") {
             const thumbWrap = document.createElement("div");
             thumbWrap.className = "grid-thumb-wrap";
             thumbWrap.style.aspectRatio = "1 / 1";
@@ -74,9 +75,9 @@ function renderList(data) {
     if (folderList) {
         folderList.forEach(item => {
             const div = document.createElement("div");
-            div.className = state.viewMode === "grid" ? "grid-item" : "item";
+            div.className = effectiveMode === "grid" ? "grid-item" : "item";
 
-            if (state.viewMode === "grid") {
+            if (effectiveMode === "grid") {
                 const thumbWrap = document.createElement("div");
                 thumbWrap.className = "grid-thumb-wrap";
                 thumbWrap.style.aspectRatio = "1 / 1";
@@ -125,9 +126,9 @@ function renderList(data) {
     if (mediaList) {
         mediaList.forEach(item => {
             const div = document.createElement("div");
-            div.className = state.viewMode === "grid" ? "grid-item" : "item";
+            div.className = effectiveMode === "grid" ? "grid-item" : "item";
 
-            if (state.viewMode === "grid") {
+            if (effectiveMode === "grid") {
                 const thumbWrap = document.createElement("div");
                 thumbWrap.className = "grid-thumb-wrap";
                 if (item.width && item.height) {

@@ -98,9 +98,8 @@ async function filterMarked() {
 window.toggleViewMode = function () {
     const state = window.getState();
     state.viewMode = state.viewMode === "list" ? "grid" : "list";
-    localStorage.setItem("viewMode", state.viewMode);
 
-    if (state.currentFolderData && state.currentFolderData.length > 0) {
+    if (!state.isRoot && state.currentFolderData && state.currentFolderData.length > 0) {
         window.renderList(state.currentFolderData);
     }
 };

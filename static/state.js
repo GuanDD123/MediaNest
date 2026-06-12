@@ -18,7 +18,7 @@ window.AppState = {
     progressBar: document.getElementById("progressBar"),
     timeTotal: document.getElementById("timeTotal"),
 
-    viewMode: localStorage.getItem("viewMode") || "list",
+    viewMode: "list",
 
     // 数据状态
     currentFolderData: [],  // 原始目录数据（含文件夹）
