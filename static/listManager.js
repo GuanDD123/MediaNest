@@ -58,11 +58,6 @@ function renderList(data) {
             img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ffd700" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`;
             thumbWrap.appendChild(img);
             backDiv.appendChild(thumbWrap);
-
-            const title = document.createElement("div");
-            title.className = "grid-title";
-            title.textContent = "返回上一页";
-            backDiv.appendChild(title);
         } else {
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
@@ -96,7 +91,6 @@ function renderList(data) {
                 title.className = "grid-title";
                 title.textContent = item.name;
                 div.appendChild(title);
-
             } else {
                 const textContainer = document.createElement("div");
                 textContainer.className = "item-text-container";
@@ -165,13 +159,6 @@ function renderList(data) {
                     thumbWrap.appendChild(star);
                 }
                 div.appendChild(thumbWrap);
-
-                const title = document.createElement("div");
-                title.className = "grid-title";
-                title.textContent = item.name;
-                title.title = item.name;
-                div.appendChild(title);
-
             } else {
                 const nameSpan = document.createElement("span");
                 nameSpan.className = "item-name";
