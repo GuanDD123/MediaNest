@@ -37,6 +37,7 @@ async function addRoot() {
         });
         const data = await res.json();
         Toast.fromResponse(data);
+        window.loadFolder("/media/root");
     } catch (err) {
         console.error("请求失败:", err);
         Toast.error("网络错误，无法连接到服务器");
@@ -55,6 +56,7 @@ async function deleteRoot() {
         });
         const data = await res.json();
         Toast.fromResponse(data);
+        window.loadFolder("/media/root");
     } catch (err) {
         console.error("请求失败:", err);
         Toast.error("网络错误，无法连接到服务器");
@@ -69,6 +71,8 @@ async function continueLastPlay() {
 
     if (data.length) {
         state.currentFolderData = data;
+        state.isRoot = false;
+        state.fileDeleteNum = 0;
         window.renderList(state.currentFolderData);
         window.openMedia(index + 1);
     } else {
@@ -83,12 +87,12 @@ async function filterMarked() {
         const response = await fetch('/media/filter_marked');
         const data = await response.json();
 
-        state.currentFolderData = data;
-        state.isRoot = false
-
         state.topBar.style.display = "none";
         state.listView.style.paddingTop = "20px";
 
+        state.currentFolderData = data;
+        state.isRoot = false;
+        state.fileDeleteNum = 0;
         window.renderList(state.currentFolderData);
     } catch (err) {
         console.error("筛选标记失败:", err);
@@ -126,6 +130,7 @@ function shufflePlay() {
     }
 
     state.currentFolderData[1].sort(() => Math.random() - 0.5);
+    state.fileDeleteNum = 0;
     window.renderList(state.currentFolderData);
     window.send_playlist(state.currentFolderData);
     window.send_progress(-1);
