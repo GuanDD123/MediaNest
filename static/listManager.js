@@ -44,10 +44,47 @@ window.renderList = function (data) {
     const effectiveMode = state.isRoot ? 'list' : state.viewMode;
     list.className = effectiveMode === "grid" ? "grid-container" : "list-container";
 
+    let columns = [];
+    let colHeights = [];
+    let colCount = 1;
+    const colBaseWidth = 140;
+
+    if (effectiveMode === "grid") {
+        const listWidth = list.clientWidth || window.innerWidth - 40;
+        colCount = Math.max(1, Math.floor((listWidth + 16) / (colBaseWidth + 16)));
+        state.currentGridColCount = colCount;
+
+        for (let i = 0; i < colCount; i++) {
+            const col = document.createElement("div");
+            col.className = "grid-column";
+            columns.push(col);
+            colHeights.push(0);
+            list.appendChild(col);
+        }
+    }
+
+    function appendToGrid(el, estHeight) {
+        if (effectiveMode === "grid") {
+            let minIdx = 0;
+            let minH = colHeights[0];
+            for (let i = 1; i < colCount; i++) {
+                if (colHeights[i] < minH) {
+                    minH = colHeights[i];
+                    minIdx = i;
+                }
+            }
+            columns[minIdx].appendChild(el);
+            colHeights[minIdx] += estHeight;
+        } else {
+            list.appendChild(el);
+        }
+    }
+
     if (!state.isRoot) {
         const backDiv = document.createElement("div");
         backDiv.className = effectiveMode === "grid" ? "grid-item" : "item";
         backDiv.style.borderLeft = "4px solid #ffd700";
+        let estHeight = 60;
 
         if (effectiveMode === "grid") {
             const thumbWrap = document.createElement("div");
@@ -58,6 +95,7 @@ window.renderList = function (data) {
             img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ffd700" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`;
             thumbWrap.appendChild(img);
             backDiv.appendChild(thumbWrap);
+            estHeight = colBaseWidth + 20;
         } else {
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
@@ -69,13 +107,14 @@ window.renderList = function (data) {
             state.pathRocord.pop();
             window.loadFolder(state.pathRocord.pop());
         }
-        list.appendChild(backDiv);
+        appendToGrid(backDiv, estHeight);
     }
 
     if (folderList) {
         folderList.forEach(item => {
             const div = document.createElement("div");
             div.className = effectiveMode === "grid" ? "grid-item" : "item";
+            let estHeight = 60;
 
             if (effectiveMode === "grid") {
                 const thumbWrap = document.createElement("div");
@@ -91,6 +130,7 @@ window.renderList = function (data) {
                 title.className = "grid-title";
                 title.textContent = item.name;
                 div.appendChild(title);
+                estHeight = colBaseWidth + 40;
             } else {
                 const textContainer = document.createElement("div");
                 textContainer.className = "item-text-container";
@@ -118,7 +158,7 @@ window.renderList = function (data) {
                 window.loadFolder(`/media/folder${encodeURI(path)}`);
             };
 
-            list.appendChild(div);
+            appendToGrid(div, estHeight);
         });
     }
 
@@ -126,17 +166,24 @@ window.renderList = function (data) {
         mediaList.forEach(item => {
             const div = document.createElement("div");
             div.className = effectiveMode === "grid" ? "grid-item" : "item";
+            let estHeight = 60;
 
             if (effectiveMode === "grid") {
                 const thumbWrap = document.createElement("div");
                 thumbWrap.className = "grid-thumb-wrap";
+
+                let ratio = 1;
                 if (item.width && item.height) {
+                    ratio = item.width / item.height;
                     thumbWrap.style.aspectRatio = `${item.width} / ${item.height}`;
                 } else if (item.type === "video") {
+                    ratio = 16 / 9;
                     thumbWrap.style.aspectRatio = "16 / 9";
                 } else {
                     thumbWrap.style.aspectRatio = "1 / 1";
                 }
+                estHeight = (colBaseWidth / ratio) + 16;
+
                 const img = document.createElement("img");
                 img.className = "grid-thumb";
                 img.loading = "lazy";
@@ -199,7 +246,7 @@ window.renderList = function (data) {
                 window.openMedia(state.mediaMap.get(`${item.parent_path}/${item.name}`));
             };
 
-            list.appendChild(div);
+            appendToGrid(div, estHeight);
         });
     }
 }

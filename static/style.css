@@ -206,9 +206,18 @@ body {
 /* ================== listManager.js ================== */
 
 .grid-container {
-    column-width: 140px;
-    column-gap: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
     padding: 10px;
+}
+
+.grid-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
 }
 
 .grid-item {
@@ -221,11 +230,8 @@ body {
     flex-direction: column;
     align-items: center;
 
-    break-inside: avoid;
-    page-break-inside: avoid;
-    -webkit-column-break-inside: avoid;
-
-    margin-bottom: 16px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .grid-item:hover {

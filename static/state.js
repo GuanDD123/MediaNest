@@ -30,6 +30,7 @@ window.AppState = {
     renderListFlag: null,
     isRoot: null,
     fileDeleteNum: 0,
+    currentGridColCount: 0,
 };
 
 // 辅助函数，使外部可以访问
