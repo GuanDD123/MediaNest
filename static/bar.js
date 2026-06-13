@@ -83,21 +83,7 @@ async function continueLastPlay() {
 
 
 async function filterMarked() {
-    const state = window.getState();
-    try {
-        const response = await fetch('/media/filter_marked');
-        const data = await response.json();
-
-        state.topBar.style.display = "none";
-        state.listView.style.paddingTop = "20px";
-
-        state.currentFolderData = data;
-        state.isRoot = false;
-        window.renderList(state.currentFolderData);
-        state.fileDeleteNum = 0;
-    } catch (err) {
-        console.error("筛选标记失败:", err);
-    }
+    window.loadFolder("/media/filter_marked")
 }
 
 

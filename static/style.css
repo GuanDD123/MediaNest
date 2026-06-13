@@ -72,9 +72,10 @@ body {
     background-color: #1e1a1a;
     border-bottom: 1px solid #3d3434;
     justify-content: space-between;
+    display: flex;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 20px 10px 20px;
 }
 
-#topBar,
 #leftTopBar,
 #rightTopBar {
     display: flex;
@@ -109,7 +110,10 @@ body {
 
 #viewerView {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
     overflow: hidden;
     background: #000000;
     z-index: 999999;
@@ -153,9 +157,12 @@ body {
 #image,
 #video {
     position: absolute;
-    inset: 0;
+    top: env(safe-area-inset-top, 0px);
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    height: 100%;
+    height: calc(100% - env(safe-area-inset-top, 0px));
     object-fit: contain;
     z-index: 1;
 }
@@ -165,7 +172,7 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 15px 20px calc(15px + env(safe-area-inset-bottom, 0px));
+    padding: 15px 20px calc(env(safe-area-inset-bottom, 15px));
     display: flex;
     align-items: center;
     gap: 12px;

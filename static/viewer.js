@@ -5,6 +5,8 @@ window.closeViewer = function () {
     state.viewerView.hidden = true;
     state.listView.hidden = false;
 
+    document.body.style.backgroundColor = "";
+
     state.image.hidden = true;
     state.image.src = "";
 
@@ -19,6 +21,8 @@ window.openMedia = function (index, isSilent = false) {
     const state = window.getState();
     state.currentIndex = index;
     const item = state.mediaList[state.currentIndex];
+
+    document.body.style.backgroundColor = "#000000";
 
     state.viewerTitle.textContent = item.name;
     state.markBtn.textContent = item.marked ? "⭐" : "☆";
@@ -90,15 +94,41 @@ window.initViewerEvents = function () {
     const state = window.getState();
     const { viewerView, video, progressBar } = state;
 
+    let isScaling = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
     viewerView.addEventListener("touchstart", (e) => {
-        if (!state.video.hidden) wakeUpUI();
+        if (e.touches && e.touches.length > 1) {
+            isScaling = true;
+        } else if (e.touches && e.touches.length === 1) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }
+        if (!state.video.hidden && !isScaling) wakeUpUI();
     }, { passive: true });
     viewerView.addEventListener("touchend", (e) => {
         if (e.target.closest('#viewerTopBar') || e.target.closest('#viewerBottomBar')) return;
 
+        if (isScaling) {
+            if (e.touches.length === 0) { setTimeout(() => isScaling = false, 150); }
+            return;
+        }
+
+        let moveDistance = 0;
+        let endX = 0;
+        if (e.changedTouches && e.changedTouches.length > 0) {
+            endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const dx = endX - touchStartX;
+            const dy = endY - touchStartY;
+            moveDistance = Math.sqrt(dx * dx + dy * dy);
+        }
+        if (moveDistance > 15) {
+            return;
+        }
+
         if (!state.image.hidden) {
-            e.preventDefault();
-            onImageClick(e);
+            onImageClick(e, endX);
         } else if (!state.video.hidden) {
             if (e.target.closest('#video')) return;
 
@@ -113,21 +143,9 @@ window.initViewerEvents = function () {
         }
     });
 
-    viewerView.addEventListener("mousemove", wakeUpUI);
-    viewerView.addEventListener("click", (e) => {
-        if (!state.image.hidden) {
-            onImageClick(e);
-        } else if (!state.video.hidden) {
-            if (e.target.closest('#viewerTopBar') || e.target.closest('#viewerBottomBar') || e.target.closest('#video')) return;
-            const isUIHidden = viewerView.classList.contains("ui-hidden");
-            if (isUIHidden) wakeUpUI();
-            else {
-                viewerView.classList.add("ui-hidden");
-                clearTimeout(state.uiTimer);
-            }
-        }
+    video.addEventListener("mousemove", () => {
+        if (!isScaling) wakeUpUI();
     });
-
     video.addEventListener("click", (event) => {
         event.stopPropagation();
         window.togglePlayState();
@@ -152,15 +170,15 @@ window.initViewerEvents = function () {
 };
 
 // 图片点击/触控左右切换
-function onImageClick(event) {
+function onImageClick(event, touchEndX = null) {
     const state = window.getState();
     if (event.target.closest('.viewer-actions')) return;
 
     const isUIHidden = state.viewerView.classList.contains("ui-hidden");
 
     let x;
-    if (event.type === 'touchend') {
-        x = event.changedTouches[0].clientX;
+    if (touchEndX !== null) {
+        x = touchEndX;
     } else {
         x = event.clientX;
     }

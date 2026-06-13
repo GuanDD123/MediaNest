@@ -167,7 +167,7 @@ window.loadFolder = async function (path) {
     } else {
         state.isRoot = false;
         state.topBar.style.display = "none";
-        state.listView.style.paddingTop = "20px";
+        state.listView.style.paddingTop = "calc(20px + env(safe-area-inset-top, 0px))";
     }
 
     try {
