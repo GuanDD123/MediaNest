@@ -48,11 +48,15 @@ window.renderList = function (data) {
     let colHeights = [];
     let colCount = 1;
     const colBaseWidth = 140;
+    const gap = 16;  // CSS 中的 .grid-container gap
+    let actualColWidth = colBaseWidth;
 
     if (effectiveMode === "grid") {
         const listWidth = list.clientWidth || window.innerWidth - 40;
-        colCount = Math.max(1, Math.floor((listWidth + 16) / (colBaseWidth + 16)));
+        colCount = Math.max(1, Math.floor((listWidth + gap) / (colBaseWidth + gap)));
         state.currentGridColCount = colCount;
+
+        actualColWidth = (listWidth - (colCount - 1) * gap) / colCount;
 
         for (let i = 0; i < colCount; i++) {
             const col = document.createElement("div");
@@ -80,10 +84,13 @@ window.renderList = function (data) {
         }
     }
 
+    const baseCssOverhead = 32;  // 预估 CSS 额外高度: .grid-item padding(8*2=16) + .grid-column gap(16)
+
     if (!state.isRoot) {
         const backDiv = document.createElement("div");
         backDiv.className = effectiveMode === "grid" ? "grid-item" : "item";
         backDiv.style.borderLeft = "4px solid #ffd700";
+
         let estHeight = 60;
 
         if (effectiveMode === "grid") {
@@ -95,7 +102,7 @@ window.renderList = function (data) {
             img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ffd700" xmlns="http://www.w3.org/2000/svg"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`;
             thumbWrap.appendChild(img);
             backDiv.appendChild(thumbWrap);
-            estHeight = colBaseWidth + 20;
+            estHeight = actualColWidth + baseCssOverhead;
         } else {
             const nameSpan = document.createElement("span");
             nameSpan.className = "item-name";
@@ -130,7 +137,8 @@ window.renderList = function (data) {
                 title.className = "grid-title";
                 title.textContent = item.name;
                 div.appendChild(title);
-                estHeight = colBaseWidth + 40;
+
+                estHeight = actualColWidth + baseCssOverhead + 26;  //thumb包裹器下边距(8) + 标题高度(~18)
             } else {
                 const textContainer = document.createElement("div");
                 textContainer.className = "item-text-container";
@@ -182,7 +190,8 @@ window.renderList = function (data) {
                 } else {
                     thumbWrap.style.aspectRatio = "1 / 1";
                 }
-                estHeight = (colBaseWidth / ratio) + 16;
+
+                estHeight = (actualColWidth / ratio) + baseCssOverhead;
 
                 const img = document.createElement("img");
                 img.className = "grid-thumb";
