@@ -2,7 +2,7 @@
 
 <div align="center">
 
-📺 一个媒体播放和管理系统
+📺 一个为家庭局域网设计的媒体文件查看器
 
 [English](#english) | [中文](#中文)
 
@@ -14,7 +14,7 @@
 
 ### 📚 项目介绍
 
-MediaNest 是一个功能完整的开源媒体管理和播放系统，基于 FastAPI 和现代 Web 技术构建。它提供了一个强大的 Web 界面，用于浏览、管理和播放多媒体文件（图片、视频等），支持播放列表管理、进度追踪、M3U 格式导出等多种功能。
+MediaNest 是一个开源媒体管理和播放系统，基于 FastAPI 和现代 Web 技术构建。它提供了一个 Web 界面，用于浏览、管理和播放多媒体文件（图片、视频等），支持播放列表管理、进度追踪、M3U 格式导出等多种功能。
 
 ### ✨ 主要功能
 
@@ -516,7 +516,7 @@ MediaNest 采用分层架构：
 
 ### 📚 Project Description
 
-MediaNest is a feature-rich, open-source media management and playback system built with FastAPI and modern web technologies. It provides a powerful web interface for browsing, managing, and playing multimedia files (images, videos, etc.), with support for playlist management, progress tracking, M3U format export, and more.
+MediaNest is an open-source media management and playback system built with FastAPI and modern web technologies. It provides a web interface for browsing, managing, and playing multimedia files (images, videos, etc.), with support for playlist management, progress tracking, M3U format export, and more.
 
 ### ✨ Features
 
