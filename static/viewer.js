@@ -156,8 +156,6 @@ function onImageClick(event) {
     const state = window.getState();
     if (event.target.closest('.viewer-actions')) return;
 
-    window.send_progress(state.currentIndex + state.fileDeleteNum);
-
     const isUIHidden = state.viewerView.classList.contains("ui-hidden");
 
     let x;
@@ -172,10 +170,12 @@ function onImageClick(event) {
     if (x < w * 0.382) {
         if (state.currentIndex > 0) {
             window.openMedia(state.currentIndex - 1, isUIHidden);
+            window.send_progress(state.currentIndex + state.fileDeleteNum);
         }
     } else if (x > w * 0.618) {
         if (state.currentIndex < state.mediaList.length - 1) {
             window.openMedia(state.currentIndex + 1, isUIHidden);
+            window.send_progress(state.currentIndex + state.fileDeleteNum);
         }
     } else {
         if (isUIHidden) {
