@@ -11,42 +11,54 @@ const Toast = {
 };
 
 
-function sync() {
-    fetch("/admin/sync", {
-        method: "POST"
-    })
-        .then(res => res.json())
-        .then(data => Toast.fromResponse(data))
-        .catch(() => Toast.error());
+async function sync() {
+    try {
+        const res = await fetch("/admin/sync", {
+            method: "POST"
+        });
+        const data = await res.json();
+        Toast.fromResponse(data);
+    } catch (err) {
+        console.error("请求失败:", err);
+        Toast.error("网络错误，无法连接到服务器");
+    }
 }
 
 
-function addRoot() {
+async function addRoot() {
     const path = prompt("请输入新增根目录路径:");
     if (!path) return;
 
-    fetch("/admin/add_root", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(path)
-    })
-        .then(res => res.json())
-        .then(data => Toast.fromResponse(data))
-        .catch(() => Toast.error());
+    try {
+        const res = await fetch("/admin/add_root", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(path)
+        });
+        const data = await res.json();
+        Toast.fromResponse(data);
+    } catch (err) {
+        console.error("请求失败:", err);
+        Toast.error("网络错误，无法连接到服务器");
+    }
 }
 
-function deleteRoot() {
+async function deleteRoot() {
     const path = prompt("请输入要删除的根目录路径:");
     if (!path) return;
 
-    fetch("/admin/delete_root", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(path)
-    })
-        .then(res => res.json())
-        .then(data => Toast.fromResponse(data))
-        .catch(() => Toast.error());
+    try {
+        const res = await fetch("/admin/delete_root", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(path)
+        });
+        const data = await res.json();
+        Toast.fromResponse(data);
+    } catch (err) {
+        console.error("请求失败:", err);
+        Toast.error("网络错误，无法连接到服务器");
+    }
 }
 
 

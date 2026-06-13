@@ -26,18 +26,14 @@ window.formatTime = function (seconds) {
 window.send_playlist = function (playlist) {
     fetch('/media/playlist', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(playlist)
-    });
+    }).catch(err => console.warn("后台播放列表同步失败，忽略:", err));
 };
 window.send_progress = function (index) {
     fetch('/media/progress', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(index)
-    });
+    }).catch(err => console.warn("后台进度同步失败，忽略:", err));
 };
