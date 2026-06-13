@@ -2,7 +2,7 @@
 
 <div align="center">
 
-📺 强大的媒体管理和播放系统
+📺 一个媒体播放和管理系统
 
 [English](#english) | [中文](#中文)
 
@@ -35,7 +35,7 @@ MediaNest 是一个功能完整的开源媒体管理和播放系统，基于 Fas
 
 #### 系统要求
 
-- **操作系统**: Linux, macOS, Windows
+- **操作系统**: Linux, macOS
 - **Python 版本**: 3.8 或更高版本
 - **内存**: 最少 512MB（推荐 2GB 或以上）
 - **存储**: 根据媒体库大小而定
@@ -55,10 +55,6 @@ cd MediaNest
 # Linux/macOS
 python3 -m venv venv
 source venv/bin/activate
-
-# Windows
-python -m venv venv
-venv\Scripts\activate
 ```
 
 **3. 安装依赖**
@@ -70,7 +66,6 @@ pip install -r requirements.txt
 必需的依赖包括：
 - `fastapi>=0.95.0` - 现代 Web 框架
 - `uvicorn>=0.21.0` - ASGI 服务器
-- `pydantic>=1.10.0` - 数据验证库
 
 **4. 配置应用**
 
@@ -494,7 +489,6 @@ MediaNest 采用分层架构：
 - **后端框架**: FastAPI 0.95.0+
 - **Web 服务器**: Uvicorn 0.21.0+
 - **数据库**: SQLite (内置)
-- **数据验证**: Pydantic 1.10.0+
 - **前端**: HTML5 / CSS3 / JavaScript
 
 ### 📝 许可证
@@ -543,7 +537,7 @@ MediaNest is a feature-rich, open-source media management and playback system bu
 
 #### System Requirements
 
-- **Operating System**: Linux, macOS, Windows
+- **Operating System**: Linux, macOS
 - **Python Version**: 3.8 or higher
 - **Memory**: Minimum 512MB (recommended 2GB or more)
 - **Storage**: Depends on media library size
@@ -563,10 +557,6 @@ cd MediaNest
 # Linux/macOS
 python3 -m venv venv
 source venv/bin/activate
-
-# Windows
-python -m venv venv
-venv\Scripts\activate
 ```
 
 **3. Install Dependencies**
@@ -578,7 +568,6 @@ pip install -r requirements.txt
 Required packages include:
 - `fastapi>=0.95.0` - Modern web framework
 - `uvicorn>=0.21.0` - ASGI server
-- `pydantic>=1.10.0` - Data validation library
 
 **4. Configure Application**
 
@@ -1002,7 +991,6 @@ Create new route files in `web/` directory and register routes in `main.py`.
 - **Backend Framework**: FastAPI 0.95.0+
 - **Web Server**: Uvicorn 0.21.0+
 - **Database**: SQLite (built-in)
-- **Data Validation**: Pydantic 1.10.0+
 - **Frontend**: HTML5 / CSS3 / JavaScript
 
 ### 📝 License
