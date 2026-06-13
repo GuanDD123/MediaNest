@@ -1,18 +1,5 @@
 from pathlib import Path
 
-THUMB_MODE = True
-THUMB_SIZE = (256, 256)
-THUMB_SAVE_PATH = Path("/Media/thumbnails")
-
-IMAGE_WORKERS = 16
-VIDEO_WORKERS = 4
-
-ROOT_PATH = Path(__file__).resolve().parents[3]
-DB_PATH = ROOT_PATH / "media_info.db"
-STATIC_PATH = ROOT_PATH / "static"
-LAST_PLAYLIST = ROOT_PATH / "last_playlist.json"
-LAST_PROGRESS = ROOT_PATH / "progress.txt"
-
 NODE_KEYS = (
     "id",
     "dev",
@@ -26,7 +13,7 @@ NODE_KEYS = (
     "duration_ms",
     "width",
     "height",
-    "marked"
+    "marked",
 )
 ROOT_KEYS = ("id", "path", "last_sync_time", "size")
 TASK_KEYS = (
@@ -42,11 +29,26 @@ TASK_KEYS = (
 )
 SEGMENT_KEYS = ("video_id", "order_", "duration_ms", "name")
 
-BASE_URL = "http://192.168.0.110:8000"
+ROOT_PATH = Path(__file__).resolve().parents[3]
+STATIC_PATH = ROOT_PATH / "static"
+LAST_PLAYLIST = ROOT_PATH / "last_playlist.json"
+LAST_PROGRESS = ROOT_PATH / "progress.txt"
 
-HLS_MODE = False  # TS, fMP4, False
-M3U_ITEM_NUM_LIMIT = 3000
-SEGMENT_SAVE_PATH = Path("/Media/segments")
+
+# 可选配置项
+DB_PATH = ROOT_PATH / "media_info.db"
 
 IMAGE_SUFFIX = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 VIDEO_SUFFIX = {".mp4", ".avi", ".mov", ".mkv"}
+
+THUMB_MODE = True
+THUMB_SIZE = (256, 256)
+THUMB_SAVE_PATH = Path("/Media/thumbnails")
+IMAGE_WORKERS = 16
+
+HLS_MODE = False  # TS, fMP4, False
+SEGMENT_SAVE_PATH = Path("/Media/segments")
+VIDEO_WORKERS = 4
+
+BASE_URL = "http://192.168.0.110:8000"
+M3U_ITEM_NUM_LIMIT = 3000
