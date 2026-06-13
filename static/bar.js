@@ -73,8 +73,8 @@ async function continueLastPlay() {
     if (data.length) {
         state.currentFolderData = data;
         state.isRoot = false;
-        state.fileDeleteNum = 0;
         window.renderList(state.currentFolderData);
+        state.fileDeleteNum = 0;
         window.openMedia(index + 1);
     } else {
         alert("No more media files.");
@@ -93,8 +93,8 @@ async function filterMarked() {
 
         state.currentFolderData = data;
         state.isRoot = false;
-        state.fileDeleteNum = 0;
         window.renderList(state.currentFolderData);
+        state.fileDeleteNum = 0;
     } catch (err) {
         console.error("筛选标记失败:", err);
     }
@@ -131,8 +131,8 @@ function shufflePlay() {
     }
 
     state.currentFolderData[1].sort(() => Math.random() - 0.5);
-    state.fileDeleteNum = 0;
     window.renderList(state.currentFolderData);
+    state.fileDeleteNum = 0;
     window.send_playlist(state.currentFolderData);
     window.send_progress(-1);
     window.openMedia(0);

@@ -23,8 +23,8 @@ window.loadFolder = async function (path) {
         const response = await fetch(path);
         const data = await response.json();
         state.currentFolderData = data;
-        state.fileDeleteNum = 0;
         window.renderList(state.currentFolderData);
+        state.fileDeleteNum = 0;
     } catch (err) {
         console.error("加载目录失败:", err);
         state.pathRocord.pop();
