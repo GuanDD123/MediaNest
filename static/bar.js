@@ -18,6 +18,7 @@ async function sync() {
         });
         const data = await res.json();
         Toast.fromResponse(data);
+        window.loadFolder("/media/root");
     } catch (err) {
         console.error("请求失败:", err);
         Toast.error("网络错误，无法连接到服务器");
