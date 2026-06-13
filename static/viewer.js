@@ -81,7 +81,7 @@ function wakeUpUI() {
         // 视频暂停时不自动隐藏，以免干扰
         if (video.paused && !video.hidden) return;
         viewerView.classList.add("ui-hidden");
-    }, 3000);
+    }, 2000);
 }
 
 
