@@ -94,10 +94,13 @@ class SyncLibrary:
             )
             return 1
         else:
-            if self._check_update(
+            flag = self._check_update(
                 db_info, scan_result, path, parent_path, root_id, path_stat, dev, ino
-            ):
+            )
+            if flag:
                 return 2
+            if flag is False:
+                scan_result.db_infos[(dev, ino)] = db_info
 
     def _node_insert(
         self,
@@ -197,6 +200,9 @@ class SyncLibrary:
             db_info.name = path.name
             node_update_flag = True
         if path.is_dir():
+            if db_info.type_ != "folder":
+                db_info.type_ = "folder"
+                node_update_flag = True
             if db_info.mtime != local_modify_time:
                 db_info.mtime = local_modify_time
                 node_update_flag = True
@@ -210,8 +216,12 @@ class SyncLibrary:
                 task_insert_flag = True
                 modify_flag = True
 
-            if db_info.type_ == "video":
-                type_ = "video"
+            if path.suffix.lower() in VIDEO_SUFFIX:
+                if db_info.type_ != "video":
+                    db_info.type_ = "video"
+                    node_update_flag = True
+                    task_insert_flag = True
+                    modify_flag = True
                 if modify_flag:
                     duration_ms_flag = True
                     width_height_flag = True
@@ -219,20 +229,26 @@ class SyncLibrary:
                 elif HLS_MODE and not (SEGMENT_SAVE_PATH / f"{dev}_{ino}").exists():
                     hls_flag = True
                     task_insert_flag = True
-            else:  # image
-                type_ = "image"
+            elif path.suffix.lower() in IMAGE_SUFFIX:
+                if db_info.type_ != "image":
+                    db_info.type_ = "image"
+                    node_update_flag = True
+                    task_insert_flag = True
+                    modify_flag = True
                 if modify_flag:
                     width_height_flag = True
                     thumb_flag = True if THUMB_MODE else False
                 elif THUMB_MODE and not (THUMB_SAVE_PATH / f"{dev}_{ino}.jpg").exists():
                     thumb_flag = True
                     task_insert_flag = True
+            else:
+                return False  # Unsupported file type, will delete
 
         if task_insert_flag:
             scan_result.task_insert_list.append(
                 TaskInfo(
                     id=None,
-                    type_=type_,
+                    type_=db_info.type_,
                     path=path,
                     dev=dev,
                     ino=ino,
