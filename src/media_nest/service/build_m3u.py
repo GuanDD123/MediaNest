@@ -9,7 +9,7 @@ from media_nest.core.constant import (
     M3U_ITEM_NUM_LIMIT,
     SEGMENT_SAVE_PATH,
 )
-from media_nest.models import VideoSegmentInfo, VideoInfo
+from media_nest.models import VideoSegmentInfo, NodeInfo
 from media_nest.repository.repository import Repository
 
 
@@ -24,7 +24,7 @@ class BuildM3u:
             return self._hls(parent_path, shuffle_flag)
 
     def _mp4(self, parent_path: Path, shuffle_flag: bool):
-        video_infos: list[VideoInfo] = [
+        video_infos: list[NodeInfo] = [
             video_info
             for video_info in self.repository.node_select_by_parent_path(
                 str(parent_path)

@@ -2,7 +2,7 @@ import shutil
 from pathlib import Path
 from datetime import datetime as Datetime
 
-from media_nest.models import RootInfo, VideoInfo, ImageInfo, FolderInfo
+from media_nest.models import RootInfo, NodeInfo
 from media_nest.repository import Repository
 from media_nest.core.constant import THUMB_SAVE_PATH, SEGMENT_SAVE_PATH
 from .sync_library import SyncLibrary
@@ -98,22 +98,18 @@ class Media:
             self._node_infos_to_response(media_marked),
         )
 
-    def _separate_folder_media(
-        self, node_infos: list[FolderInfo | VideoInfo | ImageInfo]
-    ) -> tuple[list[FolderInfo], list[VideoInfo | ImageInfo]]:
-        folder_infos = []
-        media_infos = []
-        for node_indo in node_infos:
-            if node_indo.type_ == "folder":
-                folder_infos.append(node_indo)
+    def _separate_folder_media(self, node_infos: list[NodeInfo]):
+        folder_infos: list[NodeInfo] = []
+        media_infos: list[NodeInfo] = []
+        for node_info in node_infos:
+            if node_info.type_ == "folder":
+                folder_infos.append(node_info)
             else:
-                media_infos.append(node_indo)
+                media_infos.append(node_info)
         return folder_infos, media_infos
 
-    def _node_infos_to_response(
-        self, node_infos: list[FolderInfo | VideoInfo | ImageInfo]
-    ) -> list[dict[str, str | int]]:
-        results: list[dict] = []
+    def _node_infos_to_response(self, node_infos: list[NodeInfo]):
+        results: list[dict[str, str | int]] = []
         for info in node_infos:
             result = {
                 "id": info.id,
@@ -129,7 +125,9 @@ class Media:
                 if info.type_ == "video":
                     result["duration"] = int(info.duration_ms / 1000)
                 else:
-                    result["thumb_path"] = f"{str(THUMB_SAVE_PATH)}/{info.dev}_{info.ino}.jpg"
+                    result["thumb_path"] = (
+                        f"{str(THUMB_SAVE_PATH)}/{info.dev}_{info.ino}.jpg"
+                    )
             results.append(result)
         return results
 

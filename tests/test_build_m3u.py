@@ -2,20 +2,20 @@ from pathlib import Path
 from datetime import datetime as Datetime
 
 from media_nest.core.constant import HLS_MODE
-from media_nest.models import VideoSegmentInfo, VideoInfo
+from media_nest.models import VideoSegmentInfo, NodeInfo
 from media_nest.service.build_m3u import BuildM3u
 
 
 class FakeRepository:
     def node_select_by_parent_path(self, parent_path):
         return [
-            VideoInfo(id=1,dev=111,ino=1111,root_id=1,parent_path=Path("/1"),name="11",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=111,height=1111,duration_ms=11111),
-            VideoInfo(id=2,dev=222,ino=2222,root_id=1,parent_path=Path("/2"),name="22",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=222,height=2222,duration_ms=22222),
-            VideoInfo(id=3,dev=333,ino=3333,root_id=1,parent_path=Path("/3"),name="33",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=333,height=3333,duration_ms=33333),
-            VideoInfo(id=4,dev=444,ino=4444,root_id=1,parent_path=Path("/4"),name="44",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=444,height=4444,duration_ms=44444),
-            VideoInfo(id=5,dev=555,ino=5555,root_id=1,parent_path=Path("/5"),name="55",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=555,height=5555,duration_ms=55555),
-            VideoInfo(id=6,dev=666,ino=6666,root_id=1,parent_path=Path("/6"),name="66",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=666,height=6666,duration_ms=66666),
-            VideoInfo(id=7,dev=777,ino=7777,root_id=1,parent_path=Path("/7"),name="77",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=777,height=7777,duration_ms=77777),
+            NodeInfo(id=1,dev=111,ino=1111,root_id=1,parent_path=Path("/1"),name="11",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=111,height=1111,duration_ms=11111),
+            NodeInfo(id=2,dev=222,ino=2222,root_id=1,parent_path=Path("/2"),name="22",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=222,height=2222,duration_ms=22222),
+            NodeInfo(id=3,dev=333,ino=3333,root_id=1,parent_path=Path("/3"),name="33",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=333,height=3333,duration_ms=33333),
+            NodeInfo(id=4,dev=444,ino=4444,root_id=1,parent_path=Path("/4"),name="44",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=444,height=4444,duration_ms=44444),
+            NodeInfo(id=5,dev=555,ino=5555,root_id=1,parent_path=Path("/5"),name="55",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=555,height=5555,duration_ms=55555),
+            NodeInfo(id=6,dev=666,ino=6666,root_id=1,parent_path=Path("/6"),name="66",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=666,height=6666,duration_ms=66666),
+            NodeInfo(id=7,dev=777,ino=7777,root_id=1,parent_path=Path("/7"),name="77",type_="video",size=2048,mtime=Datetime(2026, 6, 1, 12, 0, 0),width=777,height=7777,duration_ms=77777),
         ]
 
     def segments_select_join_node_id_by_parent_path(self, parent_path):
