@@ -3,14 +3,7 @@ from datetime import datetime as Datetime
 from collections import namedtuple
 
 from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, TASK_KEYS, SEGMENT_KEYS
-from media_nest.models import (
-    FolderInfo,
-    VideoInfo,
-    ImageInfo,
-    RootInfo,
-    TaskInfo,
-    SegmentInfo,
-)
+from media_nest.models import NodeInfo, RootInfo, TaskInfo, SegmentInfo
 
 Node = namedtuple("Node", NODE_KEYS)
 Root = namedtuple("Root", ROOT_KEYS)
@@ -19,24 +12,11 @@ Segment = namedtuple("Segment", SEGMENT_KEYS)
 
 
 def model_to_row(
-    table: str,
-    info: FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo,
+    table: str, info: NodeInfo | RootInfo | TaskInfo | SegmentInfo
 ) -> tuple[int | str, ...]:
     if table == "root":
         return (str(info.path), int(info.last_sync_time.timestamp()), info.size)
     elif table == "node":
-        if info.type_ == "folder":
-            duration_ms = None
-            width = None
-            height = None
-        elif info.type_ == "video":
-            duration_ms = info.duration_ms
-            width = info.width
-            height = info.height
-        else:  # image
-            duration_ms = None
-            width = info.width
-            height = info.height
         return (
             info.dev,
             info.ino,
@@ -46,9 +26,9 @@ def model_to_row(
             info.type_,
             info.size,
             int(info.mtime.timestamp()),
-            duration_ms,
-            width,
-            height,
+            info.duration_ms,
+            info.width,
+            info.height,
             int(info.marked),
         )
     elif table == "task":
@@ -73,7 +53,7 @@ def model_to_row(
 
 def row_to_model(
     table: str, row: tuple[int | str, ...]
-) -> RootInfo | TaskInfo | FolderInfo | VideoInfo | ImageInfo | SegmentInfo:
+) -> RootInfo | TaskInfo | NodeInfo | SegmentInfo:
     if table == "root":
         root = Root(*row)
         return RootInfo(
@@ -84,50 +64,21 @@ def row_to_model(
         )
     elif table == "node":
         node = Node(*row)
-        if node.type_ == "folder":
-            return FolderInfo(
-                id=node.id,
-                dev=node.dev,
-                ino=node.ino,
-                root_id=node.root_id,
-                parent_path=Path(node.parent_path),
-                name=node.name,
-                type_=node.type_,
-                size=node.size,
-                mtime=Datetime.fromtimestamp(node.mtime),
-                marked=bool(node.marked),
-            )
-        elif node.type_ == "video":
-            return VideoInfo(
-                id=node.id,
-                dev=node.dev,
-                ino=node.ino,
-                root_id=node.root_id,
-                parent_path=Path(node.parent_path),
-                name=node.name,
-                type_=node.type_,
-                size=node.size,
-                mtime=Datetime.fromtimestamp(node.mtime),
-                marked=bool(node.marked),
-                width=node.width,
-                height=node.height,
-                duration_ms=node.duration_ms,
-            )
-        else:  # image
-            return ImageInfo(
-                id=node.id,
-                dev=node.dev,
-                ino=node.ino,
-                root_id=node.root_id,
-                parent_path=Path(node.parent_path),
-                name=node.name,
-                type_=node.type_,
-                size=node.size,
-                mtime=Datetime.fromtimestamp(node.mtime),
-                marked=bool(node.marked),
-                width=node.width,
-                height=node.height,
-            )
+        return NodeInfo(
+            id=node.id,
+            dev=node.dev,
+            ino=node.ino,
+            root_id=node.root_id,
+            parent_path=Path(node.parent_path),
+            name=node.name,
+            type_=node.type_,
+            size=node.size,
+            mtime=Datetime.fromtimestamp(node.mtime),
+            width=node.width,
+            height=node.height,
+            duration_ms=node.duration_ms,
+            marked=bool(node.marked),
+        )
     elif table == "task":
         task = Task(*row)
         return TaskInfo(

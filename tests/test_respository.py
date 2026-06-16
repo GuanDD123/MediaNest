@@ -2,7 +2,7 @@ from pathlib import Path
 from datetime import datetime as Datetime
 import pytest
 
-from media_nest.models import FolderInfo, ImageInfo, VideoInfo, TaskInfo, SegmentInfo
+from media_nest.models import NodeInfo, TaskInfo, SegmentInfo
 from media_nest.repository import Repository
 
 
@@ -12,7 +12,7 @@ class TestInsert:
 
     def setup_method(self):
         fake_data_list = [
-            FolderInfo(
+            NodeInfo(
                 id=1,
                 dev=100,
                 ino=2001,
@@ -23,7 +23,7 @@ class TestInsert:
                 size=0,
                 mtime=Datetime(2026, 6, 1, 12, 0, 1),
             ),
-            FolderInfo(
+            NodeInfo(
                 id=None,
                 dev=100,
                 ino=2002,
@@ -34,7 +34,7 @@ class TestInsert:
                 size=1000,
                 mtime=Datetime(2026, 6, 1, 12, 0, 1),
             ),
-            ImageInfo(
+            NodeInfo(
                 id=7,
                 dev=100,
                 ino=2004,
@@ -47,7 +47,7 @@ class TestInsert:
                 width=None,
                 height=None,
             ),
-            VideoInfo(
+            NodeInfo(
                 id=99,
                 dev=100,
                 ino=2005,
@@ -119,7 +119,7 @@ class TestInsert:
         self.repository.task_delete_all()
 
     def test_update_one(self):
-        wait_to_update = FolderInfo(
+        wait_to_update = NodeInfo(
             id=1,
             dev=100,
             ino=2001,
@@ -135,7 +135,7 @@ class TestInsert:
 
     def test_update_many(self):
         wait_to_update = [
-            FolderInfo(
+            NodeInfo(
                 id=1,
                 dev=100,
                 ino=2001,
@@ -146,7 +146,7 @@ class TestInsert:
                 size=0,
                 mtime=Datetime(2026, 6, 1, 12, 0, 1),
             ),
-            ImageInfo(
+            NodeInfo(
                 id=3,
                 dev=100,
                 ino=2004,
@@ -159,7 +159,7 @@ class TestInsert:
                 width=None,
                 height=None,
             ),
-            VideoInfo(
+            NodeInfo(
                 id=4,
                 dev=100,
                 ino=2005,

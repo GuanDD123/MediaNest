@@ -3,9 +3,7 @@ from pathlib import Path
 from media_nest.core.db_manager import DataBaseManager
 from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, TASK_KEYS, SEGMENT_KEYS
 from media_nest.models import (
-    FolderInfo,
-    VideoInfo,
-    ImageInfo,
+    NodeInfo,
     RootInfo,
     TaskInfo,
     SegmentInfo,
@@ -23,7 +21,7 @@ class Select:
         cursor = self.database.connection.execute("SELECT * FROM root ORDER BY path")
         return [row_to_model("root", row) for row in cursor.fetchall() if row]
 
-    def node_select_all(self) -> list[FolderInfo | VideoInfo | ImageInfo]:
+    def node_select_all(self) -> list[NodeInfo]:
         return self._select_all(table="node")
 
     def task_select_all(self) -> list[TaskInfo]:
@@ -36,44 +34,38 @@ class Select:
         cursor = self.database.connection.execute(f"SELECT * FROM {table}")
         return [row_to_model(table, row) for row in cursor.fetchall() if row]
 
-    def node_select_by_id(self, id: int) -> FolderInfo | VideoInfo | ImageInfo | None:
+    def node_select_by_id(self, id: int) -> NodeInfo | None:
         sql = "SELECT * FROM node WHERE id = ?"
         cursor = self.database.connection.execute(sql, (id,))
         if info := cursor.fetchone():
             return row_to_model("node", info)
         return None
 
-    def node_select_by_dev_ino(
-        self, dev: int, ino: int
-    ) -> FolderInfo | VideoInfo | ImageInfo | None:
+    def node_select_by_dev_ino(self, dev: int, ino: int) -> NodeInfo | None:
         sql = "SELECT * FROM node WHERE dev = ? AND ino = ?"
         cursor = self.database.connection.execute(sql, (dev, ino))
         if info := cursor.fetchone():
             return row_to_model("node", info)
         return None
 
-    def node_select_by_parent_path(
-        self, parent_path_str: str
-    ) -> list[FolderInfo | VideoInfo | ImageInfo]:
+    def node_select_by_parent_path(self, parent_path_str: str) -> list[NodeInfo]:
         sql = "SELECT * FROM node WHERE parent_path = ? ORDER BY name"
         cursor = self.database.connection.execute(sql, (parent_path_str,))
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
-    def node_select_marked(self) -> list[FolderInfo | VideoInfo | ImageInfo]:
+    def node_select_marked(self) -> list[NodeInfo]:
         sql = "SELECT * FROM node WHERE marked = 1"
         cursor = self.database.connection.execute(sql)
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
-    def node_select_in_id(
-        self, ids: list[int]
-    ) -> list[FolderInfo | VideoInfo | ImageInfo]:
+    def node_select_in_id(self, ids: list[int]) -> list[NodeInfo]:
         sql = f"SELECT * FROM node WHERE id IN ({','.join('?' * len(ids))})"
         cursor = self.database.connection.execute(sql, ids)
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
 
     def node_select_in_dev_ino(
         self, dev_ino_list: list[tuple[int, int]]
-    ) -> list[FolderInfo | VideoInfo | ImageInfo]:
+    ) -> list[NodeInfo]:
         sql = f"SELECT * FROM node WHERE (dev, ino) IN ({','.join(('(?,?)' for _ in range(len(dev_ino_list))))})"
         params = [param for dev_ino in dev_ino_list for param in dev_ino]
         cursor = self.database.connection.execute(sql, params)
@@ -129,13 +121,13 @@ class Insert:
     def root_insert(self, info: RootInfo) -> bool:
         return self._insert("root", insert_many=False, info=info)
 
-    def node_insert(self, info: FolderInfo | VideoInfo | ImageInfo) -> bool:
+    def node_insert(self, info: NodeInfo) -> bool:
         return self._insert("node", insert_many=False, info=info)
 
     def task_insert(self, info: TaskInfo) -> bool:
         return self._insert("task", insert_many=False, info=info)
 
-    def node_insert_many(self, infos: list[FolderInfo | VideoInfo | ImageInfo]) -> bool:
+    def node_insert_many(self, infos: list[NodeInfo]) -> bool:
         return self._insert("node", insert_many=True, infos=infos)
 
     def task_insert_many(self, infos: list[TaskInfo]) -> bool:
@@ -148,15 +140,8 @@ class Insert:
         self,
         table: str,
         insert_many: bool,
-        info: FolderInfo
-        | VideoInfo
-        | ImageInfo
-        | RootInfo
-        | TaskInfo
-        | SegmentInfo = None,
-        infos: list[
-            FolderInfo | VideoInfo | ImageInfo | RootInfo | TaskInfo | SegmentInfo
-        ] = None,
+        info: NodeInfo | RootInfo | TaskInfo | SegmentInfo = None,
+        infos: list[NodeInfo | RootInfo | TaskInfo | SegmentInfo] = None,
     ):
         sql = f"INSERT INTO {table} {self.insert_placeholder[table]} VALUES {self.values_placeholder[table]}"
         with self.database.connection as connection:
@@ -182,16 +167,14 @@ class Update:
     def root_update_by_id(self, id: int, info: RootInfo) -> bool:
         return self._update_by_id("root", id=id, info=info)
 
-    def node_update_by_id(
-        self, id: int, info: FolderInfo | VideoInfo | ImageInfo
-    ) -> bool:
+    def node_update_by_id(self, id: int, info: NodeInfo) -> bool:
         return self._update_by_id("node", id=id, info=info)
 
     def _update_by_id(
         self,
         table: str,
         id: int,
-        info: FolderInfo | VideoInfo | ImageInfo | RootInfo | SegmentInfo,
+        info: NodeInfo | RootInfo | SegmentInfo,
     ):
         sql = f"UPDATE {table} SET {self.update_placeholder[table]} WHERE id = ?"
         with self.database.connection as connection:
@@ -205,9 +188,7 @@ class Update:
             cursor = connection.execute(sql, (int(marked), id))
         return True if cursor.rowcount else False
 
-    def node_update_many_by_id(
-        self, update_list: list[tuple[int, FolderInfo | VideoInfo | ImageInfo]]
-    ) -> bool:
+    def node_update_many_by_id(self, update_list: list[tuple[int, NodeInfo]]) -> bool:
         sql = f"UPDATE node SET {self.update_placeholder['node']} WHERE id = ?"
         with self.database.connection as connection:
             params_generator = (

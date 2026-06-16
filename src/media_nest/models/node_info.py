@@ -2,11 +2,11 @@ from dataclasses import dataclass
 from datetime import datetime as Datetime
 from pathlib import Path
 
-__all__ = ("FolderInfo", "VideoInfo", "ImageInfo")
+__all__ = ("NodeInfo",)
 
 
 @dataclass(slots=True)
-class CommonInfo:
+class NodeInfo:
     id: int
     dev: int
     ino: int
@@ -16,25 +16,7 @@ class CommonInfo:
     type_: str
     size: int
     mtime: Datetime
-    marked: bool = False
-
-
-@dataclass(slots=True)
-class FolderInfo(CommonInfo):
-    pass
-
-
-@dataclass(slots=True)
-class MediaInfo(CommonInfo):
     width: int | None = None
     height: int | None = None
-
-
-@dataclass(slots=True)
-class VideoInfo(MediaInfo):
     duration_ms: int | None = None
-
-
-@dataclass(slots=True)
-class ImageInfo(MediaInfo):
-    pass
+    marked: bool = False

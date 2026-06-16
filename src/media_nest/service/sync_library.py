@@ -11,15 +11,15 @@ from media_nest.core.constant import (
     IMAGE_SUFFIX,
     VIDEO_SUFFIX,
 )
-from media_nest.models import FolderInfo, VideoInfo, ImageInfo, TaskInfo
+from media_nest.models import NodeInfo, TaskInfo
 from media_nest.repository import Repository
 
 
 @dataclass(slots=True)
 class ScanResult:
-    db_infos: dict[tuple[int, int], FolderInfo | VideoInfo | ImageInfo]
-    node_insert_list: list[FolderInfo | VideoInfo | ImageInfo]
-    node_update_list: list[tuple[int, FolderInfo | VideoInfo | ImageInfo]]
+    db_infos: dict[tuple[int, int], NodeInfo]
+    node_insert_list: list[NodeInfo]
+    node_update_list: list[tuple[int, NodeInfo]]
     task_insert_list: list[TaskInfo]
     folder_size_dict: dict[tuple[int, int], int]
 
@@ -62,7 +62,9 @@ class SyncLibrary:
                     node_update_num = 0
 
             root_info.last_sync_time = Datetime.now()
-            root_info.size = scan_result.folder_size_dict.get((root_info.path.stat().st_dev, root_info.path.stat().st_ino), -1)
+            root_info.size = scan_result.folder_size_dict.get(
+                (root_info.path.stat().st_dev, root_info.path.stat().st_ino), -1
+            )
             self.repository.root_update_by_id(root_info.id, root_info)
 
         self._sync_to_db(scan_result)
@@ -115,7 +117,7 @@ class SyncLibrary:
         task_insert_flag = False
         width_height_flag = duration_ms_flag = thumb_flag = hls_flag = False
         if path.is_dir():
-            info = FolderInfo(
+            info = NodeInfo(
                 id=None,
                 dev=dev,
                 ino=ino,
@@ -127,7 +129,7 @@ class SyncLibrary:
                 mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
             )
         elif path.suffix.lower() in IMAGE_SUFFIX:
-            info = ImageInfo(
+            info = NodeInfo(
                 id=None,
                 dev=dev,
                 ino=ino,
@@ -143,7 +145,7 @@ class SyncLibrary:
             width_height_flag = True
             thumb_flag = True if THUMB_MODE else False
         elif path.suffix.lower() in VIDEO_SUFFIX:
-            info = VideoInfo(
+            info = NodeInfo(
                 id=None,
                 dev=dev,
                 ino=ino,
@@ -179,7 +181,7 @@ class SyncLibrary:
 
     def _check_update(
         self,
-        db_info: FolderInfo | VideoInfo | ImageInfo,
+        db_info: NodeInfo,
         scan_result: ScanResult,
         path: Path,
         parent_path: Path,
@@ -192,6 +194,7 @@ class SyncLibrary:
 
         node_update_flag = False
         task_insert_flag = False
+
         if db_info.parent_path != parent_path:
             db_info.root_id = root_id
             db_info.parent_path = parent_path
@@ -199,6 +202,7 @@ class SyncLibrary:
         if db_info.name != path.name:
             db_info.name = path.name
             node_update_flag = True
+
         if path.is_dir():
             if db_info.type_ != "folder":
                 db_info.type_ = "folder"
