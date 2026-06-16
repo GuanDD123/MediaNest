@@ -10,7 +10,7 @@ from media_nest.core.constant import (
     SEGMENT_SAVE_PATH,
 )
 from media_nest.models import VideoSegmentInfo, NodeInfo
-from media_nest.repository.repository import Repository
+from media_nest.repository import Repository
 
 
 class BuildM3u:

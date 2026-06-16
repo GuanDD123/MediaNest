@@ -202,24 +202,22 @@ class SyncLibrary:
             db_info.name = path.name
             node_update_flag = True
 
-        task_insert_flag = False
-        modify_flag = False
         if path.is_dir():
             if db_info.type_ != "folder":
                 db_info.type_ = "folder"
                 db_info.width = None
                 db_info.height = None
                 db_info.duration_ms = None
+                db_info.marked = False
                 node_update_flag = True
-                modify_flag = True
             if db_info.mtime != local_modify_time:
                 db_info.mtime = local_modify_time
                 node_update_flag = True
-                modify_flag = True
-            if modify_flag:
-                db_info.marked = False
         else:
+            task_insert_flag = False
+            modify_flag = False
             width_height_flag = duration_ms_flag = thumb_flag = hls_flag = False
+
             if db_info.mtime != local_modify_time or db_info.size != path_stat.st_size:
                 db_info.mtime = local_modify_time
                 db_info.size = path_stat.st_size
