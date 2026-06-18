@@ -193,6 +193,7 @@ class SyncLibrary:
         local_modify_time = Datetime.fromtimestamp(int(path_stat.st_mtime))
 
         node_update_flag = False
+        task_insert_flag = False
 
         if db_info.parent_path != parent_path:
             db_info.root_id = root_id
@@ -214,7 +215,6 @@ class SyncLibrary:
                 db_info.mtime = local_modify_time
                 node_update_flag = True
         else:
-            task_insert_flag = False
             modify_flag = False
             width_height_flag = duration_ms_flag = thumb_flag = hls_flag = False
 
