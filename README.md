@@ -60,8 +60,10 @@ pip install -r requirements.txt
 ```
 
 Required packages include:
-- `fastapi>=0.95.0` - Modern web framework
-- `uvicorn>=0.21.0` - ASGI server
+- `fastapi>=0.136.0` - Modern web framework
+- `uvicorn>=0.49.0` - ASGI server
+- `Pillow>=12.0.0` - Image processing library
+- `pytest>=9.0.0` - Testing framework
 
 **4. Configure Application**
 
@@ -480,9 +482,11 @@ Create new route files in `web/` directory and register routes in `main.py`.
 
 ## 🛠️ Tech Stack
 
-- **Backend Framework**: FastAPI 0.95.0+
-- **Web Server**: Uvicorn 0.21.0+
+- **Backend Framework**: FastAPI 0.136.0+
+- **Web Server**: Uvicorn 0.49.0+
 - **Database**: SQLite (built-in)
+- **Image Processing**: Pillow 12.0.0+
+- **Testing Framework**: Pytest 9.0.0+
 - **Frontend**: HTML5 / CSS3 / JavaScript
 
 ## 📝 License
