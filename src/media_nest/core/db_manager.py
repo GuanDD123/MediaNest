@@ -33,7 +33,7 @@ class DataBaseManager:
                                 marked INTEGER NOT NULL CHECK(marked IN (0, 1))
                                       );
             CREATE TABLE IF NOT EXISTS task (id INTEGER PRIMARY KEY,
-                                type_ TEXT NOT NULL CHECK(type_ IN ('folder', 'video', 'image')),
+                                type_ TEXT NOT NULL CHECK(type_ IN ('video', 'image')),
                                 path TEXT NOT NULL,
                                 dev INTEGER NOT NULL, ino INTEGER NOT NULL,
                                 duration_ms_flag INTEGER NOT NULL CHECK(duration_ms_flag IN (0, 1)),
