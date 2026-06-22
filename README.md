@@ -14,14 +14,6 @@
 
 # MediaNest
 
-<div align="center">
-
-📺 强大的媒体管理和播放系统
-
-[GitHub](https://github.com) | [Issues](https://github.com/issues)
-
-</div>
-
 ### 📚 项目介绍
 
 MediaNest 是一个开源媒体管理和播放系统，基于 FastAPI 和现代网络技术构建。它提供了一个网络界面，用于浏览、管理和播放多媒体文件（图像、视频等），支持播放列表管理、进度跟踪、M3U 格式导出等功能。
@@ -448,14 +440,6 @@ MediaNest 使用分层架构：
 ## English
 
 # MediaNest
-
-<div align="center">
-
-📺 Powerful Media Management and Playback System
-
-[GitHub](https://github.com) | [Issues](https://github.com/issues)
-
-</div>
 
 ### 📚 Project Description
 
