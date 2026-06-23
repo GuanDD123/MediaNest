@@ -5,6 +5,8 @@ from media_nest.models import TaskInfo
 from tests.tool.run_collect_info import run_collect_info
 from tests.fake.fake_folder_file import create_folder_file
 
+ROOT = Path(__file__).parents[1] / "Untitled Folder"
+
 
 class FakeRepository:
     def __init__(self):
@@ -12,9 +14,7 @@ class FakeRepository:
             TaskInfo(
                 id=1,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_3.mp4"
-                ),
+                path=ROOT / "视频/video_3.mp4",
                 dev=66312,
                 ino=2693,
                 duration_ms_flag=True,
@@ -25,9 +25,7 @@ class FakeRepository:
             TaskInfo(
                 id=2,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_0.mp4"
-                ),
+                path=ROOT / "视频/video_0.mp4",
                 dev=66312,
                 ino=2690,
                 duration_ms_flag=True,
@@ -38,9 +36,7 @@ class FakeRepository:
             TaskInfo(
                 id=3,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_5.mp4"
-                ),
+                path=ROOT / "视频/video_5.mp4",
                 dev=66312,
                 ino=2695,
                 duration_ms_flag=True,
@@ -51,9 +47,7 @@ class FakeRepository:
             TaskInfo(
                 id=4,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_2.mp4"
-                ),
+                path=ROOT / "视频/video_2.mp4",
                 dev=66312,
                 ino=2692,
                 duration_ms_flag=True,
@@ -64,9 +58,7 @@ class FakeRepository:
             TaskInfo(
                 id=5,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_4.mp4"
-                ),
+                path=ROOT / "视频/video_4.mp4",
                 dev=66312,
                 ino=2694,
                 duration_ms_flag=True,
@@ -77,9 +69,7 @@ class FakeRepository:
             TaskInfo(
                 id=6,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_6.mp4"
-                ),
+                path=ROOT / "视频/video_6.mp4",
                 dev=66312,
                 ino=2696,
                 duration_ms_flag=True,
@@ -90,9 +80,7 @@ class FakeRepository:
             TaskInfo(
                 id=7,
                 type_="video",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/视频/video_1.mp4"
-                ),
+                path=ROOT / "视频/video_1.mp4",
                 dev=66312,
                 ino=2691,
                 duration_ms_flag=True,
@@ -103,9 +91,7 @@ class FakeRepository:
             TaskInfo(
                 id=8,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/test.webp"
-                ),
+                path=ROOT / "图片/test.webp",
                 dev=66312,
                 ino=2689,
                 duration_ms_flag=False,
@@ -116,9 +102,7 @@ class FakeRepository:
             TaskInfo(
                 id=9,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/test.png"
-                ),
+                path=ROOT / "图片/test.png",
                 dev=66312,
                 ino=2688,
                 duration_ms_flag=False,
@@ -129,9 +113,7 @@ class FakeRepository:
             TaskInfo(
                 id=10,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_7.jpg"
-                ),
+                path=ROOT / "图片/风景/img_7.jpg",
                 dev=66312,
                 ino=2684,
                 duration_ms_flag=False,
@@ -142,9 +124,7 @@ class FakeRepository:
             TaskInfo(
                 id=11,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_9.jpg"
-                ),
+                path=ROOT / "图片/风景/img_9.jpg",
                 dev=66312,
                 ino=2686,
                 duration_ms_flag=False,
@@ -155,9 +135,7 @@ class FakeRepository:
             TaskInfo(
                 id=12,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_1.jpg"
-                ),
+                path=ROOT / "图片/风景/img_1.jpg",
                 dev=66312,
                 ino=2678,
                 duration_ms_flag=False,
@@ -168,9 +146,7 @@ class FakeRepository:
             TaskInfo(
                 id=13,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_10.jpg"
-                ),
+                path=ROOT / "图片/风景/img_10.jpg",
                 dev=66312,
                 ino=2687,
                 duration_ms_flag=False,
@@ -181,9 +157,7 @@ class FakeRepository:
             TaskInfo(
                 id=14,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_3.jpg"
-                ),
+                path=ROOT / "图片/风景/img_3.jpg",
                 dev=66312,
                 ino=2680,
                 duration_ms_flag=False,
@@ -194,9 +168,7 @@ class FakeRepository:
             TaskInfo(
                 id=15,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_6.jpg"
-                ),
+                path=ROOT / "图片/风景/img_6.jpg",
                 dev=66312,
                 ino=2683,
                 duration_ms_flag=False,
@@ -207,9 +179,7 @@ class FakeRepository:
             TaskInfo(
                 id=16,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_4.jpg"
-                ),
+                path=ROOT / "图片/风景/img_4.jpg",
                 dev=66312,
                 ino=2681,
                 duration_ms_flag=False,
@@ -220,9 +190,7 @@ class FakeRepository:
             TaskInfo(
                 id=17,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_2.jpg"
-                ),
+                path=ROOT / "图片/风景/img_2.jpg",
                 dev=66312,
                 ino=2679,
                 duration_ms_flag=False,
@@ -233,9 +201,7 @@ class FakeRepository:
             TaskInfo(
                 id=18,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_8.jpg"
-                ),
+                path=ROOT / "图片/风景/img_8.jpg",
                 dev=66312,
                 ino=2685,
                 duration_ms_flag=False,
@@ -246,9 +212,7 @@ class FakeRepository:
             TaskInfo(
                 id=19,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_0.jpg"
-                ),
+                path=Path(ROOT / "图片/风景/img_0.jpg"),
                 dev=66312,
                 ino=2677,
                 duration_ms_flag=False,
@@ -259,9 +223,7 @@ class FakeRepository:
             TaskInfo(
                 id=20,
                 type_="image",
-                path=Path(
-                    "/MEGA/Vscode/ProjectsWeb/MediaNest/Untitled Folder/图片/风景/img_5.jpg"
-                ),
+                path=Path(ROOT / "图片/风景/img_5.jpg"),
                 dev=66312,
                 ino=2682,
                 duration_ms_flag=False,

@@ -43,11 +43,11 @@ VIDEO_SUFFIX = {".mp4", ".avi", ".mov", ".mkv"}
 
 THUMB_MODE = True
 THUMB_SIZE = (256, 256)
-THUMB_SAVE_PATH = Path("/Media/thumbnails")
+THUMB_SAVE_PATH = Path("~/Pictures_thumbnails").expanduser()
 IMAGE_WORKERS = 16
 
 HLS_MODE = False  # TS, fMP4, False
-SEGMENT_SAVE_PATH = Path("/Media/segments")
+SEGMENT_SAVE_PATH = Path("~/Segments").expanduser()
 VIDEO_WORKERS = 4
 
 BASE_URL = "http://192.168.0.110:8000"
