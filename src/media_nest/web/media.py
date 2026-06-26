@@ -49,7 +49,7 @@ def filter_marked(request: Request):
 
 
 @router.post("/playlist")
-def save_playlist(playlist: list[list[dict], list[dict]] = Body(...)):
+def save_playlist(playlist: list[dict] = Body(...)):
     play_progress.save_playlist(playlist)
     return {"success": True}
 

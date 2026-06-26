@@ -5,7 +5,7 @@ from media_nest.core.constant import LAST_PLAYLIST, LAST_PROGRESS
 __all__ = ["save_playlist", "save_progress", "continue_last_play"]
 
 
-def save_playlist(playlist: tuple[list[dict], list[dict]]) -> None:
+def save_playlist(playlist: list[dict]) -> None:
     with open(LAST_PLAYLIST, "w", encoding="utf-8") as f:
         json.dump(playlist, f, indent=4, ensure_ascii=False)
 
@@ -15,7 +15,7 @@ def save_progress(index: int) -> None:
 
 
 def continue_last_play() -> tuple[
-    tuple[list[dict[str, str | int]], list[dict[str, str | int]]], int
+    list[dict[str, str | int]], int
 ]:
     if not LAST_PLAYLIST.exists() or not LAST_PROGRESS.exists():
         return [], 0

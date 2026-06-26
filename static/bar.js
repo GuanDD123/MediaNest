@@ -67,14 +67,15 @@ async function deleteRoot() {
 
 async function continueLastPlay() {
     const state = window.getState();
-    const response = await fetch('/media/continue_last_play');
-    const [data, index] = await response.json();
+    const response = await fetch("/media/continue_last_play");
+    const [mediaData, index] = await response.json();
 
-    if (data.length) {
-        state.currentFolderData = data;
+    if (mediaData.length) {
+        state.pathRocord.push("/media/continue_last_play");
         state.isRoot = false;
-        window.renderList(state.currentFolderData);
-        state.fileDeleteNum = 0;
+        state.currentFolderData = [];
+        state.currentMediaData = mediaData;
+        window.renderList();
         window.openMedia(index);
     } else {
         alert("No more media files.");
@@ -92,8 +93,8 @@ function toggleViewMode() {
     state.viewMode = state.viewMode === "list" ? "grid" : "list";
     updateViewModeButtonIcon(state.viewMode);
 
-    if (!state.isRoot && state.currentFolderData && state.currentFolderData.length > 0) {
-        window.renderList(state.currentFolderData);
+    if (!state.isRoot && (state.currentFolderData || state.currentMediaData) && (state.currentFolderData.length > 0 || state.currentMediaData.length > 0)) {
+        window.renderList();
     }
 }
 function updateViewModeButtonIcon(mode) {
@@ -112,107 +113,11 @@ function updateViewModeButtonIcon(mode) {
 function shufflePlay() {
     const state = window.getState();
 
-    if (!state.currentFolderData || !state.currentFolderData[1] || state.currentFolderData[1].length === 0) {
+    if (!state.currentMediaData || state.currentMediaData.length === 0) {
         return;
     }
 
-    state.currentFolderData[1].sort(() => Math.random() - 0.5);
-    window.renderList(state.currentFolderData);
-    state.fileDeleteNum = 0;
+    state.currentMediaData.sort(() => Math.random() - 0.5);
+    window.renderList();
     window.openMedia(0);
 }
-
-
-function toggleCustomFullScreen() {
-    const state = window.getState();
-    const isFull = !!(document.fullscreenElement || document.webkitFullscreenElement);
-    if (!isFull) {
-        const elem = state.viewerView;
-        (elem.requestFullscreen || elem.webkitRequestFullscreen)?.call(elem);
-    } else {
-        (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
-    }
-};
-
-
-async function toggleCurrentMark() {
-    const state = window.getState();
-    const item = state.mediaList[state.currentIndex];
-    const newMarkState = !item.marked;
-
-    state.markBtn.textContent = newMarkState ? "⭐" : "☆";
-
-    // 更新 currentFolderData、mediaList 中的标记状态
-    const mList = state.currentFolderData[1];
-    const idx = mList.findIndex(i => i.parent_path === item.parent_path && i.name === item.name);
-    if (idx !== -1) mList[idx].marked = newMarkState;
-    item.marked = newMarkState;
-
-    try {
-        const res = await fetch("/admin/mark", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: item.id, marked: newMarkState })
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.msg || "标记失败");
-    } catch (err) {
-        console.error("标记同步失败:", err);
-        // 回滚状态
-        item.marked = !newMarkState;
-        if (idx !== -1) mList[idx].marked = !newMarkState;
-        state.markBtn.textContent = item.marked ? "⭐" : "☆";
-        alert("标记同步至服务器失败，请检查网络");
-    }
-};
-
-
-async function deleteCurrentMedia() {
-    const state = window.getState();
-    const item = state.mediaList[state.currentIndex];
-    if (!item) return;
-
-    // if (!confirm(`确定要彻底删除文件 "${item.name}" 吗？\n此操作不可恢复！`)) return;
-
-    try {
-        const response = await fetch(`/admin/delete`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                id: item.id,
-                path: `${item.parent_path}/${item.name}`
-            })
-        });
-        const data = await response.json();
-
-        if (data.success) {
-            state.thisViewerDeleteFlag = true;
-
-            const deletedIndex = state.currentIndex;
-
-            state.fileDeleteNum = state.fileDeleteNum + 1
-            state.mediaList.splice(deletedIndex, 1);
-
-            if (state.currentFolderData && state.currentFolderData[1]) {
-                const mList = state.currentFolderData[1];
-                const idx = mList.findIndex(i => i.parent_path === item.parent_path && i.name === item.name);
-                if (idx !== -1) mList.splice(idx, 1);
-            }
-
-            if (state.mediaList.length === 0) {
-                window.closeViewer();
-            } else {
-                const nextIndex = deletedIndex >= state.mediaList.length ? state.mediaList.length - 1 : deletedIndex;
-                const isUIHidden = state.viewerView.classList.contains("ui-hidden");
-                window.openMedia(nextIndex, isUIHidden);
-            }
-        } else {
-            alert(data.msg || "删除失败");
-        }
-    } catch (err) {
-        console.error("删除文件请求失败:", err);
-        alert("网络错误，无法连接到服务器");
-    }
-};

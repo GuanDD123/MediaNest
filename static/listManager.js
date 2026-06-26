@@ -66,7 +66,7 @@ const DOMBuilder = {
             const thumbWrap = document.createElement("div");
             thumbWrap.className = "grid-thumb-wrap";
 
-            let ratio = (item.width && item.height) ? (item.width / item.height) : (item.type === "video" ? 16 / 9 : 1);
+            const ratio = (item.width && item.height) ? (item.width / item.height) : (item.type === "video" ? 16 / 9 : 1);
             thumbWrap.style.aspectRatio = `${ratio}`;
             estHeight = (actualColWidth / ratio) + this.baseCssOverhead;
 
@@ -153,11 +153,11 @@ class MasonryLayout {
 // 加载与协调渲染
 window.loadFolder = async function (path) {
     const state = window.getState();
-    state.pathRocord.push(path);
     state.folderActions.style.display = "none";
     state.list.innerHTML = "";
-    state.mediaList = [];
     state.mediaMap.clear();
+
+    state.pathRocord.push(path);
 
     if (path === "/media/root") {
         state.isRoot = true;
@@ -172,47 +172,43 @@ window.loadFolder = async function (path) {
     try {
         const response = await fetch(path);
         const data = await response.json();
-        state.currentFolderData = data;
-        window.renderList(state.currentFolderData);
-        state.fileDeleteNum = 0;
+        [state.currentFolderData, state.currentMediaData] = data;
+        window.renderList();
     } catch (err) {
         console.error("加载目录失败:", err);
         state.pathRocord.pop();
     }
 };
 
-window.renderList = function (data) {
+window.renderList = function () {
     const state = window.getState();
-    const { folderActions, list } = state;
 
     // 重置全局索引
-    state.mediaList = [];
     state.mediaMap.clear();
-    state.renderListFlag = true;
+    state.renderListBeforeSendPlaylist = true;
 
-    const [folderList = [], mediaList = []] = data;
-    folderActions.style.display = mediaList.length ? "block" : "none";
-    list.innerHTML = "";
+    state.folderActions.style.display = state.currentMediaData.length ? "block" : "none";
+    state.list.innerHTML = "";
 
     const effectiveMode = state.isRoot ? 'list' : state.viewMode;
 
     // 检测是否需要执行 Root 界面分组
-    const uniquePaths = [...new Set([...folderList, ...mediaList].map(item => item.parent_path).filter(Boolean))];
+    const uniquePaths = [...new Set([...state.currentFolderData, ...state.currentMediaData].map(item => item.parent_path).filter(Boolean))];
     const shouldGroup = state.isRoot && uniquePaths.length > 1;
 
     if (!shouldGroup) {
         // --- 纯平铺模式 ---
-        list.className = effectiveMode === "grid" ? "grid-container" : "list-container";
-        renderSubTask(folderList, mediaList, list, effectiveMode, state);
-        if (effectiveMode === "grid") state.currentGridColCount = list.children.length; // 更新自适应状态
+        state.list.className = effectiveMode === "grid" ? "grid-container" : "list-container";
+        renderSubTask(state.currentFolderData, state.currentMediaData, state.list, effectiveMode, state);
+        if (effectiveMode === "grid") state.currentGridColCount = state.list.children.length; // 更新自适应状态
     } else {
         // --- 折叠分组模式 ---
-        list.className = "grouped-container";
+        state.list.className = "grouped-container";
 
         uniquePaths.forEach(path => {
-            const groupFolders = folderList.filter(item => item.parent_path === path);
-            const groupMedia = mediaList.filter(item => item.parent_path === path);
-            if (groupFolders.length === 0 && groupMedia.length === 0) return;
+            const folderData = state.currentFolderData.filter(item => item.parent_path === path);
+            const mediaData = state.currentMediaData.filter(item => item.parent_path === path);
+            if (folderData.length === 0 && mediaData.length === 0) return;
 
             // 构建外壳
             const groupWrapper = document.createElement("div");
@@ -223,7 +219,7 @@ window.renderList = function (data) {
             header.innerHTML = `
                 <span class="group-arrow">▼</span>
                 <span class="group-title">${path}</span>
-                <span class="group-count">(${groupFolders.length + groupMedia.length})</span>
+                <span class="group-count">(${folderData.length + mediaData.length})</span>
             `;
 
             const contentContainer = document.createElement("div");
@@ -242,16 +238,16 @@ window.renderList = function (data) {
 
             groupWrapper.appendChild(header);
             groupWrapper.appendChild(contentContainer);
-            list.appendChild(groupWrapper);
+            state.list.appendChild(groupWrapper);
 
             // 渲染组内内容
-            renderSubTask(groupFolders, groupMedia, contentContainer, effectiveMode, state);
+            renderSubTask(folderData, mediaData, contentContainer, effectiveMode, state);
         });
     }
 };
 
 // 辅助渲染协调器：把数据送进工场加工，然后丢给布局器排版
-function renderSubTask(folders, media, container, effectiveMode, state) {
+function renderSubTask(folderData, mediaData, container, effectiveMode, state) {
     const layout = new MasonryLayout(container, effectiveMode);
 
     // 1. 返回按钮
@@ -264,7 +260,7 @@ function renderSubTask(folders, media, container, effectiveMode, state) {
     }
 
     // 2. 文件夹
-    folders.forEach(item => {
+    folderData.forEach(item => {
         const { el, estHeight } = DOMBuilder.createFolder(item, effectiveMode, layout.actualColWidth, () => {
             window.loadFolder(`/media/folder${encodeURI(`${item.parent_path}/${item.name}`)}`);
         });
@@ -272,14 +268,15 @@ function renderSubTask(folders, media, container, effectiveMode, state) {
     });
 
     // 3. 媒体文件
-    media.forEach(item => {
+    let i = 0;
+    mediaData.forEach(item => {
         const { el, estHeight } = DOMBuilder.createMedia(item, effectiveMode, layout.actualColWidth, () => {
             window.openMedia(state.mediaMap.get(`${item.parent_path}/${item.name}`));
         });
 
         // 推入全局状态，打通分组界限，保证图片浏览器的左右顺滑切换
-        state.mediaMap.set(`${item.parent_path}/${item.name}`, state.mediaList.length);
-        state.mediaList.push(item);
+        state.mediaMap.set(`${item.parent_path}/${item.name}`, i);
+        i++;
 
         layout.append(el, estHeight);
     });

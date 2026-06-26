@@ -22,16 +22,16 @@ window.AppState = {
 
     // 数据状态
     pathRocord: [],
-    currentFolderData: [[], []],  // 原始目录数据（含文件夹）
-    mediaList: [],          // 当前目录媒体文件列表
-    mediaMap: new Map(),    // 路径 -> 索引
-    currentIndex: 0,
-    uiTimer: null,
-    renderListFlag: false,
     isRoot: false,
-    fileDeleteNum: 0,
-    thisViewerDeleteFlag: false,
+    currentFolderData: [],
+    currentMediaData: [],
+    mediaMap: new Map(),    // 路径 -> 索引
+    renderListBeforeSendPlaylist: false,
     currentGridColCount: 0,
+    currentIndex: 0,
+    progressOffset: 0,
+    uiTimer: null,
+    thisViewerDeleteFlag: false,
 };
 
 // 辅助函数，使外部可以访问

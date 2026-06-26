@@ -17,7 +17,7 @@
     window.addEventListener("resize", () => {
         const state = window.getState();
         // 仅在网格视图且列表可见时触发重新计算
-        if (state.viewMode === "grid" && state.currentFolderData && !state.listView.hidden) {
+        if (state.viewMode === "grid" && (state.currentFolderData || state.currentMediaData) && !state.listView.hidden) {
             const listWidth = state.list.clientWidth || window.innerWidth - 40;
             // 预估列数 (140为基础宽, 16为gap)
             const newColCount = Math.max(1, Math.floor((listWidth + 16) / (140 + 16)));
@@ -26,7 +26,7 @@
             if (newColCount !== state.currentGridColCount) {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
-                    window.renderList(state.currentFolderData);
+                    window.renderList();
                 }, 200);
             }
         }
