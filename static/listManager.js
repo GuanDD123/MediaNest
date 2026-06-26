@@ -171,8 +171,7 @@ window.loadFolder = async function (path) {
 
     try {
         const response = await fetch(path);
-        const data = await response.json();
-        [state.currentFolderData, state.currentMediaData] = data;
+        [state.currentFolderData, state.currentMediaData] = await response.json();
         window.renderList();
     } catch (err) {
         console.error("加载目录失败:", err);

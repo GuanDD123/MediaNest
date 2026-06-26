@@ -67,12 +67,20 @@ async function deleteRoot() {
 
 async function continueLastPlay() {
     const state = window.getState();
+    state.folderActions.style.display = "none";
+    state.list.innerHTML = "";
+    state.mediaMap.clear();
+
     const response = await fetch("/media/continue_last_play");
     const [mediaData, index] = await response.json();
 
     if (mediaData.length) {
         state.pathRocord.push("/media/continue_last_play");
+
         state.isRoot = false;
+        state.topBar.style.display = "none";
+        state.listView.style.paddingTop = "calc(20px + env(safe-area-inset-top, 0px))";
+
         state.currentFolderData = [];
         state.currentMediaData = mediaData;
         window.renderList();
