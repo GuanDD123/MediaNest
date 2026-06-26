@@ -6,5 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "media_nest"
 version = "0.1.0"
 
+[project.scripts]
+media_nest = "media_nest.main:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
 [tool.setuptools.packages.find]
 where = ["src"]
+include = ["media_nest*"]

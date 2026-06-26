@@ -24,7 +24,5 @@ def continue_last_play() -> tuple[
         last_playlist = json.load(f)
     with open(LAST_PROGRESS, "r", encoding="utf-8") as f:
         index = int(f.read().strip())
-    if index + 1 >= len(last_playlist[1]):
-        return [], 0
 
     return (last_playlist, index)

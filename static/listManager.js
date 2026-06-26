@@ -152,7 +152,6 @@ class MasonryLayout {
 
 // 加载与协调渲染
 window.loadFolder = async function (path) {
-    window.closeViewer();
     const state = window.getState();
     state.pathRocord.push(path);
     state.folderActions.style.display = "none";
@@ -275,11 +274,6 @@ function renderSubTask(folders, media, container, effectiveMode, state) {
     // 3. 媒体文件
     media.forEach(item => {
         const { el, estHeight } = DOMBuilder.createMedia(item, effectiveMode, layout.actualColWidth, () => {
-            if (state.renderListFlag) {
-                window.send_playlist(state.currentFolderData);
-                window.send_progress(-1);
-                state.renderListFlag = false;
-            }
             window.openMedia(state.mediaMap.get(`${item.parent_path}/${item.name}`));
         });
 

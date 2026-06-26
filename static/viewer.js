@@ -14,6 +14,11 @@ window.closeViewer = function () {
     state.video.pause();
     state.video.currentTime = 0;
     state.video.src = "";
+
+    if (state.thisViewerDeleteFlag) {
+        window.renderList(state.currentFolderData);
+        state.thisViewerDeleteFlag = false;
+    }
 };
 
 
@@ -29,6 +34,12 @@ window.openMedia = function (index, isSilent = false) {
 
     state.listView.hidden = true;
     state.viewerView.hidden = false;
+
+    if (state.renderListFlag) {
+        window.send_playlist(state.currentFolderData);
+        state.renderListFlag = false;
+    }
+    window.send_progress(index + state.fileDeleteNum);
 
     if (item.type === "video") {
         state.image.hidden = true;
@@ -188,12 +199,10 @@ function onImageClick(event, touchEndX = null) {
     if (x < w * 0.382) {
         if (state.currentIndex > 0) {
             window.openMedia(state.currentIndex - 1, isUIHidden);
-            window.send_progress(state.currentIndex + state.fileDeleteNum);
         }
     } else if (x > w * 0.618) {
         if (state.currentIndex < state.mediaList.length - 1) {
             window.openMedia(state.currentIndex + 1, isUIHidden);
-            window.send_progress(state.currentIndex + state.fileDeleteNum);
         }
     } else {
         if (isUIHidden) {
@@ -220,7 +229,6 @@ function togglePlayState() {
 function prevMedia() {
     const state = window.getState();
     if (state.currentIndex > 0) {
-        window.send_progress(state.currentIndex + state.fileDeleteNum);
         const isUIHidden = state.viewerView.classList.contains("ui-hidden");
         window.openMedia(state.currentIndex - 1, isUIHidden);
     } else {
@@ -230,7 +238,6 @@ function prevMedia() {
 
 function nextMedia() {
     const state = window.getState();
-    window.send_progress(state.currentIndex + state.fileDeleteNum);
     if (state.currentIndex < state.mediaList.length - 1) {
         const isUIHidden = state.viewerView.classList.contains("ui-hidden");
         window.openMedia(state.currentIndex + 1, isUIHidden);

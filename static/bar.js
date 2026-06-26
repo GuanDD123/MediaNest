@@ -75,7 +75,7 @@ async function continueLastPlay() {
         state.isRoot = false;
         window.renderList(state.currentFolderData);
         state.fileDeleteNum = 0;
-        window.openMedia(index + 1);
+        window.openMedia(index);
     } else {
         alert("No more media files.");
     }
@@ -119,8 +119,6 @@ function shufflePlay() {
     state.currentFolderData[1].sort(() => Math.random() - 0.5);
     window.renderList(state.currentFolderData);
     state.fileDeleteNum = 0;
-    window.send_playlist(state.currentFolderData);
-    window.send_progress(-1);
     window.openMedia(0);
 }
 
@@ -150,9 +148,6 @@ async function toggleCurrentMark() {
     if (idx !== -1) mList[idx].marked = newMarkState;
     item.marked = newMarkState;
 
-    // 重新渲染列表以更新星标显示
-    window.renderList(state.currentFolderData);
-
     try {
         const res = await fetch("/admin/mark", {
             method: "POST",
@@ -165,9 +160,8 @@ async function toggleCurrentMark() {
         console.error("标记同步失败:", err);
         // 回滚状态
         item.marked = !newMarkState;
-        if (folderItem) folderItem.marked = !newMarkState;
+        if (idx !== -1) mList[idx].marked = !newMarkState;
         state.markBtn.textContent = item.marked ? "⭐" : "☆";
-        window.renderList(state.currentFolderData);
         alert("标记同步至服务器失败，请检查网络");
     }
 };
@@ -194,6 +188,8 @@ async function deleteCurrentMedia() {
         const data = await response.json();
 
         if (data.success) {
+            state.thisViewerDeleteFlag = true;
+
             const deletedIndex = state.currentIndex;
 
             state.fileDeleteNum = state.fileDeleteNum + 1
@@ -204,8 +200,6 @@ async function deleteCurrentMedia() {
                 const idx = mList.findIndex(i => i.parent_path === item.parent_path && i.name === item.name);
                 if (idx !== -1) mList.splice(idx, 1);
             }
-
-            window.renderList(state.currentFolderData);
 
             if (state.mediaList.length === 0) {
                 window.closeViewer();
