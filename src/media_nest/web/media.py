@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Body, HTTPException, status
 from fastapi.responses import FileResponse
 import os
 
-from media_nest.service import play_progress
+from media_nest.service import Service
 
 router = APIRouter(prefix="/media")
 
@@ -50,16 +50,16 @@ def filter_marked(request: Request):
 
 @router.post("/playlist")
 def save_playlist(playlist: list[dict] = Body(...)):
-    play_progress.save_playlist(playlist)
+    Service.save_playlist(playlist)
     return {"success": True}
 
 
 @router.post("/progress")
 def save_progress(index: int = Body(...)):
-    play_progress.save_progress(index)
+    Service.save_progress(index)
     return {"success": True}
 
 
 @router.get("/continue_last_play")
 def continue_last_play():
-    return play_progress.continue_last_play()
+    return Service.continue_last_play()

@@ -1,10 +1,12 @@
 import shutil
 from pathlib import Path
 from datetime import datetime as Datetime
+import json
 
 from media_nest.models import RootInfo, NodeInfo
 from media_nest.repository import Repository
-from media_nest.core.constant import THUMB_SAVE_PATH, SEGMENT_SAVE_PATH
+from media_nest.core.settings import Settings
+from media_nest.core.constant import LAST_PLAYLIST, LAST_PROGRESS
 from .sync_library import SyncLibrary
 from .deal_task import DealTask
 from .build_m3u import BuildM3u
@@ -15,6 +17,7 @@ __all__ = ["Service"]
 
 class Admin:
     repository: Repository
+    settings: Settings
 
     def add_root(self, path_str: str) -> None:
         self.repository.root_insert(
@@ -33,17 +36,17 @@ class Admin:
         self.repository.root_delete_all()
 
     def sync(self) -> None:
-        SyncLibrary(self.repository).run()
-        DealTask(self.repository).run()
+        SyncLibrary(self.repository, self.settings).run()
+        DealTask(self.repository, self.settings).run()
 
     def clear_cache(self) -> None:
         self.repository.node_delete_all()
         self.repository.task_delete_all()
         self.repository.segment_delete_all()
-        if THUMB_SAVE_PATH.exists():
-            shutil.rmtree(THUMB_SAVE_PATH)
-        if SEGMENT_SAVE_PATH.exists():
-            shutil.rmtree(SEGMENT_SAVE_PATH)
+        if self.settings.thumb_dirpath.exists():
+            shutil.rmtree(self.settings.thumb_dirpath)
+        if self.settings.segment_dirpath.exists():
+            shutil.rmtree(self.settings.segment_dirpath)
 
     def mark(self, id: int, marked: bool) -> None:
         self.repository.node_update_marked_by_id(id, marked)
@@ -56,13 +59,17 @@ class Admin:
 
 class Playlist:
     repository: Repository
+    settings: Settings
 
     def build_m3u(self, parent_str: str, shuffle_flag: bool = False) -> str:
-        return BuildM3u(self.repository).run(Path("/" + parent_str), shuffle_flag)
+        return BuildM3u(self.repository, self.settings).run(
+            Path("/" + parent_str), shuffle_flag
+        )
 
 
 class Media:
     repository: Repository
+    settings: Settings
 
     def get_all_root(self):
         return (
@@ -126,12 +133,34 @@ class Media:
                     result["duration"] = int(info.duration_ms / 1000)
                 else:
                     result["thumb_path"] = (
-                        f"{str(THUMB_SAVE_PATH)}/{info.dev}_{info.ino}.jpg"
+                        f"{str(self.settings.thumb_dirpath)}/{info.dev}_{info.ino}.jpg"
                     )
             results.append(result)
         return results
 
+    @staticmethod
+    def save_playlist(playlist: list[dict]) -> None:
+        with open(LAST_PLAYLIST, "w", encoding="utf-8") as f:
+            json.dump(playlist, f, indent=4, ensure_ascii=False)
+
+    @staticmethod
+    def save_progress(index: int) -> None:
+        LAST_PROGRESS.write_text(str(index))
+
+    @staticmethod
+    def continue_last_play() -> tuple[list[dict[str, str | int]], int]:
+        if not LAST_PLAYLIST.exists() or not LAST_PROGRESS.exists():
+            return [], 0
+
+        with open(LAST_PLAYLIST, "r", encoding="utf-8") as f:
+            last_playlist = json.load(f)
+        with open(LAST_PROGRESS, "r", encoding="utf-8") as f:
+            index = int(f.read().strip())
+
+        return (last_playlist, index)
+
 
 class Service(Admin, Playlist, Media):
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository, settings: Settings):
         self.repository = repository
+        self.settings = settings

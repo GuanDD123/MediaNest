@@ -3,22 +3,18 @@ from urllib.parse import quote
 import random
 from collections import defaultdict
 
-from media_nest.core.constant import (
-    BASE_URL,
-    HLS_MODE,
-    M3U_ITEM_NUM_LIMIT,
-    SEGMENT_SAVE_PATH,
-)
+from media_nest.core.settings import Settings
 from media_nest.models import VideoSegmentInfo, NodeInfo
 from media_nest.repository import Repository
 
 
 class BuildM3u:
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository, settings: Settings):
         self.repository = repository
+        self.settings = settings
 
     def run(self, parent_path: Path, shuffle_flag: bool) -> str:
-        if not HLS_MODE:
+        if not self.settings.hls_mode:
             return self._mp4(parent_path, shuffle_flag)
         else:
             return self._hls(parent_path, shuffle_flag)
@@ -42,11 +38,11 @@ class BuildM3u:
                 f"#EXTINF:{int(video_info.duration_ms / 1000)}, v - {video_info.name}"
             )
             lines.append(
-                f"{BASE_URL}/media/video{quote(str(video_info.parent_path / video_info.name))}"
+                f"{self.settings.base_url}/media/video{quote(str(video_info.parent_path / video_info.name))}"
             )
             video_num += 1
 
-            if video_num > M3U_ITEM_NUM_LIMIT:
+            if video_num > self.settings.m3u_item_num_limit:
                 break
         lines.append("#EXT-X-ENDLIST")
 
@@ -67,7 +63,7 @@ class BuildM3u:
         if shuffle_flag:
             random.shuffle(video_segment_infos_group)
 
-        if HLS_MODE == "fMP4":
+        if self.settings.hls_mode == "fMP4":
             lines = [
                 "#EXTM3U",
                 "#EXT-X-VERSION:7",
@@ -84,11 +80,15 @@ class BuildM3u:
 
             first_segment = video_segment_info_group[0]
             hls_base = (
-                SEGMENT_SAVE_PATH
+                self.settings.segment_dirpath
                 / f"{first_segment.video_dev}_{first_segment.video_ino}"
             )
-            if HLS_MODE == "fMP4":
-                init_url = BASE_URL + "/media/video" + quote(str(hls_base / "init.mp4"))
+            if self.settings.hls_mode == "fMP4":
+                init_url = (
+                    self.settings.base_url
+                    + "/media/video"
+                    + quote(str(hls_base / "init.mp4"))
+                )
                 if not first_video:
                     lines.append("#EXT-X-DISCONTINUITY")
                 lines.append(f'#EXT-X-MAP:URI="{init_url}"')
@@ -98,10 +98,10 @@ class BuildM3u:
                     f"#EXTINF:{segment_info.segment_duration_ms / 1000}, {segment_info.video_name}"
                 )
                 url_path = str(hls_base / segment_info.segment_name)
-                lines.append(BASE_URL + "/media/video" + quote(url_path))
+                lines.append(self.settings.base_url + "/media/video" + quote(url_path))
                 segment_num += 1
 
-            if segment_num > M3U_ITEM_NUM_LIMIT:
+            if segment_num > self.settings.m3u_item_num_limit:
                 break
 
             first_video = False

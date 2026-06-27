@@ -4,6 +4,7 @@ from PIL import Image
 import subprocess
 import pytest
 
+from media_nest.core.settings import Settings
 from media_nest.service.sync_library import SyncLibrary
 from media_nest.models import RootInfo
 from media_nest.repository import Repository
@@ -19,6 +20,7 @@ IMAGE_NUM = 11
 @pytest.mark.usefixtures("get_repository")
 class TestSyncLibrary:
     repository: Repository
+    settings: Settings
 
     def teardown_method(self):
         self.repository.task_delete_all()
@@ -30,13 +32,13 @@ class TestSyncLibrary:
 
     @pytest.mark.run(order=2)
     def test_initialization(self):
-        run_collect_info(SyncLibrary(self.repository).run, (), "1: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "1: ")
         assert len(self.repository.node_select_all()) == 53
         assert len(self.repository.task_select_all()) == IMAGE_NUM + 2 + VIDEO_NUM
 
     @pytest.mark.run(order=3)
     def test_no_addition(self):
-        run_collect_info(SyncLibrary(self.repository).run, (), "2: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "2: ")
         assert len(self.repository.node_select_all()) == 53
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag
@@ -62,7 +64,7 @@ class TestSyncLibrary:
             stderr=subprocess.DEVNULL,
         )
 
-        run_collect_info(SyncLibrary(self.repository).run, (), "3: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "3: ")
         assert len(self.repository.node_select_all()) == 55
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag
@@ -90,7 +92,7 @@ class TestSyncLibrary:
             stderr=subprocess.DEVNULL,
         )
 
-        run_collect_info(SyncLibrary(self.repository).run, (), "4: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "4: ")
         assert len(self.repository.node_select_all()) == 55
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag
@@ -103,7 +105,7 @@ class TestSyncLibrary:
         (ROOT / "图片" / "风景" / "img_1.jpg").unlink()
         (ROOT / "视频" / "video_1.mp4").unlink()
 
-        run_collect_info(SyncLibrary(self.repository).run, (), "5: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "5: ")
         assert len(self.repository.node_select_all()) == 53
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag
@@ -117,7 +119,7 @@ class TestSyncLibrary:
         )
         (ROOT / "视频" / "video_2.mp4").rename(ROOT / "视频" / "video_2_renamed.mp4")
 
-        run_collect_info(SyncLibrary(self.repository).run, (), "6: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "6: ")
         assert len(self.repository.node_select_all()) == 53
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag
@@ -130,7 +132,7 @@ class TestSyncLibrary:
             ROOT / "图片" / "人物" / "img_3.jpg"
         )
         (ROOT / "视频" / "video_3.mp4").rename(ROOT / "视频" / "电影" / "video_3.mp4")
-        run_collect_info(SyncLibrary(self.repository).run, (), "7: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "7: ")
         assert len(self.repository.node_select_all()) == 53
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag
@@ -145,7 +147,7 @@ class TestSyncLibrary:
         (ROOT / "中文测试" / "[特殊]#文件.txt").touch()
         (ROOT / "中文测试" / "😊emoji.txt").touch()
 
-        run_collect_info(SyncLibrary(self.repository).run, (), "8: ")
+        run_collect_info(SyncLibrary(self.repository, self.settings).run, (), "8: ")
         assert len(self.repository.node_select_all()) == 55
         task_list = [
             task for task in self.repository.task_select_all() if task.width_height_flag

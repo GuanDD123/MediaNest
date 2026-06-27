@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from media_nest.core.settings import load_settings
 from media_nest.service.deal_task import DealTask
 from media_nest.models import TaskInfo
 from tests.tool.run_collect_info import run_collect_info
@@ -263,7 +264,7 @@ def test_deal_task():
     create_folder_file(video_num=7, image_num=11)
 
     do = "deal task"
-    run_collect_info(DealTask(repository).run, (), do)
+    run_collect_info(DealTask(repository, load_settings()).run, (), do)
     assert repository.task_select_all() == []
     print(repository.segment_insert_list)
     assert repository.segment_insert_list

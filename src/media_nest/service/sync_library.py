@@ -3,14 +3,7 @@ from pathlib import Path
 from datetime import datetime as Datetime
 from dataclasses import dataclass
 
-from media_nest.core.constant import (
-    THUMB_SAVE_PATH,
-    HLS_MODE,
-    SEGMENT_SAVE_PATH,
-    THUMB_MODE,
-    IMAGE_SUFFIX,
-    VIDEO_SUFFIX,
-)
+from media_nest.core.settings import Settings
 from media_nest.models import NodeInfo, TaskInfo
 from media_nest.repository import Repository
 
@@ -25,8 +18,9 @@ class ScanResult:
 
 
 class SyncLibrary:
-    def __init__(self, repository: Repository):
+    def __init__(self, repository: Repository, settings: Settings):
         self.repository = repository
+        self.settings = settings
 
     def run(self) -> None:
         scan_result = ScanResult(
@@ -128,7 +122,7 @@ class SyncLibrary:
                 size=0,
                 mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
             )
-        elif path.suffix.lower() in IMAGE_SUFFIX:
+        elif path.suffix.lower() in self.settings.image_suffix:
             info = NodeInfo(
                 id=None,
                 dev=dev,
@@ -143,8 +137,8 @@ class SyncLibrary:
             task_insert_flag = True
             type_ = "image"
             width_height_flag = True
-            thumb_flag = True if THUMB_MODE else False
-        elif path.suffix.lower() in VIDEO_SUFFIX:
+            thumb_flag = True if self.settings.thumb_mode else False
+        elif path.suffix.lower() in self.settings.video_suffix:
             info = NodeInfo(
                 id=None,
                 dev=dev,
@@ -160,7 +154,7 @@ class SyncLibrary:
             type_ = "video"
             duration_ms_flag = True
             width_height_flag = True
-            hls_flag = True if HLS_MODE else False
+            hls_flag = True if self.settings.hls_mode else False
         else:
             return
         scan_result.node_insert_list.append(info)
@@ -225,7 +219,7 @@ class SyncLibrary:
                 task_insert_flag = True
                 modify_flag = True
 
-            if path.suffix.lower() in VIDEO_SUFFIX:
+            if path.suffix.lower() in self.settings.video_suffix:
                 if db_info.type_ != "video":
                     db_info.type_ = "video"
                     node_update_flag = True
@@ -235,11 +229,11 @@ class SyncLibrary:
                     db_info.marked = False
                     duration_ms_flag = True
                     width_height_flag = True
-                    hls_flag = True if HLS_MODE else False
-                elif HLS_MODE and not (SEGMENT_SAVE_PATH / f"{dev}_{ino}").exists():
+                    hls_flag = True if self.settings.hls_mode else False
+                elif self.settings.hls_mode and not (self.settings.segment_dirpath / f"{dev}_{ino}").exists():
                     hls_flag = True
                     task_insert_flag = True
-            elif path.suffix.lower() in IMAGE_SUFFIX:
+            elif path.suffix.lower() in self.settings.image_suffix:
                 if db_info.type_ != "image":
                     db_info.type_ = "image"
                     db_info.duration_ms = None
@@ -249,8 +243,8 @@ class SyncLibrary:
                 if modify_flag:
                     db_info.marked = False
                     width_height_flag = True
-                    thumb_flag = True if THUMB_MODE else False
-                elif THUMB_MODE and not (THUMB_SAVE_PATH / f"{dev}_{ino}.jpg").exists():
+                    thumb_flag = True if self.settings.thumb_mode else False
+                elif self.settings.thumb_mode and not (self.settings.thumb_dirpath / f"{dev}_{ino}.jpg").exists():
                     thumb_flag = True
                     task_insert_flag = True
             else:

@@ -73,31 +73,32 @@ pip install -r requirements.txt
 
 **4. 配置应用程序**
 
-编辑 `src/media_nest/core/constant.py` 文件配置参数：
+编辑 `src/media_nest/core/settings.py` 文件配置参数：
 
 ```python
 # 缩略图设置
-THUMB_MODE = True                    # 启用缩略图
-THUMB_SIZE = (256, 256)             # 缩略图尺寸
-THUMB_SAVE_PATH = Path("/Media/thumbnails")  # 缩略图保存路径
+thumb_mode = True                    # 启用缩略图
+thumb_size = (256, 256)             # 缩略图尺寸
+thumb_dirpath = Path("/Media/thumbnails")  # 缩略图保存路径
+
+# HLS 设置
+hls_mode: False                        # TS, fMP4, False
+segment_dirpath: Path("~/Segments").expanduser()    # HLS 切片保存路径
 
 # 并发设置
-IMAGE_WORKERS = 16                   # 图像处理线程数
-VIDEO_WORKERS = 4                    # 视频处理线程数
+image_workers = 16                   # 图像处理线程数
+video_workers = 4                    # 视频处理线程数
 
-# 数据库和路径配置
-DB_PATH = ROOT_PATH / "media_info.db"  # 数据库文件路径
-STATIC_PATH = ROOT_PATH / "static"     # 静态资源路径
-LAST_PLAYLIST = ROOT_PATH / "last_playlist.json"  # 最后播放列表
-LAST_PROGRESS = ROOT_PATH / "progress.txt"       # 播放进度文件
+# 数据库配置
+db_path = ROOT_PATH / "media_info.db"  # 数据库文件路径
 
 # M3U 播放列表配置
-BASE_URL = "http://192.168.0.110:8000"  # 服务器地址
-M3U_ITEM_NUM_LIMIT = 3000          # M3U 播放列表项目限制
+base_url = "http://192.168.0.110:8000"  # 服务器地址
+m3u_item_num_limit = 3000          # M3U 播放列表项目限制
 
 # 支持的文件格式
-IMAGE_SUFFIX = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-VIDEO_SUFFIX = {".mp4", ".avi", ".mov", ".mkv"}
+image_suffix = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+video_suffix = {".mp4", ".avi", ".mov", ".mkv"}
 ```
 
 **5. 启动应用程序**
@@ -121,6 +122,7 @@ MediaNest/
 │   └── media_nest/
 │       ├── core/                    # 核心模块
 │       │   ├── constant.py          # 配置常数
+│       │   ├── settings.py          # 自定义配置
 │       │   ├── db_manager.py        # 数据库管理器
 │       │   └── __init__.py
 │       ├── models/                  # 数据模型
@@ -136,8 +138,7 @@ MediaNest/
 │       │   ├── service.py           # 主服务类
 │       │   ├── sync_library.py      # 媒体库同步
 │       │   ├── deal_task.py         # 任务处理
-│       │   ├── build_m3u.py         # M3U 播放列表生成
-│       │   └── play_progress.py     # 播放进度管理
+│       │   └── build_m3u.py         # M3U 播放列表生成
 │       ├── web/                     # API 路由
 │       │   ├── __init__.py
 │       │   ├── media.py             # 媒体相关路由
@@ -335,31 +336,13 @@ marked              BOOLEAN              # 是否标记
    - 播放列表自动保存
    - 支持导出为 M3U 格式
 
-#### 高级配置
-
-**启用随机播放**
-```
-GET /playlist/path/to/folder?shuffle_flag=true
-```
-
-**自定义缩略图大小**
-```python
-THUMB_SIZE = (512, 512)  # 更大的缩略图
-```
-
-**调整并发处理**
-```python
-IMAGE_WORKERS = 32   # 增加图像处理线程
-VIDEO_WORKERS = 8    # 增加视频处理线程
-```
-
 ### 🐛 常见问题
 
 **问：添加媒体目录后看不到文件？**
 答：运行同步操作。调用 `/admin/sync` 端点扫描和索引文件。
 
 **问：缩略图生成失败？**
-答：检查 `THUMB_SAVE_PATH` 目录是否存在且有写入权限。
+答：检查 `thumb_dirpath` 目录是否存在且有写入权限。
 
 **问：支持哪些文件格式？**
 答：
@@ -382,8 +365,8 @@ uvicorn media_nest.main:app --port 8080
 **内存不足**
 ```
 减少并发处理：
-IMAGE_WORKERS = 8    # 原为 16
-VIDEO_WORKERS = 2    # 原为 4
+image_workers = 8    # 原为 16
+video_workers = 2    # 原为 4
 ```
 
 ### 🛠️ 开发指南
@@ -500,31 +483,32 @@ Required packages include:
 
 **4. Configure Application**
 
-Edit the `src/media_nest/core/constant.py` file to configure parameters:
+Edit the `src/media_nest/core/settings.py` file to configure parameters:
 
 ```python
 # Thumbnail settings
-THUMB_MODE = True                    # Enable thumbnails
-THUMB_SIZE = (256, 256)             # Thumbnail size
-THUMB_SAVE_PATH = Path("/Media/thumbnails")  # Thumbnail save path
+thumb_mode = True                    # Enable thumbnails
+thumb_size = (256, 256)             # Thumbnail size
+thumb_dirpath = Path("/Media/thumbnails")  # Thumbnail save path
+
+# HLS settings
+hls_mode: False                        # TS, fMP4, False
+segment_dirpath: Path("~/Segments").expanduser()    # HLS segments save path
 
 # Concurrency settings
-IMAGE_WORKERS = 16                   # Image processing threads
-VIDEO_WORKERS = 4                    # Video processing threads
+image_workers = 16                   # Image processing threads
+video_workers = 4                    # Video processing threads
 
-# Database and path configuration
-DB_PATH = ROOT_PATH / "media_info.db"  # Database file path
-STATIC_PATH = ROOT_PATH / "static"     # Static resources path
-LAST_PLAYLIST = ROOT_PATH / "last_playlist.json"  # Last played playlist
-LAST_PROGRESS = ROOT_PATH / "progress.txt"       # Playback progress file
+# Database configuration
+db_path = ROOT_PATH / "media_info.db"  # Database file path
 
 # M3U playlist configuration
-BASE_URL = "http://192.168.0.110:8000"  # Server address
-M3U_ITEM_NUM_LIMIT = 3000          # M3U playlist item limit
+base_url = "http://192.168.0.110:8000"  # Server address
+m3u_item_num_limit = 3000          # M3U playlist item limit
 
 # Supported file formats
-IMAGE_SUFFIX = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-VIDEO_SUFFIX = {".mp4", ".avi", ".mov", ".mkv"}
+image_suffix = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+video_suffix = {".mp4", ".avi", ".mov", ".mkv"}
 ```
 
 **5. Start Application**
@@ -548,6 +532,7 @@ MediaNest/
 │   └── media_nest/
 │       ├── core/                    # Core modules
 │       │   ├── constant.py          # Configuration constants
+│       │   ├── settings.py          # settings
 │       │   ├── db_manager.py        # Database manager
 │       │   └── __init__.py
 │       ├── models/                  # Data models
@@ -563,8 +548,7 @@ MediaNest/
 │       │   ├── service.py           # Main service class
 │       │   ├── sync_library.py      # Media library sync
 │       │   ├── deal_task.py         # Task processing
-│       │   ├── build_m3u.py         # M3U playlist generation
-│       │   └── play_progress.py     # Playback progress management
+│       │   └── build_m3u.py         # M3U playlist generation
 │       ├── web/                     # API routes
 │       │   ├── __init__.py
 │       │   ├── media.py             # Media-related routes
@@ -762,31 +746,13 @@ marked              BOOLEAN              # Whether marked
    - Playlists are auto-saved
    - Support export to M3U format
 
-#### Advanced Configuration
-
-**Enable Shuffle Playback**
-```
-GET /playlist/path/to/folder?shuffle_flag=true
-```
-
-**Custom Thumbnail Size**
-```python
-THUMB_SIZE = (512, 512)  # Larger thumbnails
-```
-
-**Adjust Concurrent Processing**
-```python
-IMAGE_WORKERS = 32   # Increase image processing threads
-VIDEO_WORKERS = 8    # Increase video processing threads
-```
-
 ### 🐛 FAQ
 
 **Q: Can't see files after adding media directory?**
 A: Run the sync operation. Call the `/admin/sync` endpoint to scan and index files.
 
 **Q: Thumbnail generation fails?**
-A: Check if the `THUMB_SAVE_PATH` directory exists and has write permissions.
+A: Check if the `thumb_dirpath` directory exists and has write permissions.
 
 **Q: What file formats are supported?**
 A: 
@@ -810,8 +776,8 @@ uvicorn media_nest.main:app --port 8080
 **Out of Memory**
 ```
 Reduce concurrent processing:
-IMAGE_WORKERS = 8    # Originally 16
-VIDEO_WORKERS = 2    # Originally 4
+image_workers = 8    # Originally 16
+video_workers = 2    # Originally 4
 ```
 
 ### 🛠️ Development Guide
