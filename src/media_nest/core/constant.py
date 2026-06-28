@@ -31,5 +31,6 @@ SEGMENT_KEYS = ("video_id", "order_", "duration_ms", "name")
 
 ROOT_PATH = Path(__file__).resolve().parents[3]
 STATIC_PATH = ROOT_PATH / "static"
+DB_PATH = ROOT_PATH / "media_info.db"
 LAST_PLAYLIST = ROOT_PATH / "last_playlist.json"
 LAST_PROGRESS = ROOT_PATH / "progress.txt"

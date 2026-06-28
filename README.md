@@ -89,9 +89,6 @@ segment_dirpath: Path("~/Segments").expanduser()    # HLS 切片保存路径
 image_workers = 16                   # 图像处理线程数
 video_workers = 4                    # 视频处理线程数
 
-# 数据库配置
-db_path = ROOT_PATH / "media_info.db"  # 数据库文件路径
-
 # M3U 播放列表配置
 base_url = "http://192.168.0.110:8000"  # 服务器地址
 m3u_item_num_limit = 3000          # M3U 播放列表项目限制
@@ -498,9 +495,6 @@ segment_dirpath: Path("~/Segments").expanduser()    # HLS segments save path
 # Concurrency settings
 image_workers = 16                   # Image processing threads
 video_workers = 4                    # Video processing threads
-
-# Database configuration
-db_path = ROOT_PATH / "media_info.db"  # Database file path
 
 # M3U playlist configuration
 base_url = "http://192.168.0.110:8000"  # Server address

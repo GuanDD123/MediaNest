@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
 
-from media_nest.core.constant import STATIC_PATH
+from media_nest.core.constant import STATIC_PATH, DB_PATH
 from media_nest.core.settings import load_settings
 from media_nest.core.db_manager import DataBaseManager
 from media_nest.repository import Repository
@@ -16,13 +16,12 @@ from media_nest.web.playlist import router as playlist_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    settings = load_settings()
-
-    database = DataBaseManager(settings.db_path)
+    database = DataBaseManager(DB_PATH)
     database.connect()
     database.init()
 
     repository = Repository(database)
+    settings = load_settings()
     app.state.service = Service(repository, settings)
 
     yield

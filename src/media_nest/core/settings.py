@@ -1,13 +1,9 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from .constant import ROOT_PATH
-
 
 @dataclass(slots=True)
 class Settings:
-    db_path: Path
-
     image_suffix: set
     video_suffix: set
 
@@ -26,7 +22,6 @@ class Settings:
 
 def load_settings() -> Settings:
     return Settings(
-        db_path=ROOT_PATH / "media_info.db",
         image_suffix={".jpg", ".jpeg", ".png", ".gif", ".webp"},
         video_suffix={".mp4", ".avi", ".mov", ".mkv"},
         thumb_mode=True,
