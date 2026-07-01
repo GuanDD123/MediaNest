@@ -101,12 +101,7 @@ video_suffix = {".mp4", ".avi", ".mov", ".mkv"}
 **5. 启动应用程序**
 
 ```bash
-# 开发环境
-cd src/media_nest
-python main.py
-
-# 生产环境
-uvicorn media_nest.main:app --host 0.0.0.0 --port 8000 --workers 4
+python run.py
 ```
 
 应用程序将在 `http://localhost:8000` 启动
@@ -508,12 +503,7 @@ video_suffix = {".mp4", ".avi", ".mov", ".mkv"}
 **5. Start Application**
 
 ```bash
-# Development environment
-cd src/media_nest
-python main.py
-
-# Production environment
-uvicorn media_nest.main:app --host 0.0.0.0 --port 8000 --workers 4
+python run.py
 ```
 
 Application will start at `http://localhost:8000`
