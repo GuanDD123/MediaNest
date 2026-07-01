@@ -40,6 +40,6 @@ def mark(request: Request, data: dict[str, int | bool] = Body(...)):
 
 
 @router.post("/delete")
-def delete_file(request: Request, data: dict[str, int | str] = Body(...)):
+def delete_file(request: Request, data: dict[str, int | str | list[str]] = Body(...)):
     request.app.state.service.delete_file(data["id"], data["path"], data["additional_path_list"])
     return {"success": True}

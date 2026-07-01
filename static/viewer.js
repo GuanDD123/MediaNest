@@ -243,8 +243,9 @@ async function deleteCurrentMedia() {
     // if (!confirm(`确定要彻底删除文件 "${item.name}" 吗？\n此操作不可恢复！`)) return;
 
     try {
+        let additional_path_list = [];
         if (item.type === "image") {
-            const additional_path_list = [item.thumb_path];
+            additional_path_list = [item.thumb_path];
         }
         const response = await fetch(`/admin/delete`, {
             method: "POST",

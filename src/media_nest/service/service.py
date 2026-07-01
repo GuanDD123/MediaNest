@@ -55,6 +55,7 @@ class Admin:
         print(f"Deleting file: {path_str}")
         Path(path_str).unlink(missing_ok=True)
         for additional_path in additional_path_list:
+            print(f"Deleting additional file: {additional_path}")
             Path(additional_path).unlink(missing_ok=True)
         self.repository.node_delete_by_id(id)
 
