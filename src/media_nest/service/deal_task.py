@@ -116,19 +116,22 @@ class DealTask:
         node_video_infos = segment_insert_list = None
         try:
             if task.duration_ms_flag:
-                cmd = [
-                    "ffprobe",
-                    "-v",
-                    "error",
-                    "-select_streams",
-                    "v:0",
-                    "-show_entries",
-                    "stream=width,height,duration",
-                    "-of",
-                    "json",
-                    str(task.path),
-                ]
-                out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL)
+                out = subprocess.check_output(
+                    [
+                        "ffprobe",
+                        "-v",
+                        "error",
+                        "-select_streams",
+                        "v:0",
+                        "-show_entries",
+                        "stream=width,height,duration",
+                        "-of",
+                        "json",
+                        str(task.path),
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
                 stream = json.loads(out)["streams"][0]
                 node_video_infos = (
                     (task.dev, task.ino),
@@ -237,7 +240,9 @@ class DealTask:
                 str(hls_dir / "seg_%05d.ts"),
                 str(hls_dir / "index.m3u8"),
             ]
-        subprocess.run(cmd, check=True)
+        subprocess.run(
+            cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
 
     def _parse_m3u8(self, video_id: int, path: Path):
         line_list = path.read_text().splitlines()
