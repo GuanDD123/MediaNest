@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Request, Body
+from fastapi import APIRouter, Request, Body, WebSocket
+import asyncio
 
 router = APIRouter(prefix="/admin")
 
@@ -23,8 +24,28 @@ def clear_root(request: Request):
 
 @router.post("/sync")
 def sync(request: Request):
-    request.app.state.service.sync()
+    if not request.app.state.service.sync():
+        return {"success": False, "message": "Sync is already in progress"}
     return {"success": True}
+
+@router.websocket("/sync/progress")
+async def sync_progress(ws: WebSocket):
+    await ws.accept()
+    service = ws.app.state.service
+
+    try:
+        while True:
+            await ws.send_json(service.get_sync_progress())
+
+            if service.future is None or service.future.done():
+                await ws.send_json(service.get_sync_progress())
+                break
+
+            await asyncio.sleep(0.2)
+    except Exception as e:
+        print(e)
+    finally:
+        await ws.close()
 
 
 @router.post("/clear_cache")
@@ -41,5 +62,7 @@ def mark(request: Request, data: dict[str, int | bool] = Body(...)):
 
 @router.post("/delete")
 def delete_file(request: Request, data: dict[str, int | str | list[str]] = Body(...)):
-    request.app.state.service.delete_file(data["id"], data["path"], data["additional_path_list"])
+    request.app.state.service.delete_file(
+        data["id"], data["path"], data["additional_path_list"]
+    )
     return {"success": True}

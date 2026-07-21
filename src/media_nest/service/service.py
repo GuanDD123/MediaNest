@@ -2,22 +2,28 @@ import shutil
 from pathlib import Path
 from datetime import datetime as Datetime
 import json
+from concurrent.futures import ThreadPoolExecutor, Future
+import logging
 
 from media_nest.models import RootInfo, NodeInfo
 from media_nest.repository import Repository
 from media_nest.core.settings import Settings
 from media_nest.core.constant import LAST_PLAYLIST, LAST_PROGRESS
-from .sync_library import SyncLibrary
+from .scan_library import ScanLibrary
 from .deal_task import DealTask
 from .build_m3u import BuildM3u
 
 
 __all__ = ["Service"]
+logger = logging.getLogger(__name__)
 
 
 class Admin:
     repository: Repository
     settings: Settings
+    executor: ThreadPoolExecutor
+    scan_library: ScanLibrary
+    deal_task: DealTask
 
     def add_root(self, path_str: str) -> None:
         self.repository.root_insert(
@@ -35,9 +41,43 @@ class Admin:
     def clear_root(self) -> None:
         self.repository.root_delete_all()
 
-    def sync(self) -> None:
-        SyncLibrary(self.repository, self.settings).run()
-        DealTask(self.repository, self.settings).run()
+    def sync(self) -> bool:
+        if self.future and not self.future.done():
+            return False
+        self.future = self.executor.submit(self._sync)
+        return True
+
+    def _sync(self):
+        try:
+            self.scan_library.run()
+        except Exception:
+            self.scan_library.progress.status = "failed"
+            logger.exception("Scan Library failed")
+            return
+
+        try:
+            self.deal_task.run()
+        except Exception:
+            self.deal_task.progress.status = "failed"
+            logger.exception("Deal Task failed")
+
+    def get_sync_progress(self):
+        if self.scan_library.progress.status != "finished":
+            return {
+                "current_step": "Scan Library",
+                "status": self.scan_library.progress.status,
+                "root_folders_num": self.scan_library.progress.root_folders_num,
+                "completed_root_folders_num": self.scan_library.progress.completed_root_folders_num,
+                "current_root_folder": str(self.scan_library.progress.current_root_folder),
+                "completed_scan_num": self.scan_library.progress.completed_scan_num,
+            }
+        else:
+            return {
+                "current_step": "Deal Task",
+                "status": self.deal_task.progress.status,
+                "task_num": self.deal_task.progress.task_num,
+                "completed_task_num": self.deal_task.progress.completed_task_num,
+            }
 
     def clear_cache(self) -> None:
         self.repository.node_delete_all()
@@ -51,7 +91,9 @@ class Admin:
     def mark(self, id: int, marked: bool) -> None:
         self.repository.node_update_marked_by_id(id, marked)
 
-    def delete_file(self, id: int, path_str: str, additional_path_list: list[str]) -> None:
+    def delete_file(
+        self, id: int, path_str: str, additional_path_list: list[str]
+    ) -> None:
         print(f"Deleting file: {path_str}")
         Path(path_str).unlink(missing_ok=True)
         for additional_path in additional_path_list:
@@ -164,6 +206,12 @@ class Media:
 
 
 class Service(Admin, Playlist, Media):
-    def __init__(self, repository: Repository, settings: Settings):
+    def __init__(
+        self, repository: Repository, settings: Settings, executor: ThreadPoolExecutor
+    ):
         self.repository = repository
         self.settings = settings
+        self.executor = executor
+        self.future: Future | None = None
+        self.scan_library = ScanLibrary(self.repository, self.settings)
+        self.deal_task = DealTask(self.repository, self.settings)

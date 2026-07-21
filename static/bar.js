@@ -11,20 +11,112 @@ const Toast = {
 };
 
 
+let socket = null;
+let panel = null;
 async function sync() {
     try {
         const res = await fetch("/admin/sync", {
             method: "POST"
         });
         const data = await res.json();
-        Toast.fromResponse(data);
+        if (!data.success) {
+            Toast.error(data.message);
+        }
         window.loadFolder("/media/root");
+        createTaskPanel();
+        connectProgress();
     } catch (err) {
         console.error("请求失败:", err);
         Toast.error("网络错误，无法连接到服务器");
     }
 }
+function createTaskPanel() {
+    if (panel) return;
 
+    panel = document.createElement("div");
+    panel.className = "task-panel";
+    panel.innerHTML = `
+        <div id="task-title" class="task-title">
+            🔄 Syncing
+        </div>
+        <div id="task-text" class="task-text">
+        </div>
+        <div class="progress-bar">
+            <div id="task-bar" class="progress-fill"></div>
+        </div>
+    `;
+
+    document.body.appendChild(panel);
+}
+function connectProgress() {
+    socket = new WebSocket(
+        `ws://${location.host}/admin/sync/progress`
+    );
+
+    socket.onmessage = (event) => {
+        const progress = JSON.parse(event.data);
+        updateProgress(progress);
+    };
+
+    socket.onclose = () => {
+        socket = null;
+    };
+
+    socket.onerror = () => {
+        if (panel) finishTask("❌ 进度连接错误", false);
+    }
+}
+function updateProgress(progress) {
+    let title;
+    let percent = 0;
+    let text;
+
+    if (progress.current_step === "Scan Library") {
+        if (progress.status === "failed") {
+            finishTask("❌ 扫描失败", false);
+            return;
+        }
+
+        title = "🔄 Scan Library";
+        const total = progress.root_folders_num || 0;
+        const completed = progress.completed_root_folders_num || 0;
+        text = `
+            root_folder：${completed} / ${total}<br>
+            current：${progress.current_root_folder}<br>
+            completed_scan：${progress.completed_scan_num}
+            `
+        percent = total === 0 ? 0 : (completed / total) * 100;
+    } else if (progress.current_step === "Deal Task") {
+        if (progress.status === "failed") {
+            finishTask("❌ 处理失败", false);
+            return;
+        }
+
+        if (progress.status === "finished") {
+            finishTask("✅ 同步完成");
+            return;
+        }
+
+        title = "⚙️ Deal Task";
+        const total = progress.task_num || 0;
+        const completed = progress.completed_task_num || 0;
+        text = `Deal：${completed} / ${total}`;
+        percent = total === 0 ? 0 : (completed / total) * 100;
+    }
+
+    document.getElementById("task-title").textContent = title;
+    document.getElementById("task-text").innerHTML = text;
+    document.getElementById("task-bar").style.width = percent + "%";
+}
+function finishTask(text, success = true) {
+    if (success) { panel.innerHTML = `<div class="task-title">${text}</div>`; }
+    else { panel.querySelector(".task-title").textContent = text; }
+
+    setTimeout(() => {
+        panel.remove();
+        panel = null;
+    }, 2000);
+}
 
 async function addRoot() {
     const path = prompt("请输入新增根目录路径:");

@@ -6,6 +6,7 @@ from pathlib import Path
 from functools import partial
 from dataclasses import dataclass
 import shutil
+from typing import Literal
 
 from media_nest.core.settings import Settings
 from media_nest.models import TaskInfo, SegmentInfo
@@ -19,12 +20,24 @@ class TaskResult:
     segment_insert_list: list[SegmentInfo]
 
 
+@dataclass(slots=True)
+class Progress:
+    status: Literal["idle", "running", "finished", "failed"]
+    task_num: int
+    completed_task_num: int
+
+
 class DealTask:
     def __init__(self, repository: Repository, settings: Settings):
         self.repository = repository
         self.settings = settings
+        self.progress = Progress(status="idle", task_num=0, completed_task_num=0)
 
     def run(self) -> None:
+        self.progress.status = "running"
+        self.progress.task_num = 0
+        self.progress.completed_task_num = 0
+
         self.settings.thumb_dirpath.mkdir(parents=True, exist_ok=True)
         self.settings.segment_dirpath.mkdir(parents=True, exist_ok=True)
 
@@ -34,7 +47,9 @@ class DealTask:
 
         image_tasks: list[TaskInfo] = []
         video_tasks: list[TaskInfo] = []
-        for task in self.repository.task_select_all():
+        task_infos = self.repository.task_select_all()
+        self.progress.task_num = len(task_infos)
+        for task in task_infos:
             if task.type_ == "video":
                 video_tasks.append(task)
             else:
@@ -47,6 +62,7 @@ class DealTask:
         self._sync_to_db(task_result)
 
         self.repository.task_delete_all()
+        self.progress.status = "finished"
 
     def _deal_image_tasks(self, image_tasks: list[TaskInfo], task_result: TaskResult):
         image_num = 0
@@ -61,6 +77,8 @@ class DealTask:
                     )
                     task_result.node_image_update_list = []
                     image_num = 0
+
+                self.progress.completed_task_num += 1
 
     def _process_image(self, task: TaskInfo):
         try:
@@ -112,6 +130,8 @@ class DealTask:
                     self.repository.segment_insert_many(task_result.segment_insert_list)
                     task_result.segment_insert_list = []
 
+                self.progress.completed_task_num += 1
+
     def _process_video(self, task: TaskInfo, video_ids: dict[str, int]):
         node_video_infos = segment_insert_list = None
         try:
@@ -129,7 +149,6 @@ class DealTask:
                         "json",
                         str(task.path),
                     ],
-                    stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                 )
                 stream = json.loads(out)["streams"][0]

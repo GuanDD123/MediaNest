@@ -128,7 +128,7 @@ MediaNest/
 │       ├── service/                 # 业务逻辑层
 │       │   ├── __init__.py
 │       │   ├── service.py           # 主服务类
-│       │   ├── sync_library.py      # 媒体库同步
+│       │   ├── scan_library.py      # 媒体库同步
 │       │   ├── deal_task.py         # 任务处理
 │       │   └── build_m3u.py         # M3U 播放列表生成
 │       ├── web/                     # API 路由
@@ -530,7 +530,7 @@ MediaNest/
 │       ├── service/                 # Business Logic Layer
 │       │   ├── __init__.py
 │       │   ├── service.py           # Main service class
-│       │   ├── sync_library.py      # Media library sync
+│       │   ├── scan_library.py      # Media library sync
 │       │   ├── deal_task.py         # Task processing
 │       │   └── build_m3u.py         # M3U playlist generation
 │       ├── web/                     # API routes

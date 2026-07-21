@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from datetime import datetime as Datetime
 from dataclasses import dataclass
+from typing import Literal
 
 from media_nest.core.settings import Settings
 from media_nest.models import NodeInfo, TaskInfo
@@ -17,12 +18,34 @@ class ScanResult:
     folder_size_dict: dict[tuple[int, int], int]
 
 
-class SyncLibrary:
+@dataclass(slots=True)
+class Progress:
+    status: Literal["idle", "running", "finished", "failed"]
+    root_folders_num: int
+    current_root_folder: Path
+    completed_root_folders_num: int
+    completed_scan_num: int
+
+
+class ScanLibrary:
     def __init__(self, repository: Repository, settings: Settings):
         self.repository = repository
         self.settings = settings
+        self.progress: Progress = Progress(
+            status="idle",
+            root_folders_num=0,
+            current_root_folder=None,
+            completed_root_folders_num=0,
+            completed_scan_num=0,
+        )
 
     def run(self) -> None:
+        self.progress.status = "running"
+        self.progress.root_folders_num = 0
+        self.progress.current_root_folder = None
+        self.progress.completed_root_folders_num = 0
+        self.progress.completed_scan_num = 0
+
         scan_result = ScanResult(
             db_infos={
                 (db_info.dev, db_info.ino): db_info
@@ -35,7 +58,10 @@ class SyncLibrary:
         )
 
         node_insert_num = node_update_num = 0
-        for root_info in self.repository.root_select_all():
+        root_infos = self.repository.root_select_all()
+        self.progress.root_folders_num = len(root_infos)
+        for root_info in root_infos:
+            self.progress.current_root_folder = root_info.path
             for parent_path, path in self._walk_files(
                 root_info.path, scan_result.folder_size_dict
             ):
@@ -55,13 +81,18 @@ class SyncLibrary:
                     scan_result.node_update_list = []
                     node_update_num = 0
 
+                self.progress.completed_scan_num += 1
+
             root_info.last_sync_time = Datetime.now()
             root_info.size = scan_result.folder_size_dict.get(
                 (root_info.path.stat().st_dev, root_info.path.stat().st_ino), -1
             )
             self.repository.root_update_by_id(root_info.id, root_info)
 
+            self.progress.completed_root_folders_num += 1
+
         self._sync_to_db(scan_result)
+        self.progress.status = "finished"
 
     def _walk_files(
         self, root_path: Path, folder_size_dict: dict[tuple[int, int], int]
@@ -230,7 +261,10 @@ class SyncLibrary:
                     duration_ms_flag = True
                     width_height_flag = True
                     hls_flag = True if self.settings.hls_mode else False
-                elif self.settings.hls_mode and not (self.settings.segment_dirpath / f"{dev}_{ino}").exists():
+                elif (
+                    self.settings.hls_mode
+                    and not (self.settings.segment_dirpath / f"{dev}_{ino}").exists()
+                ):
                     hls_flag = True
                     task_insert_flag = True
             elif path.suffix.lower() in self.settings.image_suffix:
@@ -244,7 +278,10 @@ class SyncLibrary:
                     db_info.marked = False
                     width_height_flag = True
                     thumb_flag = True if self.settings.thumb_mode else False
-                elif self.settings.thumb_mode and not (self.settings.thumb_dirpath / f"{dev}_{ino}.jpg").exists():
+                elif (
+                    self.settings.thumb_mode
+                    and not (self.settings.thumb_dirpath / f"{dev}_{ino}.jpg").exists()
+                ):
                     thumb_flag = True
                     task_insert_flag = True
             else:

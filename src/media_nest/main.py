@@ -3,6 +3,7 @@ from fastapi import FastAPI, Response
 from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
+from concurrent.futures import ThreadPoolExecutor
 
 from media_nest.core.constant import STATIC_PATH, DB_PATH
 from media_nest.core.settings import load_settings
@@ -22,11 +23,14 @@ async def lifespan(app: FastAPI):
 
     repository = Repository(database)
     settings = load_settings()
-    app.state.service = Service(repository, settings)
+    executor = ThreadPoolExecutor(max_workers=1)
+    app.state.service = Service(repository, settings, executor)
 
-    yield
-
-    database.close()
+    try:
+        yield
+    finally:
+        executor.shutdown(wait=True)
+        database.close()
 
 
 app = FastAPI(lifespan=lifespan)
