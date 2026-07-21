@@ -3,8 +3,16 @@ requires = ["setuptools>=61.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "media_nest"
+name = "medianest"
 version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.139.2",
+    "pillow>=12.3.0",
+    "uvicorn>=0.51.0",
+]
 
 [project.scripts]
 media_nest = "media_nest.main:main"
@@ -15,3 +23,12 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["media_nest*"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
