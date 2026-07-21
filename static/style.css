@@ -452,7 +452,8 @@ video[controls] {
     display: none !important;
 }
 
-.task-panel {
+/* 右下角进度条 */
+#task-panel {
     position: fixed;
     right: 20px;
     bottom: 20px;
@@ -474,12 +475,17 @@ video[controls] {
     z-index: 9999;
 }
 
-.task-title {
+#task-title {
     font-weight: bold;
     margin-bottom: 12px;
 }
 
-.progress-bar {
+#task-text {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+#task-progress-bar {
     width: 100%;
     height: 8px;
 
@@ -489,16 +495,11 @@ video[controls] {
     overflow: hidden;
 }
 
-.progress-fill {
+#task-bar {
     height: 100%;
     width: 0%;
 
     background: #409eff;
 
     transition: width .2s;
-}
-
-.task-text {
-    margin: 8px 0;
-    font-size: 14px;
 }

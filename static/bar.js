@@ -14,6 +14,12 @@ const Toast = {
 let socket = null;
 let panel = null;
 async function sync() {
+    const button = document.getElementById("sync-btn");
+    if (button.disabled) {
+        return;
+    }
+    button.disabled = true;
+
     try {
         const res = await fetch("/admin/sync", {
             method: "POST"
@@ -26,6 +32,7 @@ async function sync() {
         createTaskPanel();
         connectProgress();
     } catch (err) {
+        button.disabled = false;
         console.error("请求失败:", err);
         Toast.error("网络错误，无法连接到服务器");
     }
@@ -34,19 +41,21 @@ function createTaskPanel() {
     if (panel) return;
 
     panel = document.createElement("div");
-    panel.className = "task-panel";
+    panel.id = "task-panel";
     panel.innerHTML = `
-        <div id="task-title" class="task-title">
-            🔄 Syncing
-        </div>
-        <div id="task-text" class="task-text">
-        </div>
-        <div class="progress-bar">
-            <div id="task-bar" class="progress-fill"></div>
+        <div id="task-title">🔄 Syncing</div>
+        <div id="task-text"></div>
+        <div id="task-progress-bar">
+            <div id="task-bar"></div>
         </div>
     `;
 
     document.body.appendChild(panel);
+
+    taskTitle = panel.querySelector("#task-title");
+    taskText = panel.querySelector("#task-text");
+    taskProgressBar = panel.querySelector("#task-progress-bar");
+    taskBar = panel.querySelector("#task-bar");
 }
 function connectProgress() {
     socket = new WebSocket(
@@ -94,6 +103,7 @@ function updateProgress(progress) {
 
         if (progress.status === "finished") {
             finishTask("✅ 同步完成");
+            document.getElementById("sync-btn").disabled = false;
             return;
         }
 
@@ -104,13 +114,16 @@ function updateProgress(progress) {
         percent = total === 0 ? 0 : (completed / total) * 100;
     }
 
-    document.getElementById("task-title").textContent = title;
-    document.getElementById("task-text").innerHTML = text;
-    document.getElementById("task-bar").style.width = percent + "%";
+    taskTitle.textContent = title;
+    taskText.innerHTML = text;
+    taskBar.style.width = percent + "%";
 }
 function finishTask(text, success = true) {
-    if (success) { panel.innerHTML = `<div class="task-title">${text}</div>`; }
-    else { panel.querySelector(".task-title").textContent = text; }
+    taskTitle.textContent = text;
+    if (success) {
+        taskText.remove();
+        taskProgressBar.remove();
+    }
 
     setTimeout(() => {
         panel.remove();
@@ -198,7 +211,7 @@ function toggleViewMode() {
     }
 }
 function updateViewModeButtonIcon(mode) {
-    const btn = document.querySelector('#rightTopBar button:last-child'); // 假设按钮位置固定
+    const btn = document.getElementById("view-mode-btn");
     if (!btn) return;
     if (mode === 'list') {
         btn.innerHTML = '📋';

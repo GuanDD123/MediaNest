@@ -15,7 +15,7 @@
 <body>
     <div id="topBar" style="display: none;">
         <div id="leftTopBar">
-            <button onclick="sync()" title="同步">🔄</button>
+            <button id="sync-btn" onclick="sync()" title="同步">🔄</button>
             <button onclick="addRoot()" title="新增">➕</button>
             <button onclick="deleteRoot()" title="删除">➖</button>
         </div>
@@ -23,7 +23,7 @@
             <button onclick="continueLastPlay()" title="继续上次播放">▶️</button>
             <button onclick="filterMarked()" title="筛选标记">⭐</button>
             <span></span>
-            <button onclick="toggleViewMode()" title="切换为网格视图">📋</button>
+            <button id="view-mode-btn" onclick="toggleViewMode()" title="切换为网格视图">📋</button>
         </div>
     </div>
 
