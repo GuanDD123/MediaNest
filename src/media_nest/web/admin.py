@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Request, Body, WebSocket
 import asyncio
 
+from media_nest.logs import logger
+
 router = APIRouter(prefix="/admin")
 
 
@@ -42,8 +44,8 @@ async def sync_progress(ws: WebSocket):
                 break
 
             await asyncio.sleep(0.2)
-    except Exception as e:
-        print(e)
+    except Exception:
+        logger.exception("Error occurred while fetching sync progress")
     finally:
         await ws.close()
 

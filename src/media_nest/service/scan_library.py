@@ -7,6 +7,7 @@ from typing import Literal
 from media_nest.core.settings import Settings
 from media_nest.models import NodeInfo, TaskInfo
 from media_nest.repository import Repository
+from media_nest.logs import logger
 
 
 @dataclass(slots=True)
@@ -40,6 +41,8 @@ class ScanLibrary:
         )
 
     def run(self) -> None:
+        logger.info("Starting scan process")
+
         self.progress.status = "running"
         self.progress.root_folders_num = 0
         self.progress.current_root_folder = None
@@ -93,6 +96,10 @@ class ScanLibrary:
 
         self._sync_to_db(scan_result)
         self.progress.status = "finished"
+
+        logger.info(
+            f"Scan completed successfully: {self.progress.completed_scan_num} files scanned"
+        )
 
     def _walk_files(
         self, root_path: Path, folder_size_dict: dict[tuple[int, int], int]

@@ -3,19 +3,18 @@ from pathlib import Path
 from datetime import datetime as Datetime
 import json
 from concurrent.futures import ThreadPoolExecutor, Future
-import logging
 
 from media_nest.models import RootInfo, NodeInfo
 from media_nest.repository import Repository
 from media_nest.core.settings import Settings
 from media_nest.core.constant import LAST_PLAYLIST, LAST_PROGRESS
+from media_nest.logs import logger
 from .scan_library import ScanLibrary
 from .deal_task import DealTask
 from .build_m3u import BuildM3u
 
 
 __all__ = ["Service"]
-logger = logging.getLogger(__name__)
 
 
 class Admin:
@@ -26,6 +25,7 @@ class Admin:
     deal_task: DealTask
 
     def add_root(self, path_str: str) -> None:
+        logger.info(f"Add root: {path_str}")
         self.repository.root_insert(
             RootInfo(
                 id=None, path=Path(path_str), last_sync_time=Datetime.now(), size=0
@@ -33,21 +33,26 @@ class Admin:
         )
 
     def delete_root(self, path_str: str) -> None:
+        logger.info(f"Delete root: {path_str}")
         for root_info in self.repository.root_select_all():
             if str(root_info.path) == path_str:
                 self.repository.root_delete_by_id(root_info.id)
                 return
 
     def clear_root(self) -> None:
+        logger.info("Clear all roots")
         self.repository.root_delete_all()
 
     def sync(self) -> bool:
+        logger.info("Post sync request")
         if self.future and not self.future.done():
             return False
         self.future = self.executor.submit(self._sync)
         return True
 
     def _sync(self):
+        logger.info("Starting sync process")
+
         try:
             self.scan_library.run()
         except Exception:
@@ -60,6 +65,9 @@ class Admin:
         except Exception:
             self.deal_task.progress.status = "failed"
             logger.exception("Deal Task failed")
+            return
+
+        logger.info("Sync completed successfully")
 
     def get_sync_progress(self):
         if self.scan_library.progress.status != "finished":
@@ -68,7 +76,9 @@ class Admin:
                 "status": self.scan_library.progress.status,
                 "root_folders_num": self.scan_library.progress.root_folders_num,
                 "completed_root_folders_num": self.scan_library.progress.completed_root_folders_num,
-                "current_root_folder": str(self.scan_library.progress.current_root_folder),
+                "current_root_folder": str(
+                    self.scan_library.progress.current_root_folder
+                ),
                 "completed_scan_num": self.scan_library.progress.completed_scan_num,
             }
         else:
@@ -80,6 +90,8 @@ class Admin:
             }
 
     def clear_cache(self) -> None:
+        logger.info("Clear cache")
+
         self.repository.node_delete_all()
         self.repository.task_delete_all()
         self.repository.segment_delete_all()
@@ -94,10 +106,10 @@ class Admin:
     def delete_file(
         self, id: int, path_str: str, additional_path_list: list[str]
     ) -> None:
-        print(f"Deleting file: {path_str}")
+        logger.info(f"Delete file: {path_str}")
         Path(path_str).unlink(missing_ok=True)
         for additional_path in additional_path_list:
-            print(f"Deleting additional file: {additional_path}")
+            logger.info(f"Delete additional file: {additional_path}")
             Path(additional_path).unlink(missing_ok=True)
         self.repository.node_delete_by_id(id)
 

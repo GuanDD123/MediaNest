@@ -13,10 +13,12 @@ from media_nest.service import Service
 from media_nest.web.media import router as media_router
 from media_nest.web.admin import router as admin_router
 from media_nest.web.playlist import router as playlist_router
+from media_nest.logs import logger
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logger.info("========== MediaNest Started ==========")
     database = DataBaseManager(DB_PATH)
     database.connect()
     database.init()
@@ -31,6 +33,7 @@ async def lifespan(app: FastAPI):
     finally:
         executor.shutdown(wait=True)
         database.close()
+        logger.info("========== MediaNest Stopped ==========")
 
 
 app = FastAPI(lifespan=lifespan)

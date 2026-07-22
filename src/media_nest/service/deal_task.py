@@ -11,6 +11,7 @@ from typing import Literal
 from media_nest.core.settings import Settings
 from media_nest.models import TaskInfo, SegmentInfo
 from media_nest.repository import Repository
+from media_nest.logs import logger
 
 
 @dataclass(slots=True)
@@ -34,6 +35,8 @@ class DealTask:
         self.progress = Progress(status="idle", task_num=0, completed_task_num=0)
 
     def run(self) -> None:
+        logger.info("Starting task processing")
+
         self.progress.status = "running"
         self.progress.task_num = 0
         self.progress.completed_task_num = 0
@@ -63,6 +66,11 @@ class DealTask:
 
         self.repository.task_delete_all()
         self.progress.status = "finished"
+
+        logger.info(
+            "Task processing completed successfully: "
+            f"{self.progress.completed_task_num} tasks processed"
+        )
 
     def _deal_image_tasks(self, image_tasks: list[TaskInfo], task_result: TaskResult):
         image_num = 0
@@ -99,11 +107,11 @@ class DealTask:
                     )
             if task.width_height_flag:
                 return ((task.dev, task.ino), width, height)
-        except Exception as e:
+        except Exception:
             if (file_size := task.path.stat().st_size) < 1024:
-                print(f"[INFO] File is too small: {task.path.name} {file_size}B")
+                logger.warning(f"File is too small: {task.path.name} {file_size}B")
             else:
-                print(f"[WARN] Failed to generate thumbnail for {task.path}: {e}")
+                logger.exception(f"Failed to generate thumbnail for {task.path}")
 
     def _deal_video_tasks(self, video_tasks: list[TaskInfo], task_result: TaskResult):
         video_ids = self.repository.node_select_id_join_task_dev_ino_by_hlsflag()
@@ -165,8 +173,8 @@ class DealTask:
                 segment_insert_list = self._parse_m3u8(
                     video_ids.get(hls_dir_name), hls_dir / "index.m3u8"
                 )
-        except Exception as e:
-            print(f"[WARN] Fail: {task.path}: {e}")
+        except Exception:
+            logger.exception(f"Failed to process video: {task.path}")
         finally:
             return node_video_infos, segment_insert_list
 
