@@ -2,7 +2,7 @@
 
 <div align="center">
 
-📺 One Media Playback and Management System | 一个媒体播放和管理系统
+Media Playback & Library Management System | 媒体播放与库管理系统
 
 [English](#english) | [中文](#中文)
 
@@ -10,805 +10,184 @@
 
 ---
 
-## 中文
-
-# MediaNest
-
-### 📚 项目介绍
-
-MediaNest 是一个开源媒体管理和播放系统，基于 FastAPI 和现代网络技术构建。它提供了一个网络界面，用于浏览、管理和播放多媒体文件（图像、视频等），支持播放列表管理、进度跟踪、M3U 格式导出等功能。
-
-### ✨ 主要功能
-
-- **媒体浏览**：支持按文件夹结构浏览图像和视频，实时显示文件信息
-- **媒体播放**：集成播放器支持视频和图像流媒体
-- **播放列表管理**：创建、保存和管理自定义播放列表，支持导入/导出
-- **播放进度跟踪**：自动保存播放位置和播放列表，支持继续播放功能
-- **M3U 播放列表支持**：生成标准 M3U 格式播放列表，支持随机播放
-- **媒体库管理**：
-  - 添加/删除媒体根目录
-  - 同步和索引媒体文件
-  - 智能缓存管理
-  - 文件标记和删除
-- **缩略图生成**：自动为图像生成缩略图，支持自定义尺寸
-- **多线程处理**：支持图像和视频文件的并发处理
-
-### 🚀 快速开始
-
-#### 系统需求
-
-- **操作系统**：Linux、macOS
-- **Python 版本**：3.8 或更高
-- **内存**：最少 512MB（建议 2GB 或更多）
-- **存储**：取决于媒体库大小
-
-#### 详细安装步骤
-
-**1. 克隆仓库**
-
-```bash
-git clone <repository-url>
-cd MediaNest
-```
-
-**2. 创建虚拟环境（可选但推荐）**
-
-```bash
-# Linux/macOS
-python3 -m venv venv
-source venv/bin/activate
-```
-
-**3. 安装依赖**
-
-```bash
-pip install -r requirements.txt
-```
-
-必需的包包括：
-- `fastapi>=0.136.0` - 现代网络框架
-- `uvicorn>=0.49.0` - ASGI 服务器
-- `Pillow>=12.0.0` - 图像处理库
-- `pytest>=9.0.0` - 测试框架
-
-**4. 配置应用程序**
-
-编辑 `src/media_nest/core/settings.py` 文件配置参数：
-
-```python
-# 缩略图设置
-thumb_mode = True                    # 启用缩略图
-thumb_size = (256, 256)             # 缩略图尺寸
-thumb_dirpath = Path("/Media/thumbnails")  # 缩略图保存路径
-
-# HLS 设置
-hls_mode: False                        # TS, fMP4, False
-segment_dirpath: Path("~/Segments").expanduser()    # HLS 切片保存路径
-
-# 并发设置
-image_workers = 16                   # 图像处理线程数
-video_workers = 4                    # 视频处理线程数
-
-# M3U 播放列表配置
-base_url = "http://192.168.0.110:8000"  # 服务器地址
-m3u_item_num_limit = 3000          # M3U 播放列表项目限制
-
-# 支持的文件格式
-image_suffix = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-video_suffix = {".mp4", ".avi", ".mov", ".mkv"}
-```
-
-**5. 启动应用程序**
-
-```bash
-python run.py
-```
-
-应用程序将在 `http://localhost:8000` 启动
-
-### 📁 项目结构
-
-```
-MediaNest/
-├── src/
-│   └── media_nest/
-│       ├── core/                    # 核心模块
-│       │   ├── constant.py          # 配置常数
-│       │   ├── settings.py          # 自定义配置
-│       │   ├── db_manager.py        # 数据库管理器
-│       │   └── __init__.py
-│       ├── models/                  # 数据模型
-│       │   ├── __init__.py
-│       │   ├── db_table_info.py         # db 表对应的 models
-│       │   └─── video_segment_info.py # 视频段信息
-│       ├── repository/              # 数据访问层（DAO）
-│       │   ├── __init__.py
-│       │   ├── repository.py        # 数据库查询接口
-│       │   └── tool.py              # 数据库工具函数
-│       ├── service/                 # 业务逻辑层
-│       │   ├── __init__.py
-│       │   ├── service.py           # 主服务类
-│       │   ├── scan_library.py      # 媒体库同步
-│       │   ├── deal_task.py         # 任务处理
-│       │   └── build_m3u.py         # M3U 播放列表生成
-│       ├── web/                     # API 路由
-│       │   ├── __init__.py
-│       │   ├── media.py             # 媒体相关路由
-│       │   ├── admin.py             # 管理操作路由
-│       │   └── playlist.py           # 播放列表路由
-│       └── main.py                  # FastAPI 应用入口
-├── static/                          # 前端静态资源
-├── pyproject.toml                   # 项目配置
-├── requirements.txt                 # Python 依赖
-├── media_info.db                    # SQLite 数据库（首次运行时创建）
-├── last_playlist.json               # 最后播放列表（自动生成）
-├── progress.txt                     # 播放进度记录（自动生成）
-└── README.md                        # 本文件
-```
-
-### 🔌 详细 API 文档
-
-#### 媒体管理 (`/media`)
-
-**1. 获取所有媒体根目录**
-```
-GET /media/root
-```
-
-**2. 获取文件夹内容**
-```
-GET /media/folder/{path}
-```
-
-**3. 获取图像**
-```
-GET /media/image/{path}
-```
-
-**4. 获取视频**
-```
-GET /media/video/{path}
-```
-
-**5. 获取缩略图**
-```
-GET /media/thumb/{path}
-```
-
-**6. 获取标记文件**
-```
-GET /media/filter_marked
-```
-
-**7. 保存播放列表**
-```
-POST /media/playlist
-Content-Type: application/json
-
-{
-  "playlist": [[list[dict], list[dict]]]
-}
-```
-
-**8. 保存播放进度**
-```
-POST /media/progress
-Content-Type: application/json
-
-{
-  "index": 5
-}
-```
-
-**9. 继续最后播放**
-```
-GET /media/continue_last_play
-```
-
-#### 管理员 (`/admin`)
-
-**1. 添加媒体根目录**
-```
-POST /admin/add_root
-Content-Type: application/json
-
-{
-  "path": "/path/to/media"
-}
-```
-
-**2. 删除媒体根目录**
-```
-POST /admin/delete_root
-Content-Type: application/json
-
-{
-  "path": "/path/to/media"
-}
-```
-
-**3. 清除所有根目录**
-```
-POST /admin/clear_root
-```
-
-**4. 同步媒体库**
-```
-POST /admin/sync
-```
-
-**5. 清除缓存**
-```
-POST /admin/clear_cache
-```
-
-**6. 标记文件**
-```
-POST /admin/mark
-Content-Type: application/json
-
-{
-  "id": 1,
-  "marked": true
-}
-```
-
-**7. 删除文件**
-```
-POST /admin/delete
-Content-Type: application/json
-
-{
-  "id": 1,
-  "path": "/path/to/file"
-}
-```
-
-#### 播放列表 (`/playlist`)
-
-**生成 M3U 播放列表**
-```
-GET /playlist/{path}?shuffle_flag=false
-```
-
-**参数：**
-- `path` (string)：文件夹路径
-- `shuffle_flag` (boolean)：启用随机播放（可选，默认 false）
-
-### 📊 数据库结构
-
-**root_info 表** - 媒体根目录
-```
-id                  INTEGER PRIMARY KEY
-path                TEXT UNIQUE NOT NULL
-last_sync_time      TIMESTAMP
-size                INTEGER
-```
-
-**node_info 表** - 文件和文件夹节点
-```
-id                  INTEGER PRIMARY KEY
-dev                 INTEGER              # 设备号
-ino                 INTEGER              # inode 号
-root_id             INTEGER FOREIGN KEY
-parent_path         TEXT NOT NULL
-name                TEXT NOT NULL
-type_               TEXT NOT NULL        # 'file', 'folder', 'video', 'image'
-size                INTEGER
-mtime               INTEGER              # 修改时间
-duration_ms         INTEGER              # 视频时长（毫秒）
-width               INTEGER              # 图像/视频宽度
-height              INTEGER              # 图像/视频高度
-marked              BOOLEAN              # 是否标记
-```
-
-### 💡 使用指南
-
-#### 基本工作流
-
-1. **添加媒体库**
-   ```bash
-   curl -X POST http://localhost:8000/admin/add_root \
-     -H "Content-Type: application/json" \
-     -d '{"path": "/home/user/Videos"}'
-   ```
-
-2. **同步媒体库**
-   ```bash
-   curl -X POST http://localhost:8000/admin/sync
-   ```
-
-3. **浏览媒体**
-   - 访问网页界面：`http://localhost:8000`
-   - 浏览文件夹结构
-   - 点击播放媒体文件
-
-4. **管理播放列表**
-   - 在播放器中创建自定义播放列表
-   - 播放列表自动保存
-   - 支持导出为 M3U 格式
-
-### 🐛 常见问题
-
-**问：添加媒体目录后看不到文件？**
-答：运行同步操作。调用 `/admin/sync` 端点扫描和索引文件。
-
-**问：缩略图生成失败？**
-答：检查 `thumb_dirpath` 目录是否存在且有写入权限。
-
-**问：支持哪些文件格式？**
-答：
-- 图像：JPG, JPEG, PNG, GIF, WebP
-- 视频：MP4, AVI, MOV, MKV
-
-**问：如何清除所有数据并重新开始？**
-答：调用 `/admin/clear_cache` 清除缓存，然后重新同步。
-
-### 🔧 故障排除
-
-**数据库错误**
-如果遇到数据库锁定错误，删除 media_info.db 文件并重启应用程序以重建数据库。
-
-**端口已在使用**
-```bash
-uvicorn media_nest.main:app --port 8080
-```
-
-**内存不足**
-```
-减少并发处理：
-image_workers = 8    # 原为 16
-video_workers = 2    # 原为 4
-```
-
-### 🛠️ 开发指南
-
-#### 项目架构
-
-MediaNest 使用分层架构：
-
-- **网络层** (`web/`) - API 路由和请求处理
-- **服务层** (`service/`) - 业务逻辑实现
-- **存储库层** (`repository/`) - 数据持久化
-- **核心层** (`core/`) - 核心工具和配置
-
-#### 添加新媒体格式
-
-1. 在 `constant.py` 中添加文件后缀
-2. 在 `models/` 中创建相应的数据模型
-3. 在 `service/` 中添加处理逻辑
-
-#### 扩展 API
-
-在 `web/` 目录中创建新的路由文件，并在 `main.py` 中注册路由。
-
-### 🛠️ 技术栈
-
-- **后端框架**：FastAPI 0.136.0+
-- **网络服务器**：Uvicorn 0.49.0+
-- **数据库**：SQLite（内置）
-- **图像处理**：Pillow 12.0.0+
-- **测试框架**：Pytest 9.0.0+
-- **前端**：HTML5 / CSS3 / JavaScript
-
-### 📝 许可证
-
-本项目采用 MIT 许可证。详见 LICENSE 文件。
-
-### 🤝 贡献
-
-欢迎提交 Issues 和 Pull Requests！
-
-**贡献流程：**
-1. Fork 项目
-2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启 Pull Request
-
-### 📧 联系方式
-
-如有问题或建议，请通过 GitHub Issues 与我们联系
-
----
-
 ## English
 
 # MediaNest
 
-### 📚 Project Description
+MediaNest is a FastAPI-based local media browser and playback web app. It focuses on browsing local media folders, serving images and videos in the browser, preserving playlist state, tracking the last playback position, and synchronizing media libraries with a small SQLite-backed backend.
 
-MediaNest is an open-source media management and playback system built with FastAPI and modern web technologies. It provides a web interface for browsing, managing, and playing multimedia files (images, videos, etc.), with support for playlist management, progress tracking, M3U format export, and more.
+## Features
 
-### ✨ Features
+- Folder and file browsing with media metadata
+- Auto-generate thumbnails for images with customizable sizes
+- Web playback for images and videos
+- Playlist save/restore and continue-last-play support
+- M3U playlist export for external playback clients
+- Background library sync with progress reporting
+- WebSocket progress stream for sync status
+- Console + rotating file logging
 
-- **Media Browsing**: Support for browsing images and videos by folder structure with real-time file information
-- **Media Playback**: Integrated player supporting video and image streaming
-- **Playlist Management**: Create, save, and manage custom playlists with import/export support
-- **Playback Progress Tracking**: Automatically save playback position and playlist with resume capability
-- **M3U Playlist Support**: Generate standard M3U format playlists with shuffle option
-- **Media Library Management**:
-  - Add/remove media root directories
-  - Sync and index media files
-  - Intelligent cache management
-  - File marking and deletion
-- **Thumbnail Generation**: Auto-generate thumbnails for images with customizable sizes
-- **Multi-threaded Processing**: Support concurrent processing of images and video files
+## Core workflow
 
-### 🚀 Quick Start
-
-#### System Requirements
-
-- **Operating System**: Linux, macOS
-- **Python Version**: 3.8 or higher
-- **Memory**: Minimum 512MB (recommended 2GB or more)
-- **Storage**: Depends on media library size
-
-#### Detailed Installation Steps
-
-**1. Clone the Repository**
-
-```bash
-git clone <repository-url>
-cd MediaNest
-```
-
-**2. Create Virtual Environment (Optional but Recommended)**
-
-```bash
-# Linux/macOS
-python3 -m venv venv
-source venv/bin/activate
-```
-
-**3. Install Dependencies**
-
-```bash
-pip install -r requirements.txt
-```
-
-Required packages include:
-- `fastapi>=0.136.0` - Modern web framework
-- `uvicorn>=0.49.0` - ASGI server
-- `Pillow>=12.0.0` - Image processing library
-- `pytest>=9.0.0` - Testing framework
-
-**4. Configure Application**
-
-Edit the `src/media_nest/core/settings.py` file to configure parameters:
-
-```python
-# Thumbnail settings
-thumb_mode = True                    # Enable thumbnails
-thumb_size = (256, 256)             # Thumbnail size
-thumb_dirpath = Path("/Media/thumbnails")  # Thumbnail save path
-
-# HLS settings
-hls_mode: False                        # TS, fMP4, False
-segment_dirpath: Path("~/Segments").expanduser()    # HLS segments save path
-
-# Concurrency settings
-image_workers = 16                   # Image processing threads
-video_workers = 4                    # Video processing threads
-
-# M3U playlist configuration
-base_url = "http://192.168.0.110:8000"  # Server address
-m3u_item_num_limit = 3000          # M3U playlist item limit
-
-# Supported file formats
-image_suffix = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
-video_suffix = {".mp4", ".avi", ".mov", ".mkv"}
-```
-
-**5. Start Application**
+1. Start the app with Python:
 
 ```bash
 python run.py
 ```
 
-Application will start at `http://localhost:8000`
+2. Open the web UI at:
 
-### 📁 Project Structure
-
+```text
+http://localhost:8000
 ```
+
+3. Add one or more media roots through the admin API.
+
+4. Trigger a library sync to scan files, build the database index, and process media tasks.
+
+5. Use the media UI to browse, play, mark, and manage files.
+
+## Project layout
+
+```text
 MediaNest/
-├── src/
-│   └── media_nest/
-│       ├── core/                    # Core modules
-│       │   ├── constant.py          # Configuration constants
-│       │   ├── settings.py          # settings
-│       │   ├── db_manager.py        # Database manager
-│       │   └── __init__.py
-│       ├── models/                  # Data models
-│       │   ├── __init__.py
-│       │   ├── db_table_info.py         # Database table models
-│       │   └── video_segment_info.py # Video segment info
-│       ├── repository/              # Data Access Layer (DAO)
-│       │   ├── __init__.py
-│       │   ├── repository.py        # Database query interface
-│       │   └── tool.py              # Database utility functions
-│       ├── service/                 # Business Logic Layer
-│       │   ├── __init__.py
-│       │   ├── service.py           # Main service class
-│       │   ├── scan_library.py      # Media library sync
-│       │   ├── deal_task.py         # Task processing
-│       │   └── build_m3u.py         # M3U playlist generation
-│       ├── web/                     # API routes
-│       │   ├── __init__.py
-│       │   ├── media.py             # Media-related routes
-│       │   ├── admin.py             # Admin operation routes
-│       │   └── playlist.py           # Playlist routes
-│       └── main.py                  # FastAPI application entry point
-├── static/                          # Frontend static resources
-├── pyproject.toml                   # Project configuration
-├── requirements.txt                 # Python dependencies
-├── media_info.db                    # SQLite database (created on first run)
-├── last_playlist.json               # Last played playlist (auto-generated)
-├── progress.txt                     # Playback progress record (auto-generated)
-└── README.md                        # This file
+├── src/media_nest/
+│   ├── core/          # settings, constants, DB connection
+│   ├── logs/          # logs
+│   ├── models/        # data models
+│   ├── repository/    # database access layer
+│   ├── service/       # business logic
+│   ├── web/           # API + WebSocket routes
+│   └── main.py        # FastAPI application entry point
+├── static/            # frontend assets
+├── run.py             # launch script
+└── README.md
 ```
 
-### 🔌 Detailed API Documentation
+## Main interface and endpoints
 
-#### Media Management (`/media`)
+- `/` and `/index` — frontend entry page
+- `/media/root` — list configured media roots
+- `/media/folder/{path}` — list folder contents
+- `/media/image/{path}` — serve an image
+- `/media/video/{path}` — serve a video stream
+- `/media/thumb/{path}` — serve a thumbnail
+- `/media/filter_marked` — list marked media
+- `/media/playlist` — save playlist state
+- `/media/progress` — save current playback index
+- `/media/continue_last_play` — restore the previous playback state
+- `/admin/add_root` — add a root directory
+- `/admin/delete_root` — remove a root directory
+- `/admin/clear_root` — clear all roots
+- `/admin/sync` — start a sync job
+- `/admin/clear_cache` — clear cached metadata and generated assets
+- `/admin/mark` — mark or unmark a file
+- `/admin/delete` — delete a file and related artifacts
 
-**1. Get All Media Root Directories**
-```
-GET /media/root
-```
+## Tech Stack
 
-**2. Get Folder Contents**
-```
-GET /media/folder/{path}
-```
-
-**3. Get Image**
-```
-GET /media/image/{path}
-```
-
-**4. Get Video**
-```
-GET /media/video/{path}
-```
-
-**5. Get Thumbnail**
-```
-GET /media/thumb/{path}
-```
-
-**6. Get Marked Files**
-```
-GET /media/filter_marked
-```
-
-**7. Save Playlist**
-```
-POST /media/playlist
-Content-Type: application/json
-
-{
-  "playlist": [[list[dict], list[dict]]]
-}
-```
-
-**8. Save Playback Progress**
-```
-POST /media/progress
-Content-Type: application/json
-
-{
-  "index": 5
-}
-```
-
-**9. Resume Last Playback**
-```
-GET /media/continue_last_play
-```
-
-#### Admin (`/admin`)
-
-**1. Add Media Root Directory**
-```
-POST /admin/add_root
-Content-Type: application/json
-
-{
-  "path": "/path/to/media"
-}
-```
-
-**2. Remove Media Root Directory**
-```
-POST /admin/delete_root
-Content-Type: application/json
-
-{
-  "path": "/path/to/media"
-}
-```
-
-**3. Clear All Root Directories**
-```
-POST /admin/clear_root
-```
-
-**4. Sync Media Library**
-```
-POST /admin/sync
-```
-
-**5. Clear Cache**
-```
-POST /admin/clear_cache
-```
-
-**6. Mark File**
-```
-POST /admin/mark
-Content-Type: application/json
-
-{
-  "id": 1,
-  "marked": true
-}
-```
-
-**7. Delete File**
-```
-POST /admin/delete
-Content-Type: application/json
-
-{
-  "id": 1,
-  "path": "/path/to/file"
-}
-```
-
-#### Playlist (`/playlist`)
-
-**Generate M3U Playlist**
-```
-GET /playlist/{path}?shuffle_flag=false
-```
-
-**Parameters:**
-- `path` (string): Folder path
-- `shuffle_flag` (boolean): Enable random shuffle (optional, default false)
-
-### 📊 Database Structure
-
-**root_info Table** - Media root directories
-```
-id                  INTEGER PRIMARY KEY
-path                TEXT UNIQUE NOT NULL
-last_sync_time      TIMESTAMP
-size                INTEGER
-```
-
-**node_info Table** - File and folder nodes
-```
-id                  INTEGER PRIMARY KEY
-dev                 INTEGER              # Device number
-ino                 INTEGER              # inode number
-root_id             INTEGER FOREIGN KEY
-parent_path         TEXT NOT NULL
-name                TEXT NOT NULL
-type_               TEXT NOT NULL        # 'file', 'folder', 'video', 'image'
-size                INTEGER
-mtime               INTEGER              # Modification time
-duration_ms         INTEGER              # Video duration (milliseconds)
-width               INTEGER              # Image/video width
-height              INTEGER              # Image/video height
-marked              BOOLEAN              # Whether marked
-```
-
-### 💡 Usage Guide
-
-#### Basic Workflow
-
-1. **Add Media Library**
-   ```bash
-   curl -X POST http://localhost:8000/admin/add_root \
-     -H "Content-Type: application/json" \
-     -d '{"path": "/home/user/Videos"}'
-   ```
-
-2. **Sync Media Library**
-   ```bash
-   curl -X POST http://localhost:8000/admin/sync
-   ```
-
-3. **Browse Media**
-   - Visit Web interface: `http://localhost:8000`
-   - Browse folder structure
-   - Click to play media files
-
-4. **Manage Playlists**
-   - Create custom playlists in the player
-   - Playlists are auto-saved
-   - Support export to M3U format
-
-### 🐛 FAQ
-
-**Q: Can't see files after adding media directory?**
-A: Run the sync operation. Call the `/admin/sync` endpoint to scan and index files.
-
-**Q: Thumbnail generation fails?**
-A: Check if the `thumb_dirpath` directory exists and has write permissions.
-
-**Q: What file formats are supported?**
-A: 
-- Images: JPG, JPEG, PNG, GIF, WebP
-- Videos: MP4, AVI, MOV, MKV
-
-**Q: How to clear all data and start fresh?**
-A: Call `/admin/clear_cache` to clear cache, then resync.
-
-### 🔧 Troubleshooting
-
-**Database Error**
-If you encounter database lock errors, delete the media_info.db file and restart the application to rebuild the database.
-
-**Port Already in Use**
-```bash
-# Start on a different port
-uvicorn media_nest.main:app --port 8080
-```
-
-**Out of Memory**
-```
-Reduce concurrent processing:
-image_workers = 8    # Originally 16
-video_workers = 2    # Originally 4
-```
-
-### 🛠️ Development Guide
-
-#### Project Architecture
-
-MediaNest uses a layered architecture:
-
-- **Web Layer** (`web/`) - API routes and request handling
-- **Service Layer** (`service/`) - Business logic implementation
-- **Repository Layer** (`repository/`) - Data persistence
-- **Core Layer** (`core/`) - Core utilities and configuration
-
-#### Adding New Media Formats
-
-1. Add file suffix in `constant.py`
-2. Create corresponding data model in `models/`
-3. Add processing logic in `service/`
-
-#### Extending API
-
-Create new route files in `web/` directory and register routes in `main.py`.
-
-### 🛠️ Tech Stack
-
-- **Backend Framework**: FastAPI 0.136.0+
-- **Web Server**: Uvicorn 0.49.0+
+- **Backend Framework**: FastAPI
+- **Web Server**: Uvicorn
 - **Database**: SQLite (built-in)
-- **Image Processing**: Pillow 12.0.0+
-- **Testing Framework**: Pytest 9.0.0+
-- **Frontend**: HTML5 / CSS3 / JavaScript
+- **Image Processing**: Pillow
+- **Video Processing**: ffmpeg (ffprobe)
+- **Testing Framework**: Pytest
+- **Frontend**: HTML / CSS / JavaScript
 
-### 📝 License
+## Notes
 
-This project is licensed under the MIT License. See LICENSE file for details.
+- The app stores local data in SQLite and creates the database on first run.
+- Frontend assets are served from the `static/` folder.
+- Core configuration is defined in `src/media_nest/core/settings.py`.
 
-### 🤝 Contributing
+---
 
-Issues and Pull Requests are welcome!
+## 中文
 
-**Contributing Process:**
-1. Fork the project
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+# MediaNest
 
-### 📧 Contact
+MediaNest 是一个基于 FastAPI 的本地媒体浏览与播放 Web 应用。它的核心能力包括：浏览本地媒体目录、在浏览器中直接查看图片与视频、保存播放列表状态、记录最后一次播放位置，并通过 SQLite 后端对媒体库进行同步与索引。
 
-For questions or suggestions, please contact us via GitHub Issues
+## 主要功能
+
+- 文件夹与文件浏览，包含媒体元数据展示
+- 自动为图像生成缩略图，支持自定义尺寸
+- 图片与视频的 Web 播放
+- 播放列表保存/恢复与继续上次播放支持
+- 生成 M3U 播放列表，供外部播放器使用
+- 后台媒体库同步，并提供同步进度反馈
+- 提供 WebSocket 同步进度流
+- 控制台日志 + 轮转文件日志
+
+## 核心流程
+
+1. 使用 Python 启动应用：
+
+```bash
+python run.py
+```
+
+2. 在浏览器打开：
+
+```text
+http://localhost:8000
+```
+
+3. 通过管理接口添加一个或多个媒体根目录。
+
+4. 执行同步任务，对文件进行扫描、建立数据库索引，并处理媒体任务。
+
+5. 然后在前端页面中浏览、播放、标记和管理媒体。
+
+## 项目结构
+
+```text
+MediaNest/
+├── src/media_nest/
+│   ├── core/          # 设置、常量、数据库连接
+│   ├── logs/          # 日志
+│   ├── models/        # 数据模型
+│   ├── repository/    # 数据库访问层
+│   ├── service/       # 业务逻辑
+│   ├── web/           # API 与 WebSocket 路由
+│   └── main.py        # FastAPI 应用入口
+├── static/            # 前端静态资源
+├── run.py             # 启动脚本
+└── README.md
+```
+
+## 主要接口与页面入口
+
+- `/` 与 `/index` — 前端入口页面
+- `/media/root` — 获取已配置的媒体根目录
+- `/media/folder/{path}` — 获取目录内容
+- `/media/image/{path}` — 返回图像内容
+- `/media/video/{path}` — 返回视频流
+- `/media/thumb/{path}` — 返回缩略图
+- `/media/filter_marked` — 获取已标记媒体
+- `/media/playlist` — 保存播放列表状态
+- `/media/progress` — 保存当前播放索引
+- `/media/continue_last_play` — 恢复上一次播放状态
+- `/admin/add_root` — 添加媒体根目录
+- `/admin/delete_root` — 删除媒体根目录
+- `/admin/clear_root` — 清空所有根目录
+- `/admin/sync` — 启动同步任务
+- `/admin/clear_cache` — 清理缓存与生成文件
+- `/admin/mark` — 标记或取消标记文件
+- `/admin/delete` — 删除文件及相关附件
+
+## 技术栈
+
+- **后端框架**：FastAPI
+- **网络服务器**：Uvicorn
+- **数据库**：SQLite（内置）
+- **图像处理**：Pillow
+- **视频处理**：ffmpeg (ffprobe)
+- **测试框架**：Pytest
+- **前端**：HTML / CSS / JavaScript
+
+## 说明
+
+- 应用使用 SQLite，本地数据库会在首次运行时自动创建。
+- 前端资源位于 `static/` 目录。
+- 核心配置文件位于 `src/media_nest/core/settings.py`。
