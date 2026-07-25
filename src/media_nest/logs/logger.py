@@ -1,10 +1,10 @@
-from pathlib import Path
 import logging
 from logging.handlers import RotatingFileHandler
 
+from media_nest.core.constant import LOG_PATH
+
 __all__ = ["logger"]
 
-log_dir = Path(__file__).parent
 logger = logging.getLogger("MediaNest")
 logger.setLevel(logging.INFO)
 
@@ -19,7 +19,7 @@ if not logger.handlers:
     logger.addHandler(console_handler)
 
     file_handler = RotatingFileHandler(
-        filename=log_dir / "app.log",
+        filename=LOG_PATH,
         maxBytes=10 * 1024 * 1024,
         backupCount=3,
         encoding="utf-8",
