@@ -1,18 +1,19 @@
-import shutil
-from pathlib import Path
-from datetime import datetime as Datetime
 import json
-from concurrent.futures import ThreadPoolExecutor, Future
+import shutil
+from concurrent.futures import Future, ThreadPoolExecutor
+from datetime import UTC
+from datetime import datetime as Datetime
+from pathlib import Path
 
-from media_nest.models import RootInfo, NodeInfo
-from media_nest.repository import Repository
-from media_nest.core.settings import Settings
 from media_nest.core.constant import LAST_PLAYLIST, LAST_PROGRESS
+from media_nest.core.settings import Settings
 from media_nest.logs import logger
-from .scan_library import ScanLibrary
-from .deal_task import DealTask
-from .build_m3u import BuildM3u
+from media_nest.models import NodeInfo, RootInfo
+from media_nest.repository import Repository
 
+from .build_m3u import BuildM3u
+from .deal_task import DealTask
+from .scan_library import ScanLibrary
 
 __all__ = ["Service"]
 
@@ -26,10 +27,9 @@ class Admin:
 
     def add_root(self, path_str: str) -> None:
         logger.info(f"Add root: {path_str}")
+        now_time = Datetime.now(UTC)
         self.repository.root_insert(
-            RootInfo(
-                id=None, path=Path(path_str), last_sync_time=Datetime.now(), size=0
-            )
+            RootInfo(id=None, path=Path(path_str), last_sync_time=now_time, size=0)
         )
 
     def delete_root(self, path_str: str) -> None:
@@ -55,14 +55,14 @@ class Admin:
 
         try:
             self.scan_library.run()
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.scan_library.progress.status = "failed"
             logger.exception("Scan Library failed")
             return
 
         try:
             self.deal_task.run()
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.deal_task.progress.status = "failed"
             logger.exception("Deal Task failed")
             return
@@ -190,7 +190,7 @@ class Media:
                     result["duration"] = int(info.duration_ms / 1000)
                 else:
                     result["thumb_path"] = (
-                        f"{str(self.settings.thumb_dirpath)}/{info.dev}_{info.ino}.jpg"
+                        f"{self.settings.thumb_dirpath}/{info.dev}_{info.ino}.jpg"
                     )
             results.append(result)
         return results

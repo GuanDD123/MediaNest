@@ -1,8 +1,10 @@
-from pathlib import Path
+from datetime import UTC
 from datetime import datetime as Datetime
+from pathlib import Path
+
 import pytest
 
-from media_nest.models import NodeInfo, TaskInfo, SegmentInfo
+from media_nest.models import NodeInfo, SegmentInfo, TaskInfo
 from media_nest.repository import Repository
 
 
@@ -21,7 +23,7 @@ class TestInsert:
                 name="media",
                 type_="folder",
                 size=0,
-                mtime=Datetime(2026, 6, 1, 12, 0, 1),
+                mtime=Datetime(2026, 6, 1, 12, 0, 1, tzinfo=UTC),
             ),
             NodeInfo(
                 id=None,
@@ -32,7 +34,7 @@ class TestInsert:
                 name="photos",
                 type_="folder",
                 size=1000,
-                mtime=Datetime(2026, 6, 1, 12, 0, 1),
+                mtime=Datetime(2026, 6, 1, 12, 0, 1, tzinfo=UTC),
             ),
             NodeInfo(
                 id=7,
@@ -43,7 +45,7 @@ class TestInsert:
                 name="a.jpg",
                 type_="image",
                 size=1024,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=None,
                 height=None,
             ),
@@ -56,7 +58,7 @@ class TestInsert:
                 name="b.mp4",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=None,
                 height=None,
                 duration_ms=None,
@@ -128,7 +130,7 @@ class TestInsert:
             name="Updated Media",
             type_="folder",
             size=0,
-            mtime=Datetime(2000, 6, 1, 12, 0, 1),
+            mtime=Datetime(2000, 6, 1, 12, 0, 1, tzinfo=UTC),
         )
         self.repository.node_update_by_id(1, wait_to_update)
         assert self.repository.node_select_by_id(1) == wait_to_update
@@ -144,7 +146,7 @@ class TestInsert:
                 name="media",
                 type_="folder",
                 size=0,
-                mtime=Datetime(2026, 6, 1, 12, 0, 1),
+                mtime=Datetime(2026, 6, 1, 12, 0, 1, tzinfo=UTC),
             ),
             NodeInfo(
                 id=3,
@@ -155,7 +157,7 @@ class TestInsert:
                 name="a.jpg",
                 type_="image",
                 size=1024,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=None,
                 height=None,
             ),
@@ -168,7 +170,7 @@ class TestInsert:
                 name="b.mp4",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=None,
                 height=None,
                 duration_ms=None,

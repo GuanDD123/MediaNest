@@ -1,13 +1,14 @@
 import os
-from pathlib import Path
-from datetime import datetime as Datetime
 from dataclasses import dataclass
+from datetime import UTC
+from datetime import datetime as Datetime
+from pathlib import Path
 from typing import Literal
 
 from media_nest.core.settings import Settings
+from media_nest.logs import logger
 from media_nest.models import NodeInfo, TaskInfo
 from media_nest.repository import Repository
-from media_nest.logs import logger
 
 
 @dataclass(slots=True)
@@ -86,7 +87,7 @@ class ScanLibrary:
 
                 self.progress.completed_scan_num += 1
 
-            root_info.last_sync_time = Datetime.now()
+            root_info.last_sync_time = Datetime.now(UTC)
             root_info.size = scan_result.folder_size_dict.get(
                 (root_info.path.stat().st_dev, root_info.path.stat().st_ino), -1
             )
@@ -158,7 +159,7 @@ class ScanLibrary:
                 name=path.name,
                 type_="folder",
                 size=0,
-                mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
+                mtime=Datetime.fromtimestamp(int(path_stat.st_mtime), tz=UTC),
             )
         elif path.suffix.lower() in self.settings.image_suffix:
             info = NodeInfo(
@@ -170,12 +171,12 @@ class ScanLibrary:
                 name=path.name,
                 type_="image",
                 size=path_stat.st_size,
-                mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
+                mtime=Datetime.fromtimestamp(int(path_stat.st_mtime), tz=UTC),
             )
             task_insert_flag = True
             type_ = "image"
             width_height_flag = True
-            thumb_flag = True if self.settings.thumb_mode else False
+            thumb_flag = bool(self.settings.thumb_mode)
         elif path.suffix.lower() in self.settings.video_suffix:
             info = NodeInfo(
                 id=None,
@@ -186,13 +187,13 @@ class ScanLibrary:
                 name=path.name,
                 type_="video",
                 size=path_stat.st_size,
-                mtime=Datetime.fromtimestamp(int(path_stat.st_mtime)),
+                mtime=Datetime.fromtimestamp(int(path_stat.st_mtime), tz=UTC),
             )
             task_insert_flag = True
             type_ = "video"
             duration_ms_flag = True
             width_height_flag = True
-            hls_flag = True if self.settings.hls_mode else False
+            hls_flag = bool(self.settings.hls_mode)
         else:
             return
         scan_result.node_insert_list.append(info)
@@ -222,7 +223,7 @@ class ScanLibrary:
         dev: int,
         ino: int,
     ):
-        local_modify_time = Datetime.fromtimestamp(int(path_stat.st_mtime))
+        local_modify_time = Datetime.fromtimestamp(int(path_stat.st_mtime), tz=UTC)
 
         node_update_flag = False
         task_insert_flag = False
@@ -267,7 +268,7 @@ class ScanLibrary:
                     db_info.marked = False
                     duration_ms_flag = True
                     width_height_flag = True
-                    hls_flag = True if self.settings.hls_mode else False
+                    hls_flag = bool(self.settings.hls_mode)
                 elif (
                     self.settings.hls_mode
                     and not (self.settings.segment_dirpath / f"{dev}_{ino}").exists()
@@ -284,7 +285,7 @@ class ScanLibrary:
                 if modify_flag:
                     db_info.marked = False
                     width_height_flag = True
-                    thumb_flag = True if self.settings.thumb_mode else False
+                    thumb_flag = bool(self.settings.thumb_mode)
                 elif (
                     self.settings.thumb_mode
                     and not (self.settings.thumb_dirpath / f"{dev}_{ino}.jpg").exists()

@@ -1,17 +1,18 @@
-import subprocess
 import json
-from PIL import Image
-from concurrent.futures import ThreadPoolExecutor
-from pathlib import Path
-from functools import partial
-from dataclasses import dataclass
 import shutil
+import subprocess
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from functools import partial
+from pathlib import Path
 from typing import Literal
 
+from PIL import Image
+
 from media_nest.core.settings import Settings
-from media_nest.models import TaskInfo, SegmentInfo
-from media_nest.repository import Repository
 from media_nest.logs import logger
+from media_nest.models import SegmentInfo, TaskInfo
+from media_nest.repository import Repository
 
 
 @dataclass(slots=True)
@@ -107,7 +108,7 @@ class DealTask:
                     )
             if task.width_height_flag:
                 return ((task.dev, task.ino), width, height)
-        except Exception:
+        except Exception:  # noqa: BLE001
             if (file_size := task.path.stat().st_size) < 1024:
                 logger.warning(f"File is too small: {task.path.name} {file_size}B")
             else:
@@ -173,10 +174,10 @@ class DealTask:
                 segment_insert_list = self._parse_m3u8(
                     video_ids.get(hls_dir_name), hls_dir / "index.m3u8"
                 )
-        except Exception:
+        except Exception:  # noqa: BLE001
             logger.exception(f"Failed to process video: {task.path}")
-        finally:
-            return node_video_infos, segment_insert_list
+
+        return node_video_infos, segment_insert_list
 
     def _build_hls(self, video_path: Path, hls_dir: Path):
         if hls_dir.exists():

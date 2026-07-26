@@ -1,10 +1,10 @@
-from pathlib import Path
-from urllib.parse import quote
 import random
 from collections import defaultdict
+from pathlib import Path
+from urllib.parse import quote
 
 from media_nest.core.settings import Settings
-from media_nest.models import VideoSegmentInfo, NodeInfo
+from media_nest.models import NodeInfo, VideoSegmentInfo
 from media_nest.repository import Repository
 
 
@@ -32,17 +32,15 @@ class BuildM3u:
             random.shuffle(video_infos)
 
         lines = ["#EXTM3U"]
-        video_num = 0
-        for video_info in video_infos:
+        for index, video_info in enumerate(video_infos, start=1):
             lines.append(
                 f"#EXTINF:{int(video_info.duration_ms / 1000)}, v - {video_info.name}"
             )
             lines.append(
                 f"{self.settings.base_url}/media/video{quote(str(video_info.parent_path / video_info.name))}"
             )
-            video_num += 1
 
-            if video_num > self.settings.m3u_item_num_limit:
+            if index > self.settings.m3u_item_num_limit:
                 break
         lines.append("#EXT-X-ENDLIST")
 

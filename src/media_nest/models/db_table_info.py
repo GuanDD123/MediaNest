@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime as Datetime
 from pathlib import Path
 
-__all__ = ("NodeInfo", "RootInfo", "TaskInfo", "SegmentInfo")
+__all__ = ("NodeInfo", "RootInfo", "SegmentInfo", "TaskInfo")
 
 
 @dataclass(slots=True)

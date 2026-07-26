@@ -1,15 +1,16 @@
 from pathlib import Path
 
+from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, SEGMENT_KEYS, TASK_KEYS
 from media_nest.core.db_manager import DataBaseManager
-from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, TASK_KEYS, SEGMENT_KEYS
 from media_nest.models import (
     NodeInfo,
     RootInfo,
-    TaskInfo,
     SegmentInfo,
+    TaskInfo,
     VideoSegmentInfo,
 )
-from .tool import row_to_model, model_to_row
+
+from .tool import model_to_row, row_to_model
 
 __all__ = ["Repository"]
 
@@ -66,7 +67,7 @@ class Select:
     def node_select_in_dev_ino(
         self, dev_ino_list: list[tuple[int, int]]
     ) -> list[NodeInfo]:
-        sql = f"SELECT * FROM node WHERE (dev, ino) IN ({','.join(('(?,?)' for _ in range(len(dev_ino_list))))})"
+        sql = f"SELECT * FROM node WHERE (dev, ino) IN ({','.join('(?,?)' for _ in range(len(dev_ino_list)))})"
         params = [param for dev_ino in dev_ino_list for param in dev_ino]
         cursor = self.database.connection.execute(sql, params)
         return [row_to_model("node", row) for row in cursor.fetchall() if row]
@@ -104,19 +105,8 @@ class Select:
 
 class Insert:
     database: DataBaseManager
-
-    insert_placeholder = {
-        "node": "(" + ",".join((key for key in NODE_KEYS[1:])) + ")",
-        "root": "(" + ",".join((key for key in ROOT_KEYS[1:])) + ")",
-        "task": "(" + ",".join((key for key in TASK_KEYS[1:])) + ")",
-        "segment": "(" + ",".join((key for key in SEGMENT_KEYS)) + ")",
-    }
-    values_placeholder = {
-        "node": "(" + ",".join("?" * (len(NODE_KEYS) - 1)) + ")",
-        "root": "(" + ",".join("?" * (len(ROOT_KEYS) - 1)) + ")",
-        "task": "(" + ",".join("?" * (len(TASK_KEYS) - 1)) + ")",
-        "segment": "(" + ",".join("?" * len(SEGMENT_KEYS)) + ")",
-    }
+    insert_placeholder: dict[str, str]
+    values_placeholder: dict[str, str]
 
     def root_insert(self, info: RootInfo) -> bool:
         return self._insert("root", insert_many=False, info=info)
@@ -141,7 +131,7 @@ class Insert:
         table: str,
         insert_many: bool,
         info: NodeInfo | RootInfo | TaskInfo | SegmentInfo = None,
-        infos: list[NodeInfo | RootInfo | TaskInfo | SegmentInfo] = None,
+        infos: list[NodeInfo | RootInfo | TaskInfo | SegmentInfo] | None = None,
     ):
         sql = f"INSERT INTO {table} {self.insert_placeholder[table]} VALUES {self.values_placeholder[table]}"
         with self.database.connection as connection:
@@ -151,18 +141,12 @@ class Insert:
             else:
                 params = model_to_row(table, info)
                 cursor = connection.execute(sql, params)
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
 
 class Update:
     database: DataBaseManager
-
-    update_placeholder = {
-        "node": ",".join((f"{key}=?" for key in NODE_KEYS[1:])),
-        "root": ",".join((f"{key}=?" for key in ROOT_KEYS[1:])),
-        "task": ",".join((f"{key}=?" for key in TASK_KEYS[1:])),
-        "segment": ",".join((f"{key}=?" for key in SEGMENT_KEYS)),
-    }
+    update_placeholder: dict[str, str]
 
     def root_update_by_id(self, id: int, info: RootInfo) -> bool:
         return self._update_by_id("root", id=id, info=info)
@@ -180,13 +164,13 @@ class Update:
         with self.database.connection as connection:
             params = (*model_to_row(table, info), id)
             cursor = connection.execute(sql, params)
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
     def node_update_marked_by_id(self, id: int, marked: bool) -> bool:
         sql = """UPDATE node SET marked = ? WHERE id = ?"""
         with self.database.connection as connection:
             cursor = connection.execute(sql, (int(marked), id))
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
     def node_update_many_by_id(self, update_list: list[tuple[int, NodeInfo]]) -> bool:
         sql = f"UPDATE node SET {self.update_placeholder['node']} WHERE id = ?"
@@ -195,7 +179,7 @@ class Update:
                 (*model_to_row("node", info), id) for id, info in update_list
             )
             cursor = connection.executemany(sql, params_generator)
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
     def node_update_many_width_height_by_dev_ino(
         self, update_list: list[tuple[tuple[int, int], int, int]]
@@ -206,7 +190,7 @@ class Update:
                 (width, height, dev, ino) for (dev, ino), width, height in update_list
             )
             cursor = connection.executemany(sql, params_generator)
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
     def node_update_many_width_height_duration_by_dev_ino(
         self, update_list: list[tuple[tuple[int, int], int, int, int]]
@@ -218,7 +202,7 @@ class Update:
                 for (dev, ino), width, height, duration_ms in update_list
             )
             cursor = connection.executemany(sql, params_generator)
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
 
 class Delete:
@@ -234,7 +218,7 @@ class Delete:
         sql = f"DELETE FROM {table} WHERE id = ?"
         with self.database.connection as connection:
             cursor = connection.execute(sql, (id,))
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
     def node_delete_in_id(self, ids: list[int]) -> bool:
         return self._delete_in_one_key("node", key="id", values=ids)
@@ -246,7 +230,7 @@ class Delete:
         sql = f"""DELETE FROM {table} WHERE {key} IN ({",".join("?" * len(values))})"""
         with self.database.connection as connection:
             cursor = connection.execute(sql, values)
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
     def task_delete_all(self) -> bool:
         return self._delete_all("task")
@@ -263,9 +247,27 @@ class Delete:
     def _delete_all(self, table: str):
         with self.database.connection as connection:
             cursor = connection.execute(f"DELETE FROM {table}")
-        return True if cursor.rowcount else False
+        return bool(cursor.rowcount)
 
 
 class Repository(Select, Insert, Update, Delete):
     def __init__(self, database: DataBaseManager):
         self.database = database
+        self.insert_placeholder = {
+            "node": "(" + ",".join(key for key in NODE_KEYS[1:]) + ")",
+            "root": "(" + ",".join(key for key in ROOT_KEYS[1:]) + ")",
+            "task": "(" + ",".join(key for key in TASK_KEYS[1:]) + ")",
+            "segment": "(" + ",".join(key for key in SEGMENT_KEYS) + ")",
+        }
+        self.values_placeholder = {
+            "node": "(" + ",".join("?" * (len(NODE_KEYS) - 1)) + ")",
+            "root": "(" + ",".join("?" * (len(ROOT_KEYS) - 1)) + ")",
+            "task": "(" + ",".join("?" * (len(TASK_KEYS) - 1)) + ")",
+            "segment": "(" + ",".join("?" * len(SEGMENT_KEYS)) + ")",
+        }
+        self.update_placeholder = {
+            "node": ",".join(f"{key}=?" for key in NODE_KEYS[1:]),
+            "root": ",".join(f"{key}=?" for key in ROOT_KEYS[1:]),
+            "task": ",".join(f"{key}=?" for key in TASK_KEYS[1:]),
+            "segment": ",".join(f"{key}=?" for key in SEGMENT_KEYS),
+        }

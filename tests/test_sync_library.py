@@ -1,16 +1,17 @@
-from pathlib import Path
-from datetime import datetime as Datetime
-from PIL import Image
 import subprocess
+from datetime import UTC
+from datetime import datetime as Datetime
+from pathlib import Path
+
 import pytest
+from PIL import Image
 
 from media_nest.core.settings import Settings
-from media_nest.service.scan_library import ScanLibrary
 from media_nest.models import RootInfo
 from media_nest.repository import Repository
-from tests.tool.run_collect_info import run_collect_info
+from media_nest.service.scan_library import ScanLibrary
 from tests.fake.fake_folder_file import create_folder_file
-
+from tests.tool.run_collect_info import run_collect_info
 
 ROOT = Path(__file__).parents[1] / "Untitled Folder"
 VIDEO_NUM = 7
@@ -28,7 +29,9 @@ class TestScanLibrary:
     @pytest.mark.run(order=1)
     def test_setup_class_data(self):
         create_folder_file(video_num=VIDEO_NUM, image_num=IMAGE_NUM)
-        self.repository.root_insert(RootInfo(None, ROOT, Datetime.now(), 0), )
+        self.repository.root_insert(
+            RootInfo(None, ROOT, Datetime.now(UTC), 0),
+        )
 
     @pytest.mark.run(order=2)
     def test_initialization(self):
@@ -62,6 +65,7 @@ class TestScanLibrary:
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            check=True,
         )
 
         run_collect_info(ScanLibrary(self.repository, self.settings).run, (), "3: ")
@@ -90,6 +94,7 @@ class TestScanLibrary:
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            check=True,
         )
 
         run_collect_info(ScanLibrary(self.repository, self.settings).run, (), "4: ")

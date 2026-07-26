@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from media_nest.core.settings import load_settings
-from media_nest.service.deal_task import DealTask
 from media_nest.models import TaskInfo
-from tests.tool.run_collect_info import run_collect_info
+from media_nest.service.deal_task import DealTask
 from tests.fake.fake_folder_file import create_folder_file
+from tests.tool.run_collect_info import run_collect_info
 
 ROOT = Path(__file__).parents[1] / "Untitled Folder"
 

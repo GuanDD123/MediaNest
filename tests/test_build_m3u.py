@@ -1,8 +1,9 @@
-from pathlib import Path
+from datetime import UTC
 from datetime import datetime as Datetime
+from pathlib import Path
 
 from media_nest.core.settings import load_settings
-from media_nest.models import VideoSegmentInfo, NodeInfo
+from media_nest.models import NodeInfo, VideoSegmentInfo
 from media_nest.service.build_m3u import BuildM3u
 
 
@@ -18,7 +19,7 @@ class FakeRepository:
                 name="11",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=111,
                 height=1111,
                 duration_ms=11111,
@@ -32,7 +33,7 @@ class FakeRepository:
                 name="22",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=222,
                 height=2222,
                 duration_ms=22222,
@@ -46,7 +47,7 @@ class FakeRepository:
                 name="33",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=333,
                 height=3333,
                 duration_ms=33333,
@@ -60,7 +61,7 @@ class FakeRepository:
                 name="44",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=444,
                 height=4444,
                 duration_ms=44444,
@@ -74,7 +75,7 @@ class FakeRepository:
                 name="55",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=555,
                 height=5555,
                 duration_ms=55555,
@@ -88,7 +89,7 @@ class FakeRepository:
                 name="66",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=666,
                 height=6666,
                 duration_ms=66666,
@@ -102,7 +103,7 @@ class FakeRepository:
                 name="77",
                 type_="video",
                 size=2048,
-                mtime=Datetime(2026, 6, 1, 12, 0, 0),
+                mtime=Datetime(2026, 6, 1, 12, 0, 0, tzinfo=UTC),
                 width=777,
                 height=7777,
                 duration_ms=77777,

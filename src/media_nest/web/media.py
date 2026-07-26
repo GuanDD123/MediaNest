@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Request, Body, HTTPException, status
-from fastapi.responses import FileResponse
 import os
+from typing import Annotated
+
+from fastapi import APIRouter, Body, HTTPException, Request, status
+from fastapi.responses import FileResponse
 
 from media_nest.service import Service
 
@@ -49,13 +51,13 @@ def filter_marked(request: Request):
 
 
 @router.post("/playlist")
-def save_playlist(playlist: list[dict] = Body(...)):
+def save_playlist(playlist: Annotated[list[dict], Body()]):
     Service.save_playlist(playlist)
     return {"success": True}
 
 
 @router.post("/progress")
-def save_progress(index: int = Body(...)):
+def save_progress(index: Annotated[int, Body()]):
     Service.save_progress(index)
     return {"success": True}
 

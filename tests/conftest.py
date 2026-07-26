@@ -1,8 +1,9 @@
 import sqlite3
+
 import pytest
 
-from media_nest.core.settings import load_settings
 from media_nest.core.db_manager import DataBaseManager
+from media_nest.core.settings import load_settings
 from media_nest.repository import Repository
 
 

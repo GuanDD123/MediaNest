@@ -1,9 +1,10 @@
-from pathlib import Path
-from datetime import datetime as Datetime
 from collections import namedtuple
+from datetime import UTC
+from datetime import datetime as Datetime
+from pathlib import Path
 
-from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, TASK_KEYS, SEGMENT_KEYS
-from media_nest.models import NodeInfo, RootInfo, TaskInfo, SegmentInfo
+from media_nest.core.constant import NODE_KEYS, ROOT_KEYS, SEGMENT_KEYS, TASK_KEYS
+from media_nest.models import NodeInfo, RootInfo, SegmentInfo, TaskInfo
 
 Node = namedtuple("Node", NODE_KEYS)
 Root = namedtuple("Root", ROOT_KEYS)
@@ -59,7 +60,7 @@ def row_to_model(
         return RootInfo(
             id=root.id,
             path=Path(root.path),
-            last_sync_time=Datetime.fromtimestamp(root.last_sync_time),
+            last_sync_time=Datetime.fromtimestamp(root.last_sync_time, tz=UTC),
             size=root.size,
         )
     elif table == "node":
@@ -73,7 +74,7 @@ def row_to_model(
             name=node.name,
             type_=node.type_,
             size=node.size,
-            mtime=Datetime.fromtimestamp(node.mtime),
+            mtime=Datetime.fromtimestamp(node.mtime, tz=UTC),
             width=node.width,
             height=node.height,
             duration_ms=node.duration_ms,

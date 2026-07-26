@@ -1,19 +1,20 @@
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
+
 import uvicorn
 from fastapi import FastAPI, Response
 from fastapi.responses import FileResponse
-from contextlib import asynccontextmanager
 from fastapi.staticfiles import StaticFiles
-from concurrent.futures import ThreadPoolExecutor
 
-from media_nest.core.constant import STATIC_PATH, DB_PATH
-from media_nest.core.settings import load_settings
+from media_nest.core.constant import DB_PATH, STATIC_PATH
 from media_nest.core.db_manager import DataBaseManager
+from media_nest.core.settings import load_settings
+from media_nest.logs import logger
 from media_nest.repository import Repository
 from media_nest.service import Service
-from media_nest.web.media import router as media_router
 from media_nest.web.admin import router as admin_router
+from media_nest.web.media import router as media_router
 from media_nest.web.playlist import router as playlist_router
-from media_nest.logs import logger
 
 
 @asynccontextmanager

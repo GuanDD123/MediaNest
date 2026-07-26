@@ -1,8 +1,8 @@
-from pathlib import Path
 import shutil
-from PIL import Image
 import subprocess
+from pathlib import Path
 
+from PIL import Image
 
 ROOT = Path(__file__).parents[2] / "Untitled Folder"
 
@@ -47,6 +47,7 @@ def create_folder_file(video_num=5, image_num=10):
             ],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
+            check=True
         )
 
     long_dir = ROOT

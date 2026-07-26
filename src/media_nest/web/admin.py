@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Request, Body, WebSocket
 import asyncio
+from typing import Annotated
+
+from fastapi import APIRouter, Body, Request, WebSocket
+from pydantic import BaseModel
 
 from media_nest.logs import logger
 
@@ -7,13 +10,13 @@ router = APIRouter(prefix="/admin")
 
 
 @router.post("/add_root")
-def add_root(request: Request, path: str = Body(...)):
+def add_root(request: Request, path: Annotated[str, Body()]):
     request.app.state.service.add_root(path)
     return {"success": True}
 
 
 @router.post("/delete_root")
-def delete_root(request: Request, path: str = Body(...)):
+def delete_root(request: Request, path: Annotated[str, Body()]):
     request.app.state.service.delete_root(path)
     return {"success": True}
 
@@ -30,6 +33,7 @@ def sync(request: Request):
         return {"success": False, "message": "Sync is already in progress"}
     return {"success": True}
 
+
 @router.websocket("/sync/progress")
 async def sync_progress(ws: WebSocket):
     await ws.accept()
@@ -44,7 +48,7 @@ async def sync_progress(ws: WebSocket):
                 break
 
             await asyncio.sleep(0.2)
-    except Exception:
+    except Exception:  # noqa: BLE001
         logger.exception("Error occurred while fetching sync progress")
     finally:
         await ws.close()
@@ -56,15 +60,24 @@ def clear_cache(request: Request):
     return {"success": True}
 
 
+class MarkRequest(BaseModel):
+    id: int
+    marked: bool
+
+
 @router.post("/mark")
-def mark(request: Request, data: dict[str, int | bool] = Body(...)):
-    request.app.state.service.mark(data["id"], data["marked"])
+def mark(request: Request, data: Annotated[MarkRequest, Body()]):
+    request.app.state.service.mark(data.id, data.marked)
     return {"success": True}
 
 
+class DeleteRequest(BaseModel):
+    id: int
+    path: str
+    additional_path_list: list[str]
+
+
 @router.post("/delete")
-def delete_file(request: Request, data: dict[str, int | str | list[str]] = Body(...)):
-    request.app.state.service.delete_file(
-        data["id"], data["path"], data["additional_path_list"]
-    )
+def delete_file(request: Request, data: Annotated[DeleteRequest, Body()]):
+    request.app.state.service.delete_file(data.id, data.path, data.additional_path_list)
     return {"success": True}
