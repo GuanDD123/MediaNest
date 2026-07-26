@@ -28,7 +28,6 @@ async function sync() {
         if (!data.success) {
             Toast.error(data.message);
         }
-        window.loadFolder("/media/root");
         createTaskPanel();
         connectProgress();
     } catch (err) {
@@ -124,6 +123,7 @@ function finishTask(text, success = true) {
         taskText.remove();
         taskProgressBar.remove();
     }
+    window.loadFolder("/media/root");
 
     setTimeout(() => {
         panel.remove();
