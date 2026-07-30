@@ -13,24 +13,33 @@
 </head>
 
 <body>
-    <div id="topBar" style="display: none;">
-        <div id="leftTopBar">
+    <div class="top-bar" id="topBarRootFolder" style="display: none;">
+        <div class="left-top-bar">
             <button id="sync-btn" onclick="sync()" title="同步">🔄</button>
+            <span></span>
             <button onclick="addRoot()" title="新增">➕</button>
             <button onclick="deleteRoot()" title="删除">➖</button>
         </div>
-        <div id="rightTopBar">
+        <div class="right-top-bar">
             <button onclick="continueLastPlay()" title="继续上次播放">▶️</button>
             <button onclick="filterMarked()" title="筛选标记">⭐</button>
             <span></span>
-            <button id="view-mode-btn" onclick="toggleViewMode()" title="切换为网格视图">📋</button>
+            <button class="view-mode-btn" onclick="toggleViewMode()" title="切换为网格视图">📋</button>
+        </div>
+    </div>
+    <div class="top-bar" id="topBarSubFolder" style="display: none;">
+        <div class="left-top-bar">
+            <button onclick="backUpper()" title="返回上一级">⬅️</button>
+        </div>
+        <div class="center-top-bar">
+            <button onclick="shufflePlay()">🔀 随机播放当前目录</button>
+        </div>
+        <div class="right-top-bar">
+            <button class="view-mode-btn" onclick="toggleViewMode()" title="切换为网格视图">📋</button>
         </div>
     </div>
 
     <div id="listView">
-        <div id="folderActions" style="display: none; margin-bottom: 10px;">
-            <button class="shuffle-btn" onclick="shufflePlay()">🔀 随机播放当前目录</button>
-        </div>
         <div id="list"></div>
     </div>
 

@@ -4,31 +4,6 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.shuffle-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px;
-    background: #3d3434;
-    color: #e0d5d5;
-    border: 1px solid #4a3f3f;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    width: 100%;
-    transition: background 0.2s, transform 0.1s;
-}
-
-.shuffle-btn:hover {
-    background: #4a3f3f;
-}
-
-.shuffle-btn:active {
-    transform: scale(0.98);
-}
-
 .viewer-actions {
     display: flex;
     gap: 8px;
@@ -68,7 +43,7 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
-#topBar {
+.top-bar {
     background-color: #1e1a1a;
     border-bottom: 1px solid #3d3434;
     justify-content: space-between;
@@ -76,14 +51,7 @@ body {
     padding: calc(10px + env(safe-area-inset-top, 0px)) 20px 10px 20px;
 }
 
-#leftTopBar,
-#rightTopBar {
-    display: flex;
-    gap: 8px;
-    padding: 10px 20px;
-}
-
-#topBar button {
+.top-bar button {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -96,13 +64,33 @@ body {
     transition: background 0.2s, transform 0.1s;
 }
 
-#topBar button:hover {
+.top-bar button:hover {
     background-color: #3d3434;
 }
 
-#topBar button:active {
+.top-bar button:active {
     transform: scale(0.95);
 }
+
+.left-top-bar,
+.center-top-bar,
+.right-top-bar {
+    display: flex;
+    gap: 8px;
+    padding: 10px 20px;
+}
+
+.center-top-bar {
+    flex: 1;
+}
+
+.center-top-bar button {
+    width: 100%;
+    color: #e0d5d5;
+    font-size: 14px;
+    font-weight: 500;
+}
+
 
 #listView {
     padding: 15px 20px;

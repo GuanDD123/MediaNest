@@ -2,9 +2,9 @@
 
 window.AppState = {
     // DOM 元素
-    topBar: document.getElementById("topBar"),
+    topBarRootFolder: document.getElementById("topBarRootFolder"),
+    topBarSubFolder: document.getElementById("topBarSubFolder"),
     listView: document.getElementById("listView"),
-    folderActions: document.getElementById("folderActions"),
     list: document.getElementById("list"),
     viewerView: document.getElementById("viewerView"),
     viewerTopBar: document.getElementById("viewerTopBar"),
@@ -21,7 +21,7 @@ window.AppState = {
     viewMode: "list",
 
     // 数据状态
-    pathRocord: [],
+    pathRecord: [],
     isRoot: false,
     currentFolderData: [],
     currentMediaData: [],

@@ -4,27 +4,6 @@
 const DOMBuilder = {
     baseCssOverhead: 32, // CSS 额外消耗: .grid-item padding(8*2=16) + .grid-column gap(16)
 
-    createBackBtn(effectiveMode, actualColWidth, onClick) {
-        const div = document.createElement("div");
-        div.className = effectiveMode === "grid" ? "grid-item" : "item";
-        div.style.borderLeft = "4px solid #ffd700";
-        let estHeight = 60;
-
-        if (effectiveMode === "grid") {
-            const thumbWrap = document.createElement("div");
-            thumbWrap.className = "grid-thumb-wrap";
-            thumbWrap.style.aspectRatio = "1 / 1";
-            thumbWrap.innerHTML = `<img class="grid-thumb" src="data:image/svg+xml;utf8,<svg viewBox='0 0 24 24' fill='%23ffd700' xmlns='http://www.w3.org/2000/svg'><path d='M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z'/></svg>">`;
-            div.appendChild(thumbWrap);
-            estHeight = actualColWidth + this.baseCssOverhead;
-        } else {
-            div.innerHTML = `<span class="item-name">⬅️ 返回上一页</span>`;
-        }
-
-        div.onclick = onClick;
-        return { el: div, estHeight };
-    },
-
     createFolder(item, effectiveMode, actualColWidth, onClick) {
         const div = document.createElement("div");
         div.className = effectiveMode === "grid" ? "grid-item" : "item";
@@ -153,20 +132,19 @@ class MasonryLayout {
 // 加载与协调渲染
 window.loadFolder = async function (path) {
     const state = window.getState();
-    state.folderActions.style.display = "none";
     state.list.innerHTML = "";
     state.mediaMap.clear();
 
-    state.pathRocord.push(path);
+    state.pathRecord.push(path);
 
     if (path === "/media/root") {
         state.isRoot = true;
-        state.topBar.style.display = "flex";
-        state.listView.style.paddingTop = "10px";
+        state.topBarRootFolder.style.display = "flex";
+        state.topBarSubFolder.style.display = "none";
     } else {
         state.isRoot = false;
-        state.topBar.style.display = "none";
-        state.listView.style.paddingTop = "calc(20px + env(safe-area-inset-top, 0px))";
+        state.topBarRootFolder.style.display = "none";
+        state.topBarSubFolder.style.display = "flex";
     }
 
     try {
@@ -175,7 +153,7 @@ window.loadFolder = async function (path) {
         window.renderList();
     } catch (err) {
         console.error("加载目录失败:", err);
-        state.pathRocord.pop();
+        state.pathRecord.pop();
     }
 };
 
@@ -186,7 +164,6 @@ window.renderList = function () {
     state.mediaMap.clear();
     state.renderListBeforeSendPlaylist = true;
 
-    state.folderActions.style.display = state.currentMediaData.length ? "block" : "none";
     state.list.innerHTML = "";
 
     const effectiveMode = state.isRoot ? 'list' : state.viewMode;
@@ -249,16 +226,7 @@ window.renderList = function () {
 function renderSubTask(folderData, mediaData, container, effectiveMode, state) {
     const layout = new MasonryLayout(container, effectiveMode);
 
-    // 1. 返回按钮
-    if (!state.isRoot) {
-        const { el, estHeight } = DOMBuilder.createBackBtn(effectiveMode, layout.actualColWidth, () => {
-            state.pathRocord.pop();
-            window.loadFolder(state.pathRocord.pop());
-        });
-        layout.append(el, estHeight);
-    }
-
-    // 2. 文件夹
+    // 文件夹
     folderData.forEach(item => {
         const { el, estHeight } = DOMBuilder.createFolder(item, effectiveMode, layout.actualColWidth, () => {
             window.loadFolder(`/media/folder${encodeURI(`${item.parent_path}/${item.name}`)}`);
@@ -266,7 +234,7 @@ function renderSubTask(folderData, mediaData, container, effectiveMode, state) {
         layout.append(el, estHeight);
     });
 
-    // 3. 媒体文件
+    // 媒体文件
     let i = 0;
     mediaData.forEach(item => {
         const { el, estHeight } = DOMBuilder.createMedia(item, effectiveMode, layout.actualColWidth, () => {

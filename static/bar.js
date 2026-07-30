@@ -172,7 +172,6 @@ async function deleteRoot() {
 
 async function continueLastPlay() {
     const state = window.getState();
-    state.folderActions.style.display = "none";
     state.list.innerHTML = "";
     state.mediaMap.clear();
 
@@ -180,11 +179,11 @@ async function continueLastPlay() {
     const [mediaData, index] = await response.json();
 
     if (mediaData.length) {
-        state.pathRocord.push("/media/continue_last_play");
+        state.pathRecord.push("/media/continue_last_play");
 
         state.isRoot = false;
-        state.topBar.style.display = "none";
-        state.listView.style.paddingTop = "calc(20px + env(safe-area-inset-top, 0px))";
+        state.topBarRootFolder.style.display = "none";
+        state.topBarSubFolder.style.display = "flex";
 
         state.currentFolderData = [];
         state.currentMediaData = mediaData;
@@ -211,15 +210,16 @@ function toggleViewMode() {
     }
 }
 function updateViewModeButtonIcon(mode) {
-    const btn = document.getElementById("view-mode-btn");
-    if (!btn) return;
-    if (mode === 'list') {
-        btn.innerHTML = '📋';
-        btn.title = '切换为网格视图';
-    } else {
-        btn.innerHTML = '🔲';
-        btn.title = '切换为列表视图';
-    }
+    const btns = document.querySelectorAll(".view-mode-btn");
+    btns.forEach(btn => {
+        if (mode === "list") {
+            btn.innerHTML = "📋";
+            btn.title = "切换为网格视图";
+        } else {
+            btn.innerHTML = "🔲";
+            btn.title = "切换为列表视图";
+        }
+    });
 }
 
 
@@ -233,4 +233,13 @@ function shufflePlay() {
     state.currentMediaData.sort(() => Math.random() - 0.5);
     window.renderList();
     window.openMedia(0);
+}
+
+
+function backUpper() {
+    const state = window.getState();
+    if (state.pathRecord.length > 1) {
+        state.pathRecord.pop();
+        window.loadFolder(state.pathRecord.pop());
+    }
 }
