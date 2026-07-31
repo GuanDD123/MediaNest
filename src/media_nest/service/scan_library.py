@@ -316,6 +316,10 @@ class ScanLibrary:
     def _sync_to_db(self, scan_result: ScanResult):
         if ids := [db_info.id for db_info in scan_result.db_infos.values()]:
             self.repository.node_delete_in_id(ids)
+            for dev, ino in scan_result.db_infos:
+                (self.settings.thumb_dirpath / f"{dev}_{ino}.jpg").unlink(
+                    missing_ok=True
+                )
         if update_list := scan_result.node_update_list:
             self.repository.node_update_many_by_id(update_list)
         if insert_list := scan_result.node_insert_list:
