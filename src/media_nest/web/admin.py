@@ -66,7 +66,7 @@ class MarkRequest(BaseModel):
 
 
 @router.post("/mark")
-def mark(request: Request, data: Annotated[MarkRequest, Body()]):
+def mark(request: Request, data: MarkRequest):
     request.app.state.service.mark(data.id, data.marked)
     return {"success": True}
 
@@ -78,6 +78,6 @@ class DeleteRequest(BaseModel):
 
 
 @router.post("/delete")
-def delete_file(request: Request, data: Annotated[DeleteRequest, Body()]):
+def delete_file(request: Request, data: DeleteRequest):
     request.app.state.service.delete_file(data.id, data.path, data.additional_path_list)
     return {"success": True}
