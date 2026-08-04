@@ -229,7 +229,7 @@ function renderSubTask(folderData, mediaData, container, effectiveMode, state) {
     // 文件夹
     folderData.forEach(item => {
         const { el, estHeight } = DOMBuilder.createFolder(item, effectiveMode, layout.actualColWidth, () => {
-            window.loadFolder(`/media/folder?path=${encodeURI(`${item.parent_path}/${item.name}`)}`);
+            window.loadFolder(`/media/folder?path=${encodeURIComponent(`${item.parent_path}/${item.name}`)}`);
         });
         layout.append(el, estHeight);
     });

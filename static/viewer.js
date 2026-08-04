@@ -23,7 +23,7 @@ window.openMedia = function (index, isSilent = false) {
         state.image.hidden = true;
         state.viewerBottomBar.hidden = false;
         state.video.hidden = false;
-        playVideo(`${encodeURI(item.parent_path)}/${encodeURIComponent(item.name)}`);
+        playVideo(`${encodeURIComponent(`${item.parent_path}/${item.name}`)}`);
     } else if (item.type === "image") {
         state.video.hidden = true;
         state.video.pause();
@@ -44,7 +44,7 @@ window.openMedia = function (index, isSilent = false) {
 function showImage() {
     const state = window.getState();
     const item = state.currentMediaData[state.currentIndex];
-    const path = `${encodeURI(item.parent_path)}/${encodeURIComponent(item.name)}`;
+    const path = `${encodeURIComponent(`${item.parent_path}/${item.name}`)}`;
     state.image.src = `/media/image?path=${path}`;
     if (state.currentIndex < state.currentMediaData.length - 1) preloadNextImage();
 }
@@ -53,7 +53,7 @@ function preloadNextImage() {
     const next = state.currentMediaData[state.currentIndex + 1];
     if (next?.type === "image") {
         const img = new Image();
-        const path = `${encodeURI(next.parent_path)}/${encodeURIComponent(next.name)}`;
+        const path = `${encodeURIComponent(`${next.parent_path}/${next.name}`)}`;
         img.src = `/media/image?path=${path}`;
     }
 }
