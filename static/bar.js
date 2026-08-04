@@ -86,14 +86,12 @@ function updateProgress(progress) {
         }
 
         title = "🔄 Scan Library";
-        const total = progress.root_folders_num || 0;
-        const completed = progress.completed_root_folders_num || 0;
         text = `
-            root_folder：${completed} / ${total}<br>
-            current：${progress.current_root_folder}<br>
-            completed_scan：${progress.completed_scan_num}
-            `
-        percent = total === 0 ? 0 : (completed / total) * 100;
+            Root Folder：${progress.completed_root_folders_num} / ${progress.root_folders_num}<br>
+            Current：${progress.current_root_folder}<br>
+            Completed Scan：${progress.completed_scan_num}
+            `;
+        percent = progress.root_folders_num === 0 ? 0 : (progress.completed_root_folders_num / progress.root_folders_num) * 100;
     } else if (progress.current_step === "Deal Task") {
         if (progress.status === "failed") {
             finishTask("❌ 处理失败", false);
@@ -101,28 +99,38 @@ function updateProgress(progress) {
         }
 
         if (progress.status === "finished") {
-            finishTask("✅ 同步完成");
+            if (progress.failed_task_num > 0) {
+                finishTask("⚠️ 同步完成（部分失败）", `Failed Tasks：${progress.failed_task_num}`);
+            } else {
+                finishTask("✅ 同步完成");
+            }
             document.getElementById("sync-btn").disabled = false;
             return;
         }
 
         title = "⚙️ Deal Task";
-        const total = progress.task_num || 0;
-        const completed = progress.completed_task_num || 0;
-        text = `Deal：${completed} / ${total}`;
-        percent = total === 0 ? 0 : (completed / total) * 100;
+        const completed = progress.successed_task_num + progress.failed_task_num;
+        text = `
+            Deal Task：${completed} / ${progress.task_num}<br>
+            Successed：${progress.successed_task_num}<br>
+            Failed：${progress.failed_task_num}
+            `;
+        percent = progress.task_num === 0 ? 0 : (completed / progress.task_num) * 100;
     }
 
     taskTitle.textContent = title;
     taskText.innerHTML = text;
     taskBar.style.width = percent + "%";
 }
-function finishTask(text, success = true) {
-    taskTitle.textContent = text;
-    if (success) {
-        taskText.remove();
-        taskProgressBar.remove();
+function finishTask(title, text = null) {
+    taskTitle.textContent = title;
+    if (text) {
+        taskText.innerHTML = text;
     }
+    else {
+        taskText.remove();
+    }
+    taskProgressBar.remove();
     window.loadFolder("/media/root");
 
     setTimeout(() => {

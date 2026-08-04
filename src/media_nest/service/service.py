@@ -86,7 +86,8 @@ class Admin:
                 "current_step": "Deal Task",
                 "status": self.deal_task.progress.status,
                 "task_num": self.deal_task.progress.task_num,
-                "completed_task_num": self.deal_task.progress.completed_task_num,
+                "successed_task_num": self.deal_task.progress.successed_task_num,
+                "failed_task_num": self.deal_task.progress.failed_task_num,
             }
 
     def clear_cache(self) -> None:

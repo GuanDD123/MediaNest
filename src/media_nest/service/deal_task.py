@@ -26,21 +26,25 @@ class TaskResult:
 class Progress:
     status: Literal["idle", "running", "finished", "failed"]
     task_num: int
-    completed_task_num: int
+    successed_task_num: int
+    failed_task_num: int
 
 
 class DealTask:
     def __init__(self, repository: Repository, settings: Settings):
         self.repository = repository
         self.settings = settings
-        self.progress = Progress(status="idle", task_num=0, completed_task_num=0)
+        self.progress = Progress(
+            status="idle", task_num=0, successed_task_num=0, failed_task_num=0
+        )
 
     def run(self) -> None:
         logger.info("Starting task processing")
 
         self.progress.status = "running"
         self.progress.task_num = 0
-        self.progress.completed_task_num = 0
+        self.progress.successed_task_num = 0
+        self.progress.failed_task_num = 0
 
         self.settings.thumb_dirpath.mkdir(parents=True, exist_ok=True)
         self.settings.segment_dirpath.mkdir(parents=True, exist_ok=True)
@@ -69,8 +73,9 @@ class DealTask:
         self.progress.status = "finished"
 
         logger.info(
-            "Task processing completed successfully: "
-            f"{self.progress.completed_task_num} tasks processed"
+            "Task processing completed: "
+            f"{self.progress.successed_task_num} tasks processed, "
+            f"{self.progress.failed_task_num} tasks failed"
         )
 
     def _deal_image_tasks(self, image_tasks: list[TaskInfo], task_result: TaskResult):
@@ -87,7 +92,10 @@ class DealTask:
                     task_result.node_image_update_list = []
                     image_num = 0
 
-                self.progress.completed_task_num += 1
+                if node_image_infos is False:
+                    self.progress.failed_task_num += 1
+                else:
+                    self.progress.successed_task_num += 1
 
     def _process_image(self, task: TaskInfo):
         try:
@@ -109,10 +117,8 @@ class DealTask:
             if task.width_height_flag:
                 return ((task.dev, task.ino), width, height)
         except Exception:  # noqa: BLE001
-            if (file_size := task.path.stat().st_size) < 1024:
-                logger.warning(f"File is too small: {task.path.name} {file_size}B")
-            else:
-                logger.exception(f"Failed to generate thumbnail for {task.path}")
+            logger.exception(f"Failed to process image for {task.path}")
+            return False
 
     def _deal_video_tasks(self, video_tasks: list[TaskInfo], task_result: TaskResult):
         video_ids = self.repository.node_select_id_join_task_dev_ino_by_hlsflag()
@@ -139,7 +145,10 @@ class DealTask:
                     self.repository.segment_insert_many(task_result.segment_insert_list)
                     task_result.segment_insert_list = []
 
-                self.progress.completed_task_num += 1
+                if (node_video_infos is False) or (segment_insert_list is False):
+                    self.progress.failed_task_num += 1
+                else:
+                    self.progress.successed_task_num += 1
 
     def _process_video(self, task: TaskInfo, video_ids: dict[str, int]):
         node_video_infos = segment_insert_list = None
@@ -167,6 +176,11 @@ class DealTask:
                     int(stream["height"]),
                     int(float(stream["duration"]) * 1000),
                 )
+        except Exception:  # noqa: BLE001
+            node_video_infos = False
+            logger.exception(f"Failed to get video info for {task.path}")
+
+        try:
             if task.hls_flag:
                 hls_dir_name = f"{task.dev}_{task.ino}"
                 hls_dir = self.settings.segment_dirpath / hls_dir_name
@@ -175,7 +189,8 @@ class DealTask:
                     video_ids.get(hls_dir_name), hls_dir / "index.m3u8"
                 )
         except Exception:  # noqa: BLE001
-            logger.exception(f"Failed to process video: {task.path}")
+            segment_insert_list = False
+            logger.exception(f"Failed to generate HLS for {task.path}")
 
         return node_video_infos, segment_insert_list
 
