@@ -27,6 +27,12 @@ MediaNest is a FastAPI-based local media browser and playback web app. It focuse
 - WebSocket progress stream for sync status
 - Console + rotating file logging
 
+## Shotscreens
+
+![](images/image_1.png)
+![](images/image_2.png)
+![](images/image_3.png)
+
 ## Core workflow
 
 1. Start the app with Python:
@@ -68,10 +74,10 @@ MediaNest/
 
 - `/` and `/index` — frontend entry page
 - `/media/root` — list configured media roots
-- `/media/folder/{path}` — list folder contents
-- `/media/image/{path}` — serve an image
-- `/media/video/{path}` — serve a video stream
-- `/media/thumb/{path}` — serve a thumbnail
+- `/media/folder?path={path}` — list folder contents
+- `/media/image?path={path}` — serve an image
+- `/media/video?path={path}` — serve a video stream
+- `/media/thumb?path={path}` — serve a thumbnail
 - `/media/filter_marked` — list marked media
 - `/media/playlist` — save playlist state
 - `/media/progress` — save current playback index
@@ -119,6 +125,12 @@ MediaNest 是一个基于 FastAPI 的本地媒体浏览与播放 Web 应用。�
 - 提供 WebSocket 同步进度流
 - 控制台日志 + 轮转文件日志
 
+## 运行截图
+
+![](images/image_1.png)
+![](images/image_2.png)
+![](images/image_3.png)
+
 ## 核心流程
 
 1. 使用 Python 启动应用：
@@ -160,10 +172,10 @@ MediaNest/
 
 - `/` 与 `/index` — 前端入口页面
 - `/media/root` — 获取已配置的媒体根目录
-- `/media/folder/{path}` — 获取目录内容
-- `/media/image/{path}` — 返回图像内容
-- `/media/video/{path}` — 返回视频流
-- `/media/thumb/{path}` — 返回缩略图
+- `/media/folder?path={path}` — 获取目录内容
+- `/media/image?path={path}` — 返回图像内容
+- `/media/video?path={path}` — 返回视频流
+- `/media/thumb?path={path}` — 返回缩略图
 - `/media/filter_marked` — 获取已标记媒体
 - `/media/playlist` — 保存播放列表状态
 - `/media/progress` — 保存当前播放索引
