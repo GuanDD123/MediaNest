@@ -99,7 +99,7 @@ class ScanLibrary:
         self.progress.status = "finished"
 
         logger.info(
-            f"Scan completed successfully: {self.progress.completed_scan_num} files scanned"
+            f"Scan completed successfully: {self.progress.completed_scan_num} files or folders scanned"
         )
 
     def _walk_files(
