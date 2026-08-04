@@ -38,7 +38,7 @@ python run.py
 2. Open the web UI at:
 
 ```text
-http://localhost:8000
+http://localhost:8001
 ```
 
 3. Add one or more media roots through the admin API.
@@ -130,7 +130,7 @@ python run.py
 2. 在浏览器打开：
 
 ```text
-http://localhost:8000
+http://localhost:8001
 ```
 
 3. 通过管理接口添加一个或多个媒体根目录。

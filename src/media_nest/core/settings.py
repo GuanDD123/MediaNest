@@ -31,6 +31,6 @@ def load_settings() -> Settings:
         hls_mode=False,
         segment_dirpath=Path("~/Segments").expanduser(),
         video_workers=4,
-        base_url="http://192.168.0.110:8000",
+        base_url="http://192.168.0.110:8001",
         m3u_item_num_limit=3000,
     )
