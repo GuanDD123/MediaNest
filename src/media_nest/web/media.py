@@ -9,27 +9,25 @@ from media_nest.service import Service
 router = APIRouter(prefix="/media")
 
 
-@router.get("/image/{path:path}")
-@router.get("/video/{path:path}")
+@router.get("/image")
+@router.get("/video")
 def get_media(path: str):
-    if not os.path.exists("/" + path):
+    if not os.path.exists(path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"File not found: {'/' + path}",
+            detail=f"File not found: {path}",
         )
-    return FileResponse("/" + path, headers={"cache-control": "public, max-age=86400"})
+    return FileResponse(path, headers={"cache-control": "public, max-age=86400"})
 
 
-@router.get("/thumb/{path:path}")
+@router.get("/thumb")
 def get_thumb(path: str):
-    if not os.path.exists("/" + path):
+    if not os.path.exists(path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"File not found: {'/' + path}",
+            detail=f"File not found: {path}",
         )
-    return FileResponse(
-        "/" + path, headers={"cache-control": "public, max-age=2592000"}
-    )
+    return FileResponse(path, headers={"cache-control": "public, max-age=2592000"})
 
 
 @router.get("/root")
@@ -37,12 +35,12 @@ def get_all_root(request: Request):
     return request.app.state.service.get_all_root()
 
 
-@router.get("/folder/{path:path}")
+@router.get("/folder")
 def get_all_in_folder(
     request: Request,
     path: str,
 ):
-    return request.app.state.service.get_all_in_folder("/" + path)
+    return request.app.state.service.get_all_in_folder(path)
 
 
 @router.get("/filter_marked")

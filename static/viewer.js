@@ -45,7 +45,7 @@ function showImage() {
     const state = window.getState();
     const item = state.currentMediaData[state.currentIndex];
     const path = `${encodeURI(item.parent_path)}/${encodeURIComponent(item.name)}`;
-    state.image.src = `/media/image${path}`;
+    state.image.src = `/media/image?path=${path}`;
     if (state.currentIndex < state.currentMediaData.length - 1) preloadNextImage();
 }
 function preloadNextImage() {
@@ -54,13 +54,13 @@ function preloadNextImage() {
     if (next?.type === "image") {
         const img = new Image();
         const path = `${encodeURI(next.parent_path)}/${encodeURIComponent(next.name)}`;
-        img.src = `/media/image${path}`;
+        img.src = `/media/image?path=${path}`;
     }
 }
 
 function playVideo(path) {
     const state = window.getState();
-    state.video.src = `/media/video${path}`;
+    state.video.src = `/media/video?path=${path}`;
     state.video.play().catch(e => console.warn("自动播放拦截", e));
 }
 

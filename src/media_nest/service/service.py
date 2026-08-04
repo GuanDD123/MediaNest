@@ -121,7 +121,7 @@ class Playlist:
 
     def build_m3u(self, parent_str: str, shuffle_flag: bool = False) -> str:
         return BuildM3u(self.repository, self.settings).run(
-            Path("/" + parent_str), shuffle_flag
+            Path(parent_str), shuffle_flag
         )
 
 

@@ -56,7 +56,7 @@ const DOMBuilder = {
             if (item.type === "video") {
                 img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23ccbfbf" xmlns="http://www.w3.org/2000/svg"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg>`;
             } else {
-                img.src = `/media/thumb${item.thumb_path}`;
+                img.src = `/media/thumb?path=${item.thumb_path}`;
                 img.onerror = () => img.src = `data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" fill="%23555" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>`;
             }
             thumbWrap.appendChild(img);
@@ -229,7 +229,7 @@ function renderSubTask(folderData, mediaData, container, effectiveMode, state) {
     // 文件夹
     folderData.forEach(item => {
         const { el, estHeight } = DOMBuilder.createFolder(item, effectiveMode, layout.actualColWidth, () => {
-            window.loadFolder(`/media/folder${encodeURI(`${item.parent_path}/${item.name}`)}`);
+            window.loadFolder(`/media/folder?path=${encodeURI(`${item.parent_path}/${item.name}`)}`);
         });
         layout.append(el, estHeight);
     });

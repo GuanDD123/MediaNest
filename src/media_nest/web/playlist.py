@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Response
 router = APIRouter(prefix="/playlist")
 
 
-@router.api_route("/{parent_path:path}", methods=["GET", "HEAD"])
+@router.api_route("/", methods=["GET", "HEAD"])
 def build_m3u(
     request: Request,
     parent_path: str,
