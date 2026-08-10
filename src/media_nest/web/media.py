@@ -1,10 +1,12 @@
 import os
 from typing import Annotated
 
-from fastapi import APIRouter, Body, HTTPException, Request, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 
 from media_nest.service import Service
+
+from .dependencies import get_service
 
 router = APIRouter(prefix="/media")
 
@@ -31,21 +33,18 @@ def get_thumb(path: str):
 
 
 @router.get("/root")
-def get_all_root(request: Request):
-    return request.app.state.service.get_all_root()
+def get_all_root(service: Annotated[Service, Depends(get_service)]):
+    return service.get_all_root()
 
 
 @router.get("/folder")
-def get_all_in_folder(
-    request: Request,
-    path: str,
-):
-    return request.app.state.service.get_all_in_folder(path)
+def get_all_in_folder(service: Annotated[Service, Depends(get_service)], path: str):
+    return service.get_all_in_folder(path)
 
 
 @router.get("/filter_marked")
-def filter_marked(request: Request):
-    return request.app.state.service.filter_marked()
+def filter_marked(service: Annotated[Service, Depends(get_service)]):
+    return service.filter_marked()
 
 
 @router.post("/playlist")

@@ -1,35 +1,42 @@
 import asyncio
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Request, WebSocket
+from fastapi import APIRouter, Body, Depends, WebSocket
 from pydantic import BaseModel
 
 from media_nest.logs import logger
+from media_nest.service import Service
+
+from .dependencies import get_service
 
 router = APIRouter(prefix="/admin")
 
 
 @router.post("/add_root")
-def add_root(request: Request, path: Annotated[str, Body()]):
-    request.app.state.service.add_root(path)
+def add_root(
+    service: Annotated[Service, Depends(get_service)], path: Annotated[str, Body()]
+):
+    service.add_root(path)
     return {"success": True}
 
 
 @router.post("/delete_root")
-def delete_root(request: Request, path: Annotated[str, Body()]):
-    request.app.state.service.delete_root(path)
+def delete_root(
+    service: Annotated[Service, Depends(get_service)], path: Annotated[str, Body()]
+):
+    service.delete_root(path)
     return {"success": True}
 
 
 @router.post("/clear_root")
-def clear_root(request: Request):
-    request.app.state.service.clear_root()
+def clear_root(service: Annotated[Service, Depends(get_service)]):
+    service.clear_root()
     return {"success": True}
 
 
 @router.post("/sync")
-def sync(request: Request):
-    if not request.app.state.service.sync():
+def sync(service: Annotated[Service, Depends(get_service)]):
+    if not service.sync():
         return {"success": False, "message": "Sync is already in progress"}
     return {"success": True}
 
@@ -37,7 +44,7 @@ def sync(request: Request):
 @router.websocket("/sync/progress")
 async def sync_progress(ws: WebSocket):
     await ws.accept()
-    service = ws.app.state.service
+    service: Service = ws.app.state.service
 
     try:
         while True:
@@ -55,8 +62,8 @@ async def sync_progress(ws: WebSocket):
 
 
 @router.post("/clear_cache")
-def clear_cache(request: Request):
-    request.app.state.service.clear_cache()
+def clear_cache(service: Annotated[Service, Depends(get_service)]):
+    service.clear_cache()
     return {"success": True}
 
 
@@ -66,8 +73,8 @@ class MarkRequest(BaseModel):
 
 
 @router.post("/mark")
-def mark(request: Request, data: MarkRequest):
-    request.app.state.service.mark(data.id, data.marked)
+def mark(service: Annotated[Service, Depends(get_service)], data: MarkRequest):
+    service.mark(data.id, data.marked)
     return {"success": True}
 
 
@@ -78,6 +85,6 @@ class DeleteRequest(BaseModel):
 
 
 @router.post("/delete")
-def delete_file(request: Request, data: DeleteRequest):
-    request.app.state.service.delete_file(data.id, data.path, data.additional_path_list)
+def delete_file(service: Annotated[Service, Depends(get_service)], data: DeleteRequest):
+    service.delete_file(data.id, data.path, data.additional_path_list)
     return {"success": True}
